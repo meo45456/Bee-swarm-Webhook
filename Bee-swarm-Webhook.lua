@@ -1975,7 +1975,7 @@ playerName.TextColor3 = Color3.fromRGB(255, 230, 180) -- ครีมทอง�
 playerName.Font = Enum.Font.GothamBold
 playerName.TextSize = 18
 playerName.TextXAlignment = Enum.TextXAlignment.Left
-playerName.Text = "🐝 " .. LocalPlayer.DisplayName
+playerName.Text = "🐝 " .. LocalPlayer.Name
 playerName.Parent = frame
 
 -- ⏱️ เวลาเล่นเกม
