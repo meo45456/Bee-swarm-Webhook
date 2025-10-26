@@ -656,23 +656,25 @@ local function createUI(showFrames, badgeFrames, questFrames)
 	title.TextSize = 14
 	title.TextXAlignment = Enum.TextXAlignment.Left
 
-	-- 🔍 ช่องค้นหา
-	local searchBox = Instance.new("TextBox", mainFrame)
-	searchBox.PlaceholderText = "🔎 ค้นหา..."
-	searchBox.Size = UDim2.new(1, -16, 0, 26)
-	searchBox.Position = UDim2.new(0, 8, 0, 38)
-	searchBox.BackgroundColor3 = cozyTheme.bg_mid
-	searchBox.TextColor3 = cozyTheme.text_main
-	searchBox.PlaceholderColor3 = cozyTheme.text_sub
-	searchBox.BorderSizePixel = 0
-	searchBox.TextXAlignment = Enum.TextXAlignment.Left
-	searchBox.ClearTextOnFocus = false
-	searchBox.Font = Enum.Font.Gotham
-	searchBox.TextSize = 12
-	Instance.new("UICorner", searchBox).CornerRadius = UDim.new(0, 6)
-	local searchStroke = Instance.new("UIStroke", searchBox)
-	searchStroke.Color = cozyTheme.border
-	searchStroke.Thickness = 1
+    -- 🔍 ช่องค้นหา
+    local searchBox = Instance.new("TextBox", mainFrame)
+    searchBox.Size = UDim2.new(1, -16, 0, 26)
+    searchBox.Position = UDim2.new(0, 8, 0, 38)
+    searchBox.BackgroundColor3 = cozyTheme.bg_mid
+    searchBox.TextColor3 = cozyTheme.text_main
+    searchBox.PlaceholderText = "🔎 ค้นหา..."         -- 🧹 ไม่มีข้อความตั้งต้น
+    searchBox.Text = ""                    -- 🧹 ล้างค่าข้อความเริ่มต้น
+    searchBox.PlaceholderColor3 = cozyTheme.text_sub
+    searchBox.BorderSizePixel = 0
+    searchBox.TextXAlignment = Enum.TextXAlignment.Left
+    searchBox.ClearTextOnFocus = false
+    searchBox.Font = Enum.Font.Gotham
+    searchBox.TextSize = 12
+    Instance.new("UICorner", searchBox).CornerRadius = UDim.new(0, 6)
+    local searchStroke = Instance.new("UIStroke", searchBox)
+    searchStroke.Color = cozyTheme.border
+    searchStroke.Thickness = 1
+
 
 	-- 🗂️ แถบแท็บ (เมนูหลัก)
 	local tabBar = Instance.new("Frame", mainFrame)
