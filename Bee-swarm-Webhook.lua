@@ -1,13 +1,13 @@
-
-
+-- 🧩 PART 1 START : Map Check + Data Table
 
 if game.PlaceId ~= 1537690962 then
-print("Unmatch Map")
-return
+    warn("❌ ไม่ใช่แม็พ Bee Swarm Simulator — สคริปต์หยุดทำงาน")
+    return
 else
-print("match!")
+    print("✅ ตรวจสอบแม็พสำเร็จ: Bee Swarm Simulator")
 end
 
+-- 🎒 รายการไอเท็มทั้งหมด (Showlist)
 Showlist = {
     Ticket = { show = false, emoji = "<:Ticket:1374331280488927303>" },
     Gumdrops = { show = false, emoji = "<:Gumdrops:1374331689471311993>" },
@@ -88,6 +88,18 @@ Showlist = {
     ["Vicious Bee Jelly"] = { show = false, emoji = "<:Basic_Egg:1374459785113763891>" }
 }
 
+-- 🏅 รายการ Badge ที่เลือกได้
+QuestShowlist = {
+    ["Spirit Bear"] = { show = false },
+    ["Black Bear"]  = { show = false },
+    ["Polar Bear"]  = { show = false },
+    ["Panda Bear"]  = { show = false },
+    ["Mother Bear"] = { show = false },
+    ["Science Bear"] = { show = false },
+	["Onett"] = { show = false },
+}
+
+-- 🧸 รายชื่อหมีและเควชที่เลือกได้
 BadgeShowlist = {
     ["Honey Badge"] = false,
     ["Quest Badge"] = false,
@@ -116,1225 +128,7 @@ BadgeShowlist = {
     ["Hive Hub Badge"] = false,
 }
 
-QuestShowlist = {
-    ["Spirit Bear"] = { show = false },
-    ["Black Bear"]  = { show = false },
-    ["Polar Bear"]  = { show = false },
-    ["Panda Bear"]  = { show = false },
-    ["Mother Bear"] = { show = false },
-    ["Science Bear"] = { show = false },
-	["Onett"] = { show = false },
-}
-
-
-local Players = game:GetService("Players")
-local HttpService = game:GetService("HttpService")
-local LocalPlayer = Players.LocalPlayer
-local UserId = tostring(LocalPlayer.UserId)
-local folderPath = "KhamKhomShop"
-local fileName = folderPath .. "/" .. UserId .. "_Hook_Service.txt"
-local itemHeight = 30
-
-local function saveConfig()
-    if not isfolder(folderPath) then makefolder(folderPath) end
-    local dataToSave = {
-        Showlist = {},
-        BadgeShowlist = {},
-        QuestShowlist = {} 
-    }
-
-    for k, v in pairs(Showlist) do
-        dataToSave.Showlist[k] = { show = v.show, emoji = v.emoji }
-    end
-    for k, v in pairs(BadgeShowlist) do
-        dataToSave.BadgeShowlist[k] = v
-    end
-
-    for k, v in pairs(QuestShowlist) do
-        dataToSave.QuestShowlist[k] = { show = v.show }
-    end
-
-    writefile(fileName, HttpService:JSONEncode(dataToSave))
-end
-
-
-local function loadConfig()
-    if isfile(fileName) then
-        local data = readfile(fileName)
-        local decoded = HttpService:JSONDecode(data)
-        if decoded.Showlist then
-            for k, v in pairs(decoded.Showlist) do
-                if Showlist[k] then
-                    Showlist[k].show = v.show
-                end
-            end
-        end
-        if decoded.BadgeShowlist then
-            for k, v in pairs(decoded.BadgeShowlist) do
-                if BadgeShowlist[k] ~= nil then
-                    BadgeShowlist[k] = v
-                end
-            end
-        end
-        -- ✅ โหลดสถานะเควชรายหมี
-        if decoded.QuestShowlist then
-            for k, v in pairs(decoded.QuestShowlist) do
-                if QuestShowlist[k] ~= nil and v and v.show ~= nil then
-                    QuestShowlist[k].show = v.show
-                end
-            end
-        end
-    end
-end
-
-local function buildShowlistFrames()
-    local itemFrames = {}
-    local items = {}
-
-    for name, data in pairs(Showlist) do
-        table.insert(items, { name = name, data = data })
-    end
-
-    table.sort(items, function(a, b)
-        return tostring(a.name):lower() < tostring(b.name):lower()
-    end)
-
-    for i, item in ipairs(items) do
-        local itemFrame = Instance.new("Frame")
-        itemFrame.Size = UDim2.new(1, 0, 0, 26)
-        itemFrame.BackgroundColor3 = (i % 2 == 0)
-            and Color3.fromRGB(26, 26, 26)
-            or Color3.fromRGB(18, 18, 18)
-        itemFrame.BorderSizePixel = 0
-
-        local label = Instance.new("TextLabel", itemFrame)
-        label.Name = "ItemName"
-        label.Size = UDim2.new(0.7, -10, 1, 0)
-        label.Position = UDim2.new(0, 10, 0, 0)
-        label.BackgroundTransparency = 1
-        label.Text = item.name
-        label.TextColor3 = Color3.fromRGB(220, 220, 220)
-        label.TextXAlignment = Enum.TextXAlignment.Left
-        label.Font = Enum.Font.Gotham
-        label.TextSize = 12
-        label.TextScaled = false
-
-        local toggle = Instance.new("TextButton", itemFrame)
-        toggle.Size = UDim2.new(0.3, -8, 1, -8)
-        toggle.Position = UDim2.new(0.7, 8, 0, 4)
-        toggle.Text = item.data.show and "Show" or "Hide"
-        toggle.TextColor3 = Color3.fromRGB(240, 240, 240)
-        toggle.Font = Enum.Font.Gotham
-        toggle.TextScaled = false
-        toggle.TextSize = 12
-        toggle.BorderSizePixel = 1
-
-        local function updateToggleColor()
-            if item.data.show then
-                toggle.BackgroundColor3 = Color3.fromRGB(40, 90, 40)   -- ✅ เขียวบาง
-                toggle.BorderColor3 = Color3.fromRGB(80, 160, 80)
-            else
-                toggle.BackgroundColor3 = Color3.fromRGB(90, 40, 40)   -- ❌ แดงบาง
-                toggle.BorderColor3 = Color3.fromRGB(160, 80, 80)
-            end
-        end
-
-        updateToggleColor()
-
-        toggle.MouseButton1Click:Connect(function()
-            item.data.show = not item.data.show
-            toggle.Text = item.data.show and "Show" or "Hide"
-            updateToggleColor()
-            saveConfig()
-        end)
-
-        table.insert(itemFrames, itemFrame)
-    end
-
-    return itemFrames
-end
-
-local function buildBadgeShowlistFrames()
-    local badgeFrames = {}
-    local badges = {}
-
-    for name, show in pairs(BadgeShowlist) do
-        table.insert(badges, { name = name, show = show })
-    end
-
-    table.sort(badges, function(a, b)
-        return tostring(a.name):lower() < tostring(b.name):lower()
-    end)
-
-    for i, badge in ipairs(badges) do
-        local badgeFrame = Instance.new("Frame")
-        badgeFrame.Size = UDim2.new(1, 0, 0, 26)
-        badgeFrame.BackgroundColor3 = (i % 2 == 0)
-            and Color3.fromRGB(26, 26, 26)
-            or Color3.fromRGB(18, 18, 18)
-        badgeFrame.BorderSizePixel = 0
-
-        local label = Instance.new("TextLabel", badgeFrame)
-        label.Name = "BadgeName"
-        label.Size = UDim2.new(0.7, -10, 1, 0)
-        label.Position = UDim2.new(0, 10, 0, 0)
-        label.BackgroundTransparency = 1
-        label.Text = badge.name
-        label.TextColor3 = Color3.fromRGB(220, 220, 220)
-        label.TextXAlignment = Enum.TextXAlignment.Left
-        label.Font = Enum.Font.Gotham
-        label.TextSize = 12
-        label.TextScaled = false
-
-        local toggle = Instance.new("TextButton", badgeFrame)
-        toggle.Size = UDim2.new(0.3, -8, 1, -8)
-        toggle.Position = UDim2.new(0.7, 8, 0, 4)
-        toggle.Text = badge.show and "Show" or "Hide"
-        toggle.TextColor3 = Color3.fromRGB(240, 240, 240)
-        toggle.Font = Enum.Font.Gotham
-        toggle.TextScaled = false
-        toggle.TextSize = 12
-        toggle.BorderSizePixel = 1
-
-        local function updateToggleColor()
-            if badge.show then
-                toggle.BackgroundColor3 = Color3.fromRGB(40, 90, 40)
-                toggle.BorderColor3 = Color3.fromRGB(80, 160, 80)
-            else
-                toggle.BackgroundColor3 = Color3.fromRGB(90, 40, 40)
-                toggle.BorderColor3 = Color3.fromRGB(160, 80, 80)
-            end
-        end
-
-        updateToggleColor()
-
-        toggle.MouseButton1Click:Connect(function()
-            BadgeShowlist[badge.name] = not BadgeShowlist[badge.name]
-            badge.show = BadgeShowlist[badge.name]
-            toggle.Text = badge.show and "Show" or "Hide"
-            updateToggleColor()
-            saveConfig()
-        end)
-
-        table.insert(badgeFrames, badgeFrame)
-    end
-
-    return badgeFrames
-end
-
-local function buildQuestFrames()
-    local questFrames = {}
-    local quests = {}
-
-    for name, data in pairs(QuestShowlist) do
-        table.insert(quests, { name = name, data = data })
-    end
-
-    table.sort(quests, function(a, b)
-        return tostring(a.name):lower() < tostring(b.name):lower()
-    end)
-
-    for i, quest in ipairs(quests) do
-        local questFrame = Instance.new("Frame")
-        questFrame.Size = UDim2.new(1, 0, 0, 26)
-        questFrame.BackgroundColor3 = (i % 2 == 0)
-            and Color3.fromRGB(26, 26, 26)
-            or Color3.fromRGB(18, 18, 18)
-        questFrame.BorderSizePixel = 0
-
-        local label = Instance.new("TextLabel", questFrame)
-        label.Name = "QuestName"
-        label.Size = UDim2.new(0.7, -10, 1, 0)
-        label.Position = UDim2.new(0, 10, 0, 0)
-        label.BackgroundTransparency = 1
-        label.Text = quest.name
-        label.TextColor3 = Color3.fromRGB(220, 220, 220)
-        label.TextXAlignment = Enum.TextXAlignment.Left
-        label.Font = Enum.Font.Gotham
-        label.TextSize = 12
-        label.TextScaled = false
-
-        local toggle = Instance.new("TextButton", questFrame)
-        toggle.Size = UDim2.new(0.3, -8, 1, -8)
-        toggle.Position = UDim2.new(0.7, 8, 0, 4)
-        toggle.Text = quest.data.show and "Show" or "Hide"
-        toggle.TextColor3 = Color3.fromRGB(240, 240, 240)
-        toggle.Font = Enum.Font.Gotham
-        toggle.TextScaled = false
-        toggle.TextSize = 12
-        toggle.BorderSizePixel = 1
-
-        local function updateToggleColor()
-            if quest.data.show then
-                toggle.BackgroundColor3 = Color3.fromRGB(40, 90, 40)
-                toggle.BorderColor3 = Color3.fromRGB(80, 160, 80)
-            else
-                toggle.BackgroundColor3 = Color3.fromRGB(90, 40, 40)
-                toggle.BorderColor3 = Color3.fromRGB(160, 80, 80)
-            end
-        end
-
-        updateToggleColor()
-
-        toggle.MouseButton1Click:Connect(function()
-            quest.data.show = not quest.data.show
-            toggle.Text = quest.data.show and "Show" or "Hide"
-            updateToggleColor()
-            saveConfig()
-        end)
-
-        table.insert(questFrames, questFrame)
-    end
-
-    return questFrames
-end
-
-local function createUI(showFrames, badgeFrames, questFrames)
-    -- ป้องกันซ้ำ
-    if game.CoreGui:FindFirstChild("ItemUi") then
-        game.CoreGui.ItemUi:Destroy()
-        task.wait(0.05)
-    end
-
-    local itemhandbook = Instance.new("ScreenGui", game.CoreGui)
-    itemhandbook.Name = "ItemUi"
-
-    -- กล่องหลัก (เหลี่ยม มินิมอล)
-    local mainFrame = Instance.new("Frame", itemhandbook)
-    mainFrame.Size = UDim2.new(0, 440, 0, 520)
-    mainFrame.AnchorPoint = Vector2.new(1, 0.5)
-    mainFrame.Position = UDim2.new(1, -15, 0.5, 0)
-    mainFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
-    mainFrame.BorderSizePixel = 1
-    mainFrame.BorderColor3 = Color3.fromRGB(50, 50, 50)
-    mainFrame.Active = true
-
-    -- Title Bar
-    local titleBar = Instance.new("Frame", mainFrame)
-    titleBar.Size = UDim2.new(1, 0, 0, 30)
-    titleBar.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-    titleBar.BorderSizePixel = 0
-
-    local title = Instance.new("TextLabel", titleBar)
-    title.Text = "Bee Swarm Config Panel"
-    title.Size = UDim2.new(1, -10, 1, 0)
-    title.Position = UDim2.new(0, 10, 0, 0)
-    title.BackgroundTransparency = 1
-    title.TextColor3 = Color3.fromRGB(220, 220, 220)
-    title.Font = Enum.Font.GothamMedium
-    title.TextScaled = false
-    title.TextSize = 14
-    title.TextXAlignment = Enum.TextXAlignment.Left
-
-    -- SearchBox (อยู่ใต้ titleBar)
-    local searchBox = Instance.new("TextBox", mainFrame)
-    searchBox.PlaceholderText = "Search..."
-    searchBox.Size = UDim2.new(1, -16, 0, 26)
-    searchBox.Position = UDim2.new(0, 8, 0, 35 + 3) -- ระยะห่างเล็กน้อย
-    searchBox.BackgroundColor3 = Color3.fromRGB(26, 26, 26)
-    searchBox.TextColor3 = Color3.fromRGB(220, 220, 220)
-    searchBox.PlaceholderColor3 = Color3.fromRGB(100, 100, 100)
-    searchBox.BorderSizePixel = 1
-    searchBox.BorderColor3 = Color3.fromRGB(50, 50, 50)
-    searchBox.TextXAlignment = Enum.TextXAlignment.Left
-    searchBox.ClearTextOnFocus = false
-    searchBox.Font = Enum.Font.Gotham
-    searchBox.TextScaled = false
-    searchBox.TextSize = 12
-    searchBox.Text = ""
-
-    -- แถบแท็บ (ใต้ SearchBox)
-    local tabBar = Instance.new("Frame", mainFrame)
-    tabBar.Size = UDim2.new(1, 0, 0, 28)
-    tabBar.Position = UDim2.new(0, 0, 0, 35 + 3 + 26 + 5) -- title(30) + margin + search(26) + margin
-    tabBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    tabBar.BorderSizePixel = 0
-
-    local tabs = {
-        {name = "Items", icon = "🎒"},
-        {name = "Quests", icon = "📜"},
-        {name = "Badges", icon = "🏅"},
-        {name = "Settings", icon = "⚙️"},
-    }
-
-    local tabButtons = {}
-    local activeTab = nil
-
-    -- หน้าต่างเนื้อหา (ใช้พื้นที่จากใต้ tabBar ลงไป)
-    local contentTop = 35 + 3 + 26 + 5 + 28 + 6
-    local contentHeightOffset = -(contentTop + 8)
-
-    -- Items
-    local scrollShow = Instance.new("ScrollingFrame", mainFrame)
-    scrollShow.Name = "scrollShow"
-    scrollShow.Size = UDim2.new(1, -8, 1, contentHeightOffset)
-    scrollShow.Position = UDim2.new(0, 4, 0, contentTop)
-    scrollShow.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    scrollShow.BorderSizePixel = 0
-    scrollShow.ScrollBarThickness = 6
-    scrollShow.AutomaticCanvasSize = Enum.AutomaticSize.Y
-
-    for i, frame in ipairs(showFrames) do
-        frame.Parent = scrollShow
-        frame.Position = UDim2.new(0, 0, 0, (i - 1) * 26)
-        frame.Size = UDim2.new(1, 0, 0, 26)
-        frame.BackgroundColor3 = (i % 2 == 0) and Color3.fromRGB(26, 26, 26) or Color3.fromRGB(18, 18, 18)
-        frame.BorderSizePixel = 0
-        local label = frame:FindFirstChild("ItemName")
-        if label then
-            label.TextColor3 = Color3.fromRGB(220, 220, 220)
-            label.Font = Enum.Font.Gotham
-            label.TextScaled = false
-            label.TextSize = 12
-        end
-    end
-
-    -- Quests (placeholder)
-	local scrollQuest = Instance.new("ScrollingFrame", mainFrame)
-	scrollQuest.Name = "scrollQuest"
-	scrollQuest.Size = UDim2.new(1, -8, 1, contentHeightOffset) 
-	scrollQuest.Position = UDim2.new(0, 4, 0, contentTop)
-	scrollQuest.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-	scrollQuest.BorderSizePixel = 0
-	scrollQuest.ScrollBarThickness = 6
-	scrollQuest.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	scrollQuest.Visible = false
-
-	
-	for i, frame in ipairs(questFrames) do
-		frame.Parent = scrollQuest
-		frame.Position = UDim2.new(0, 0, 0, (i - 1) * 26)
-		frame.Size = UDim2.new(1, 0, 0, 26)
-	end
-
-
-    -- Badges
-    local scrollBadge = Instance.new("ScrollingFrame", mainFrame)
-    scrollBadge.Name = "scrollBadge"
-    scrollBadge.Size = UDim2.new(1, -8, 1, contentHeightOffset)
-    scrollBadge.Position = UDim2.new(0, 4, 0, contentTop)
-    scrollBadge.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    scrollBadge.BorderSizePixel = 0
-    scrollBadge.ScrollBarThickness = 6
-    scrollBadge.Visible = false
-
-    for i, frame in ipairs(badgeFrames) do
-        frame.Parent = scrollBadge
-        frame.Position = UDim2.new(0, 0, 0, (i - 1) * 26)
-        frame.Size = UDim2.new(1, 0, 0, 26)
-        frame.BackgroundColor3 = (i % 2 == 0) and Color3.fromRGB(26, 26, 26) or Color3.fromRGB(18, 18, 18)
-        frame.BorderSizePixel = 0
-        local label = frame:FindFirstChild("ItemName")
-        if label then
-            label.TextColor3 = Color3.fromRGB(220, 220, 220)
-            label.Font = Enum.Font.Gotham
-            label.TextScaled = false
-            label.TextSize = 12
-        end
-    end
-
-    -- Settings (placeholder)
-    local scrollSettings = Instance.new("Frame", mainFrame)
-    scrollSettings.Name = "scrollSettings"
-    scrollSettings.Size = UDim2.new(1, -8, 1, contentHeightOffset)
-    scrollSettings.Position = UDim2.new(0, 4, 0, contentTop)
-    scrollSettings.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    scrollSettings.BorderSizePixel = 0
-    scrollSettings.Visible = false
-
-    local txt = Instance.new("TextLabel", scrollSettings)
-    txt.Text = "⚙️ Settings Tab — Minimal UI"
-    txt.TextColor3 = Color3.fromRGB(180, 180, 180)
-    txt.Font = Enum.Font.Gotham
-    txt.TextSize = 13
-    txt.BackgroundTransparency = 1
-    txt.Size = UDim2.new(1, 0, 0, 30)
-    txt.Position = UDim2.new(0, 8, 0, 8)
-    txt.TextXAlignment = Enum.TextXAlignment.Left
-
-    -- สร้างปุ่มแท็บ
-    for i, tab in ipairs(tabs) do
-        local btn = Instance.new("TextButton", tabBar)
-        btn.Size = UDim2.new(1 / #tabs, -1, 1, 0)
-        btn.Position = UDim2.new((i - 1) / #tabs, i - 1, 0, 0)
-        btn.Text = tab.icon .. "  " .. tab.name
-        btn.Font = Enum.Font.Gotham
-        btn.TextSize = 12
-        btn.TextColor3 = Color3.fromRGB(200, 200, 200)
-        btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        btn.BorderSizePixel = 0
-        btn.AutoButtonColor = false
-        tabButtons[tab.name] = btn
-    end
-
-    -- เปลี่ยนแท็บ
-	local function switchTab(tabName)
-		scrollShow.Visible     = (tabName == "Items")
-		scrollQuest.Visible    = (tabName == "Quests")
-		scrollBadge.Visible    = (tabName == "Badges")
-		scrollSettings.Visible = (tabName == "Settings")
-
-		for name, btn in pairs(tabButtons) do
-			btn.BackgroundColor3 = (name == tabName) and Color3.fromRGB(45,45,45) or Color3.fromRGB(30,30,30)
-		end
-		activeTab = tabName
-	end
-
-
-    for name, btn in pairs(tabButtons) do
-        btn.MouseButton1Click:Connect(function()
-            switchTab(name)
-        end)
-    end
-
-    -- ระบบค้นหา
-    local function filterFrames(frames, searchText)
-        local y = 0
-        for _, frame in ipairs(frames) do
-            local label = frame:FindFirstChildWhichIsA("TextLabel")
-            local visible = true
-            if label then
-                visible = string.find(string.lower(label.Text), string.lower(searchText), 1, true) ~= nil
-            end
-            frame.Visible = visible
-            if visible then
-                frame.Position = UDim2.new(0, 0, 0, y)
-                y = y + 26
-            end
-        end
-    end
-
-	searchBox:GetPropertyChangedSignal("Text"):Connect(function()
-		if activeTab == "Items" then
-			filterFrames(showFrames, searchBox.Text)
-		elseif activeTab == "Badges" then
-			filterFrames(badgeFrames, searchBox.Text)
-		elseif activeTab == "Quests" then
-			filterFrames(questFrames, searchBox.Text)
-		end
-	end)
-
-
-    -- เปิดหน้าแรก
-    switchTab("Items")
-
-    return itemhandbook
-end
-
-
-
-loadConfig()
-local showFrames = buildShowlistFrames()
-local badgeFrames = buildBadgeShowlistFrames()
-local questFrames = buildQuestFrames()
-createUI(showFrames, badgeFrames, questFrames)
-
------Webhook Auto----
-
-local Players = game:GetService("Players")
-local HttpService = game:GetService("HttpService")
-local LocalPlayer = Players.LocalPlayer
-local UserId = LocalPlayer.UserId
-
-local folderName = "ClematisHub/WebhookService_" .. UserId
-local fileName = folderName .. "/config.json"
-
-if not isfolder("ClematisHub") then makefolder("ClematisHub") end
-if not isfolder(folderName) then makefolder(folderName) end
-
-local config = {
-    WebhookUrl = "",
-    Enabled = false,
-    Delay = 60,
-    Anonymous = false,
-}
-
-if isfile(fileName) then
-    local ok, data = pcall(function()
-        return HttpService:JSONDecode(readfile(fileName))
-    end)
-    if ok and typeof(data) == "table" then
-        config = data
-    end
-else
-    writefile(fileName, HttpService:JSONEncode(config))
-end
-
-local function saveConfig()
-    writefile(fileName, HttpService:JSONEncode(config))
-end
-
-local gui = Instance.new("ScreenGui", game.CoreGui)
-gui.Name = "WebhookUI"
-gui.ResetOnSpawn = false
-
-local frame = Instance.new("Frame")
-frame.Name = "MainFrame"
-frame.Size = UDim2.new(0, 320, 0, 420)
-frame.Position = UDim2.new(0, 0, 0, 0)
-frame.AnchorPoint = Vector2.new(0, 0)
-frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-frame.BackgroundTransparency = 0.1
-frame.BorderSizePixel = 0
-frame.ClipsDescendants = true
-frame.Active = true
-frame.Draggable = true
-frame.ZIndex = 1
-frame.Parent = gui
-
-local UICorner = Instance.new("UICorner", frame)
-UICorner.CornerRadius = UDim.new(0, 12)
-
-local titleLabel = Instance.new("TextLabel", frame)
-titleLabel.Size = UDim2.new(1, 0, 0, 30)
-titleLabel.Position = UDim2.new(0, 0, 0.03, 0)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "🌐 Weebhook Service"
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleLabel.TextScaled = false
-titleLabel.TextSize = 20
-titleLabel.Font = Enum.Font.GothamBold
-titleLabel.ZIndex = 3
-
-local function createTextBox(name, placeholder, defaultText, position)
-    local box = Instance.new("TextBox", frame)
-    box.Name = name
-    box.PlaceholderText = placeholder
-    box.Text = defaultText or ""
-    box.Size = UDim2.new(1, -20, 0, 30)
-    box.Position = position
-    box.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    box.TextColor3 = Color3.fromRGB(255, 255, 255)
-    box.BorderSizePixel = 0
-    box.Font = Enum.Font.Gotham
-    box.TextScaled = false
-    box.TextSize = 18
-    local corner = Instance.new("UICorner", box)
-    corner.CornerRadius = UDim.new(0, 8)
-    return box
-end
-
-local function createButton(text, position, color)
-    local btn = Instance.new("TextButton", frame)
-    btn.Text = text
-    btn.Size = UDim2.new(1, -20, 0, 30)
-    btn.Position = position
-    btn.BackgroundColor3 = color
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.BorderSizePixel = 0
-    btn.Font = Enum.Font.Gotham
-    btn.TextScaled = false
-    btn.TextSize = 18
-    local corner = Instance.new("UICorner", btn)
-    corner.CornerRadius = UDim.new(0, 8)
-    return btn
-end
-
-local StartY = 40
-local YGap = 40
-
-local webhookBox = createTextBox("WebhookBox", "Enter Webhook URL", config.WebhookUrl, UDim2.new(0, 10, 0, StartY))
-webhookBox.FocusLost:Connect(function()
-    config.WebhookUrl = webhookBox.Text
-    saveConfig()
-end)
-
-if config.Delay == nil then
-    config.Delay = 60
-    saveConfig()
-end
-
-local delayBox = createTextBox("DelayBox", "Delay (sec)", tostring(config.Delay), UDim2.new(0, 10, 0, StartY + YGap))
-delayBox.FocusLost:Connect(function()
-    local val = tonumber(delayBox.Text)
-    if val then
-        config.Delay = val
-        saveConfig()
-    end
-end)
-
-local flagOptions = {
-    Item = false,
-    Quest = false,
-    Badge = false,
-}
-
-if config.Flags == nil then
-    config.Flags = flagOptions
-    saveConfig()
-else
-    for k, v in pairs(flagOptions) do
-        if config.Flags[k] == nil then
-            config.Flags[k] = v
-        end
-    end
-end
-
-local startY = StartY + YGap * 2 + 120
-
-local flagLabel = Instance.new("TextLabel", frame)
-flagLabel.Size = UDim2.new(1, -20, 0, 30)
-flagLabel.Position = UDim2.new(0, 10, 0, startY)
-flagLabel.BackgroundTransparency = 1
-flagLabel.Text = "🚩 Flag Settings"
-flagLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-flagLabel.TextScaled = false
-flagLabel.TextSize = 18
-flagLabel.Font = Enum.Font.GothamBold
-
-local checkboxes = {}
-
-local checkboxCount = 0
-for name, default in pairs(flagOptions) do
-    local checkbox = Instance.new("TextButton", frame)
-    checkbox.Size = UDim2.new(1, -20, 0, 30)
-    checkbox.Position = UDim2.new(0, 10, 0, startY + 30 + checkboxCount * 35)
-    checkbox.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    checkbox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    checkbox.Font = Enum.Font.Gotham
-    checkbox.TextScaled = false
-    checkbox.TextSize = 18
-    checkbox.Text = (config.Flags[name] and "✅ " or "❌ ") .. name
-
-    local corner = Instance.new("UICorner", checkbox)
-    corner.CornerRadius = UDim.new(0, 6)
-
-    checkbox.MouseButton1Click:Connect(function()
-        config.Flags[name] = not config.Flags[name]
-        checkbox.Text = (config.Flags[name] and "✅ " or "❌ ") .. name
-        saveConfig()
-    end)
-
-    checkboxes[name] = checkbox
-    checkboxCount = checkboxCount + 1
-end
-
----Service
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local player = game.Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-local menus = playerGui:WaitForChild("ScreenGui"):WaitForChild("Menus")
-local childTabs = menus:WaitForChild("ChildTabs")
-local eggsTab = childTabs:WaitForChild("Eggs Tab")
-local badgesTab = childTabs:WaitForChild("Badges Tab")
-local questsTab = childTabs:WaitForChild("Quests Tab")
-local http = game:GetService("HttpService")
-
-local usernamemode = game.Players.LocalPlayer.Name
-if config.Anonymous then
-    usernamemode = "Anonymous | ไม่เปิดเผยชื่อ"
-else
-    usernamemode = game.Players.LocalPlayer.Name
-end
-
--- 🐝 สมสี - opentab แบบล็อกแท็บ + ส่ง Enter + คืนคอนโทรล (เสถียร)
--- ใช้ชื่อแท็บแบบที่มึงเรียกอยู่แล้ว เช่น "Eggs Tab", "Quests Tab", "Badges Tab"
-local function findChildTabs()
-    local player = game:GetService("Players").LocalPlayer
-    local playerGui = player:FindFirstChild("PlayerGui")
-    if not playerGui then return nil end
-    local screenGui = playerGui:FindFirstChild("ScreenGui")
-    if not screenGui then return nil end
-    local menus = screenGui:FindFirstChild("Menus")
-    if not menus then return nil end
-    local childTabs = menus:FindFirstChild("ChildTabs")
-    return childTabs
-end
-
-local function getTabByNameLike(tabDisplayName)
-    local childTabs = findChildTabs()
-    if not childTabs then return nil end
-    local targetLower = string.lower(tabDisplayName)
-    for _, tab in ipairs(childTabs:GetChildren()) do
-        if (tab:IsA("ImageButton") or tab:IsA("TextButton")) and tab.Name then
-            if string.find(string.lower(tab.Name), targetLower, 1, true) then
-                return tab
-            end
-        end
-    end
-    return nil
-end
-
-function opentab(tabName)
-    print("🎯 [เปิดแท็บ] " .. tostring(tabName))
-    local tab = getTabByNameLike(tabName)
-    if not tab then
-        warn("❌ ไม่พบแท็บ: " .. tostring(tabName))
-        return false
-    end
-
-    -- ล็อก selection ไปที่ปุ่มแท็บ
-    game:GetService("GuiService").SelectedObject = tab
-    task.wait(0.3)
-
-    -- ส่งคีย์ Enter เพื่อกดแท็บ
-    local VIM = game:GetService("VirtualInputManager")
-    VIM:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
-    task.wait(0.1)
-    VIM:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
-
-    -- รอให้เนื้อหาแท็บโหลด
-    task.wait(0.8)
-
-    -- คืนการควบคุม
-    game:GetService("GuiService").SelectedObject = nil
-    print("✅ เปิดแท็บสำเร็จ + คืนคอนโทรล")
-    return true
-end
-
-local function resettab()
-    local sec = game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Menus.Children
-    for _, v in pairs(sec:GetDescendants()) do
-        if v:IsA("ScrollingFrame") and v.Name == "Content" then
-            local childCount = #v:GetChildren()
-            if childCount >= 1 then
-                opentab(v.Parent.Name.." Tab")
-            end
-        end
-    end
-end
-
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
-
-local CoreGui = game:GetService("CoreGui")
-local targets = {
-    CoreGui:FindFirstChild("ItemUi"),
-    CoreGui:FindFirstChild("WebhookUI")
-}
-
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "ToggleUI"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = PlayerGui
-
-local toggleFrame = Instance.new("Frame")
-toggleFrame.Size = UDim2.new(0, 120, 0, 40)
-toggleFrame.Position = UDim2.new(0.5, 0, 0.5, 10)
-toggleFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-toggleFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-toggleFrame.BorderSizePixel = 1
-toggleFrame.Parent = screenGui
-
-
-local toggleLabel = Instance.new("TextLabel")
-toggleLabel.Size = UDim2.new(1, 0, 1, 0)
-toggleLabel.BackgroundTransparency = 1
-toggleLabel.Text = "Open/Close"
-toggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleLabel.TextScaled = true
-toggleLabel.Parent = toggleFrame
-
-local enabled = true
-
-local function toggleUI()
-    enabled = not enabled
-    for _, ui in ipairs(targets) do
-        if ui then
-            ui.Enabled = enabled
-        end
-    end
-end
-
-toggleFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        toggleUI()
-    end
-end)
-
-local dragging = false
-local dragStartPos
-local frameStartPos
-
-toggleFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStartPos = input.Position
-        frameStartPos = toggleFrame.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - dragStartPos
-        toggleFrame.Position = UDim2.new(
-            frameStartPos.X.Scale,
-            frameStartPos.X.Offset + delta.X,
-            frameStartPos.Y.Scale,
-            frameStartPos.Y.Offset + delta.Y
-        )
-    end
-end)
-
-toggleFrame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseWheel then
-        local delta = input.Position.Z / 120
-        local newWidth = math.clamp(toggleFrame.Size.X.Offset + delta*10, 50, 300)
-        local newHeight = math.clamp(toggleFrame.Size.Y.Offset + delta*5, 20, 150)
-        toggleFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
-    end
-end)
-
-local function SendMessageEMBED(url, embed)
-    local headers = {
-        ["Content-Type"] = "application/json"
-    }
-
-    local data = {
-        username = game.Players.LocalPlayer.Name,
-        avatar_url = "https://media.discordapp.net/attachments/1371924996766564402/1374117907646255135/Main.png?ex=682e3407&is=682ce287&hm=3167e7ffde6ea2f6d6c2e014796c602684d24e29f01cb40014fea733c264b108&=&format=webp&quality=lossless",
-        embeds = { {
-            title = "**⸻ 🌻 Bee Swarm Simulator 🐝 ⸻**",
-            color = embed.color or tonumber(0x00FFFF),
-            thumbnail = { url = embed.thumbnail or "" },
-            image = { url = embed.image or "" },
-            fields = embed.fields or {},
-            footer = {
-                text = embed.footer and embed.footer.text or "📅 Time Report"
-            },
-            timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
-        }}
-    }
-
-    local success, err = pcall(function()
-        http_request({
-            Url = url,
-            Method = "POST",
-            Headers = headers,
-            Body = http:JSONEncode(data)
-        })
-    end)
-
-    if success then
-        print("📤 Message Sent to Discord Webhook")
-    else
-        warn("❌ Webhook ส่งไม่สำเร็จ:", err)
-    end
-end
-
-function randomHexColor()
-    local randomColor = math.random(0, 0xFFFFFF)
-    
-    return randomColor
-end
-
-local function formatNumberWithCommas(n)
-    n = math.floor(n)
-    local formatted = tostring(n)
-    local k
-    while true do
-        formatted, k = formatted:gsub("^(-?%d+)(%d%d%d)", "%1,%2")
-        if k == 0 then break end
-    end
-    return formatted
-end
-
-AutoWebhook = config.Enabled or false
-
-function eggtab_webhook_service()
-    if not config.Flags.Item then return end
-                task.wait(0.3)
-                opentab("Eggs Tab")
-                local allowedNames = {}
-                for name, info in pairs(Showlist) do
-                    if info.show then
-                allowedNames[name] = info.emoji or "📦"
-                end
-            end
-            task.wait(2)
-                local maintofind
-                local maxRetries = 50
-                local tries = 0
-                while not maintofind and tries < maxRetries do
-                    tries = tries + 1
-
-                    local Players = game:GetService("Players")
-                    local localPlayer = Players.LocalPlayer
-                    local playerGui = localPlayer:FindFirstChild("PlayerGui")
-                    if not playerGui then 
-                        warn("❌ ไม่พบ PlayerGui") 
-                        break
-                    end
-                    local screenGui = playerGui:FindFirstChild("ScreenGui")
-                    if not screenGui then 
-                        warn("❌ ไม่พบ ScreenGui") 
-                    else
-                        local menus = screenGui:FindFirstChild("Menus")
-                        if not menus then 
-                            warn("❌ ไม่พบ Menus") 
-                        else
-                            local children = menus:FindFirstChild("Children")
-                            if not children then 
-                                warn("❌ ไม่พบ Children") 
-                            else
-                                local eggs = children:FindFirstChild("Eggs")
-                                if not eggs then 
-                                    warn("❌ ไม่พบ Eggs") 
-                                else
-                                    local content = eggs:FindFirstChild("Content")
-                                    if not content then 
-                                        warn("❌ ไม่พบ Content") 
-                                    else
-                                        maintofind = content:FindFirstChild("EggRows")
-                                        if not maintofind then
-                                            resettab()
-                                            warn("❌ ไม่พบ Inventory Ui - Retry " .. tries)
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-    if not maintofind then
-        resettab()
-        task.wait(0.2)
-    end
-    end
-
-    local TeleportService = game:GetService("TeleportService")
-    local PlaceId, JobId = game.PlaceId, game.JobId
-
-    if not maintofind then
-        warn("❌ หยุดการทำงานเนื่องจากไม่พบ Inventory หลังจากลอง " .. maxRetries .. " ครั้ง กำลัง Rejoin")
-
-        if #Players:GetPlayers() <= 1 then
-            Players.LocalPlayer:Kick("\nRejoining...")
-            task.wait()
-            TeleportService:Teleport(PlaceId, Players.LocalPlayer)
-        else
-            TeleportService:TeleportToPlaceInstance(PlaceId, JobId, Players.LocalPlayer)
-        end
-    end
-
-    local fields = {}
-    local countLimit = 0
-    local maxFields = 25
-
-    for _, eggRow in pairs(maintofind:GetChildren()) do
-        if countLimit >= maxFields then break end
-
-            if eggRow:FindFirstChild("TypeName") and eggRow:FindFirstChild("EggSlot") then
-            local typeName = eggRow.TypeName
-            local eggSlot = eggRow.EggSlot
-            local count = eggSlot:FindFirstChild("Count")
-
-        if typeName:IsA("TextLabel") and count and count:IsA("TextLabel") then
-            local nameText = string.sub(typeName.Text, 1, 256)
-
-            if allowedNames[nameText] then
-                local emoji = allowedNames[nameText]
-                local displayText = emoji .. " [ " .. nameText .. " ] : " .. count.Text
-
-                table.insert(fields, {
-                    name = displayText,
-                    value = " ",
-                    inline = false
-                })
-
-                countLimit = countLimit + 1
-                end
-            end
-        end
-    end
-
-    beeCount = 0
-
-    local myname = game.Players.LocalPlayer.Name
-    local hives = workspace.Honeycombs:GetChildren()
-    local basemyhive = nil
-
-    for _, hive in ipairs(hives) do
-        local owner = hive:FindFirstChild("Owner")
-        if owner and owner:IsA("ObjectValue") and owner.Value and owner.Value.Name == myname then
-            basemyhive = hive
-        end
-    end
-
-    if not basemyhive then
-        warn("❌ ไม่พบ Hive ของคุณ")
-    end
-
-    if basemyhive then
-    cells = basemyhive:FindFirstChild("Cells")
-
-    if cells then
-        for _, cell in ipairs(cells:GetChildren()) do
-            local cellType = cell:FindFirstChild("CellType")
-            if cellType and cellType:IsA("StringValue") and cellType.Value ~= "Empty" then
-            beeCount = beeCount + 1
-            end
-        end
-    else
-        warn("❌ ไม่พบ Cells ภายใน Hive")
-    end
-    end
-
-    if beeCount == 0 then
-        finalbeeCount = "```" .. "❌ ผู้เล่นไม่ได้รับช่องรัง" .. "```"
-    end
-
-        if beeCount >= 1 then
-        finalbeeCount = "```" .. "จำนวนผึ้ง : " .. tostring(beeCount) .. " ตัว" .. "```"
-    end
-
-    local HttpService = game:GetService("HttpService")
-    local userId = game.Players.LocalPlayer.UserId
-    local apiURL = "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=" .. userId .. "&size=420x420&format=Png&isCircular=false"
-
-    local avatarImageURL = nil
-
-    local success, response = pcall(function()
-        local json = HttpService:JSONDecode(game:HttpGet(apiURL))
-        avatarImageURL = json.data[1].imageUrl
-    end)
-
-    if not avatarImageURL then
-        avatarImageURL = "https://tr.rbxcdn.com/default_avatar.png"
-    end
-
-    local myhoney = game:GetService("Players").LocalPlayer.CoreStats.Honey.Value
-    local mypollen = game:GetService("Players").LocalPlayer.CoreStats.Pollen.Value
-    local mycapacity = game:GetService("Players").LocalPlayer.CoreStats.Capacity.Value
-
-    local inventoryText = ""
-
-    if #fields == 0 then
-        inventoryText = inventoryText .. "❌ ไม่ได้ตั้งค่าไอเทมที่จะส่งข้อมูล\n"
-    else
-        for _, field in ipairs(fields) do
-            inventoryText = inventoryText .. "> " .. field.name .. "\n"
-        end
-    end
-
-    inventoryText = inventoryText
-
-    local sectionFields = {
-        { name = "<:user:1374753027625582682> Username ", value = "```" .. usernamemode .. "```", inline = false },
-        { name = "**⸻ Information ⸻**", value = " ", inline = false }
-    }
-
-    local baseFields = {
-        { name = "<:Honey:1374751354622574763> **Honey**", value = "```" .. formatNumberWithCommas(myhoney) .. "```", inline = false },
-        { name = "<:Pollen:1374751948774969344> **Pollen/Capacity**", value = "```" .. formatNumberWithCommas(mypollen) .. "/" .. formatNumberWithCommas(mycapacity) .. "```", inline = true },
-        { name = "<:Basic_Egg:1374459785113763891> **Bee count**", value = finalbeeCount, inline = true },
-        { name = "<:Inv:1374752562087067801> **Inventory**", value = inventoryText, inline = false }
-    }
-
-    local finalFields = {}
-    for _, field in ipairs(sectionFields) do
-        table.insert(finalFields, field)
-    end
-    for _, field in ipairs(baseFields) do
-        table.insert(finalFields, field)
-    end
-
-    if config.WebhookUrl == "" or nil then
-            game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "❌ ล้มเหลว!",
-            Text = "ส่งไม่สำเร็จ: Webhook Url ว่างเปล่า",
-            Icon = "rbxthumb://type=Asset&id=6031071050&w=150&h=150",
-            Duration = 6
-            })
-    end
-    SendMessageEMBED(config.WebhookUrl, {
-        color = randomHexColor(),
-        thumbnail = avatarImageURL,
-        image = "https://cdn.discordapp.com/attachments/1371924996766564402/1374403252057149450/KhamKhomShop.jpg?ex=682dec46&is=682c9ac6&hm=66f4dac5960243b3717a984a746c87b66a9de5e721446b0b9eda12032943b98e&",
-        fields = finalFields,
-        footer = {
-            text = "⸻ » Powered by KhamKhomShop | Webhook Service « ⸻"
-        }
-    })
-
-task.wait(1)
-end
-
-
-function questtab_webhook_service()
-    if not config.Flags.Quest then return end
-
-    local Players = game:GetService("Players")
-    local localPlayer = Players.LocalPlayer
-    local HttpService = game:GetService("HttpService")
-    local TeleportService = game:GetService("TeleportService")
-    resettab()
-    opentab("Quests Tab")
-            task.wait(2)
-                local maintofind2
-                local maxRetries2 = 50
-                local tries2 = 0
-                while not maintofind2 and tries2 < maxRetries2 do
-                    tries2 = tries2 + 1
-
-                    local Players = game:GetService("Players")
-                    local localPlayer = Players.LocalPlayer
-                    local playerGui = localPlayer:FindFirstChild("PlayerGui")
-                    if not playerGui then 
-                        warn("❌ ไม่พบ PlayerGui") 
-                        break
-                    end
-                    local screenGui = playerGui:FindFirstChild("ScreenGui")
-                    if not screenGui then 
-                        warn("❌ ไม่พบ ScreenGui") 
-                    else
-                        local menus = screenGui:FindFirstChild("Menus")
-                        if not menus then 
-                            warn("❌ ไม่พบ Menus") 
-                        else
-                            local children = menus:FindFirstChild("Children")
-                            if not children then 
-                                warn("❌ ไม่พบ Children") 
-                            else
-                                local eggs = children:FindFirstChild("Quests")
-                                if not eggs then 
-                                    warn("❌ ไม่พบ Quests") 
-                                else
-                                    local content = eggs:FindFirstChild("Content")
-                                    if not content then 
-                                        warn("❌ ไม่พบ Content") 
-                                    else
-                                        maintofind2 = content:FindFirstChild("Frame")
-                                        if not maintofind2 then
-                                            resettab()
-                                            warn("❌ ไม่พบ Inventory Ui - Retry " .. tries2)
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-    if not maintofind2 then
-        resettab()
-        task.wait(0.2)
-    end
-    end
-
-    local TeleportService = game:GetService("TeleportService")
-    local PlaceId, JobId = game.PlaceId, game.JobId
-
-    if not maintofind2 then
-        warn("❌ หยุดการทำงานเนื่องจากไม่พบ Inventory หลังจากลอง " .. maxRetries2 .. " ครั้ง กำลัง Rejoin")
-
-        if #Players:GetPlayers() <= 1 then
-            Players.LocalPlayer:Kick("\nRejoining...")
-            task.wait()
-            TeleportService:Teleport(PlaceId, Players.LocalPlayer)
-        else
-            TeleportService:TeleportToPlaceInstance(PlaceId, JobId, Players.LocalPlayer)
-        end
-    end
-
-    -- ✅ Map: ชื่อเควช (ที่อ่านจาก UI) → ชื่อหมีเจ้าของเควช
-
-	local QuestOwnerMap = {
+local QuestOwnerMap = {
     -- 🧭 Spirit Bear
     ["Spirit's Starter"] = "Spirit Bear",
     ["The First Offering"] = "Spirit Bear",
@@ -1566,619 +360,1669 @@ function questtab_webhook_service()
     ["Blue Request 15"] = "Bucko Bee",
 }
 
-	local questBoxes = maintofind2:GetChildren()
-	local questTextLines = {}
 
-	for _, questBox in ipairs(questBoxes) do
+-- 🧩 PART 1 END
+
+-- 🧩 PART 2 START : Save / Load Config + UI Builder
+
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local LocalPlayer = Players.LocalPlayer
+local UserId = tostring(LocalPlayer.UserId)
+local folderPath = "KhamKhomShop"
+local fileName = folderPath .. "/" .. UserId .. "_Hook_Service.txt"
+local itemHeight = 26
+
+-- 💾 ฟังก์ชันบันทึกข้อมูล config (สถานะ Show/Hide)
+local function saveConfig()
+	if not isfolder(folderPath) then makefolder(folderPath) end
+	local dataToSave = {
+		Showlist = {},
+		BadgeShowlist = {},
+		QuestShowlist = {}
+	}
+
+	for k, v in pairs(Showlist) do
+		dataToSave.Showlist[k] = { show = v.show, emoji = v.emoji }
+	end
+	for k, v in pairs(BadgeShowlist) do
+		dataToSave.BadgeShowlist[k] = v
+	end
+	for k, v in pairs(QuestShowlist) do
+		dataToSave.QuestShowlist[k] = { show = v.show }
+	end
+
+	writefile(fileName, HttpService:JSONEncode(dataToSave))
+end
+
+-- 📂 โหลด config กลับมา (ถ้ามีไฟล์เก็บไว้)
+local function loadConfig()
+	if isfile(fileName) then
+		local data = readfile(fileName)
+		local decoded = HttpService:JSONDecode(data)
+
+		if decoded.Showlist then
+			for k, v in pairs(decoded.Showlist) do
+				if Showlist[k] then
+					Showlist[k].show = v.show
+				end
+			end
+		end
+
+		if decoded.BadgeShowlist then
+			for k, v in pairs(decoded.BadgeShowlist) do
+				if BadgeShowlist[k] ~= nil then
+					BadgeShowlist[k] = v
+				end
+			end
+		end
+
+		if decoded.QuestShowlist then
+			for k, v in pairs(decoded.QuestShowlist) do
+				if QuestShowlist[k] ~= nil and v and v.show ~= nil then
+					QuestShowlist[k].show = v.show
+				end
+			end
+		end
+	end
+end
+
+-- 🎨 ฟังก์ชันสร้าง Frame ของแต่ละไอเท็มใน Showlist
+local function buildShowlistFrames()
+	local itemFrames, items = {}, {}
+	for name, data in pairs(Showlist) do
+		table.insert(items, { name = name, data = data })
+	end
+
+	table.sort(items, function(a, b)
+		return tostring(a.name):lower() < tostring(b.name):lower()
+	end)
+
+	for i, item in ipairs(items) do
+		local frame = Instance.new("Frame")
+		frame.Size = UDim2.new(1, 0, 0, itemHeight)
+		frame.BackgroundColor3 = (i % 2 == 0)
+			and Color3.fromRGB(26, 26, 26)
+			or Color3.fromRGB(18, 18, 18)
+		frame.BorderSizePixel = 0
+
+		local label = Instance.new("TextLabel", frame)
+		label.Size = UDim2.new(0.7, -10, 1, 0)
+		label.Position = UDim2.new(0, 10, 0, 0)
+		label.BackgroundTransparency = 1
+		label.Text = item.name
+		label.TextColor3 = Color3.fromRGB(220, 220, 220)
+		label.TextXAlignment = Enum.TextXAlignment.Left
+		label.Font = Enum.Font.Gotham
+		label.TextSize = 12
+
+		local toggle = Instance.new("TextButton", frame)
+		toggle.Size = UDim2.new(0.3, -8, 1, -8)
+		toggle.Position = UDim2.new(0.7, 8, 0, 4)
+		toggle.Text = item.data.show and "Show" or "Hide"
+		toggle.Font = Enum.Font.Gotham
+		toggle.TextSize = 12
+		toggle.BorderSizePixel = 1
+
+		local function updateColor()
+			if item.data.show then
+				toggle.BackgroundColor3 = Color3.fromRGB(40, 90, 40)
+				toggle.BorderColor3 = Color3.fromRGB(80, 160, 80)
+			else
+				toggle.BackgroundColor3 = Color3.fromRGB(90, 40, 40)
+				toggle.BorderColor3 = Color3.fromRGB(160, 80, 80)
+			end
+		end
+		updateColor()
+
+		toggle.MouseButton1Click:Connect(function()
+			item.data.show = not item.data.show
+			toggle.Text = item.data.show and "Show" or "Hide"
+			updateColor()
+			saveConfig()
+		end)
+
+		table.insert(itemFrames, frame)
+	end
+	return itemFrames
+end
+
+-- 🏅 ฟังก์ชันสร้าง Frame ของ Badge
+local function buildBadgeShowlistFrames()
+	local badgeFrames, badges = {}, {}
+	for name, show in pairs(BadgeShowlist) do
+		table.insert(badges, { name = name, show = show })
+	end
+	table.sort(badges, function(a, b) return a.name < b.name end)
+
+	for i, badge in ipairs(badges) do
+		local frame = Instance.new("Frame")
+		frame.Size = UDim2.new(1, 0, 0, itemHeight)
+		frame.BackgroundColor3 = (i % 2 == 0)
+			and Color3.fromRGB(26, 26, 26)
+			or Color3.fromRGB(18, 18, 18)
+		frame.BorderSizePixel = 0
+
+		local label = Instance.new("TextLabel", frame)
+		label.Size = UDim2.new(0.7, -10, 1, 0)
+		label.Position = UDim2.new(0, 10, 0, 0)
+		label.BackgroundTransparency = 1
+		label.Text = badge.name
+		label.TextColor3 = Color3.fromRGB(220, 220, 220)
+		label.TextXAlignment = Enum.TextXAlignment.Left
+		label.Font = Enum.Font.Gotham
+		label.TextSize = 12
+
+		local toggle = Instance.new("TextButton", frame)
+		toggle.Size = UDim2.new(0.3, -8, 1, -8)
+		toggle.Position = UDim2.new(0.7, 8, 0, 4)
+		toggle.Text = badge.show and "Show" or "Hide"
+		toggle.Font = Enum.Font.Gotham
+		toggle.TextSize = 12
+
+		local function updateColor()
+			if badge.show then
+				toggle.BackgroundColor3 = Color3.fromRGB(40, 90, 40)
+			else
+				toggle.BackgroundColor3 = Color3.fromRGB(90, 40, 40)
+			end
+		end
+		updateColor()
+
+		toggle.MouseButton1Click:Connect(function()
+			badge.show = not badge.show
+			BadgeShowlist[badge.name] = badge.show
+			toggle.Text = badge.show and "Show" or "Hide"
+			updateColor()
+			saveConfig()
+		end)
+
+		table.insert(badgeFrames, frame)
+	end
+	return badgeFrames
+end
+
+-- 🧸 ฟังก์ชันสร้าง Frame ของ Quest
+local function buildQuestFrames()
+	local questFrames, quests = {}, {}
+	for name, data in pairs(QuestShowlist) do
+		table.insert(quests, { name = name, data = data })
+	end
+	table.sort(quests, function(a, b) return a.name < b.name end)
+
+	for i, quest in ipairs(quests) do
+		local frame = Instance.new("Frame")
+		frame.Size = UDim2.new(1, 0, 0, itemHeight)
+		frame.BackgroundColor3 = (i % 2 == 0)
+			and Color3.fromRGB(26, 26, 26)
+			or Color3.fromRGB(18, 18, 18)
+		frame.BorderSizePixel = 0
+
+		local label = Instance.new("TextLabel", frame)
+		label.Size = UDim2.new(0.7, -10, 1, 0)
+		label.Position = UDim2.new(0, 10, 0, 0)
+		label.BackgroundTransparency = 1
+		label.Text = quest.name
+		label.TextColor3 = Color3.fromRGB(220, 220, 220)
+		label.TextXAlignment = Enum.TextXAlignment.Left
+		label.Font = Enum.Font.Gotham
+		label.TextSize = 12
+
+		local toggle = Instance.new("TextButton", frame)
+		toggle.Size = UDim2.new(0.3, -8, 1, -8)
+		toggle.Position = UDim2.new(0.7, 8, 0, 4)
+		toggle.Text = quest.data.show and "Show" or "Hide"
+		toggle.Font = Enum.Font.Gotham
+		toggle.TextSize = 12
+
+		local function updateColor()
+			if quest.data.show then
+				toggle.BackgroundColor3 = Color3.fromRGB(40, 90, 40)
+			else
+				toggle.BackgroundColor3 = Color3.fromRGB(90, 40, 40)
+			end
+		end
+		updateColor()
+
+		toggle.MouseButton1Click:Connect(function()
+			quest.data.show = not quest.data.show
+			toggle.Text = quest.data.show and "Show" or "Hide"
+			updateColor()
+			saveConfig()
+		end)
+
+		table.insert(questFrames, frame)
+	end
+	return questFrames
+end
+
+-- 🧩 PART 2 END
+
+
+-- 🧩 PART 3 START : Bee Swarm Config Panel UI
+
+-- 🎨 โทนสีอบอุ่นแบบคาเฟ่
+local cozyTheme = {
+	bg_dark = Color3.fromRGB(60, 42, 33),     -- น้ำตาลเข้มอบอุ่น
+	bg_mid  = Color3.fromRGB(75, 50, 40),     -- น้ำตาลกลาง
+	bg_light = Color3.fromRGB(230, 200, 170), -- น้ำตาลครีม
+	border = Color3.fromRGB(180, 140, 90),    -- ทองนุ่มๆ
+	text_main = Color3.fromRGB(255, 240, 210),
+	text_sub = Color3.fromRGB(230, 210, 180),
+	accent = Color3.fromRGB(200, 160, 110),   -- ปุ่ม highlight
+	success = Color3.fromRGB(110, 80, 50),
+	fail = Color3.fromRGB(90, 50, 40),
+}
+
+-- ☕ Bee Swarm Config Panel (โทนน้ำตาลอบอุ่น)
+local function createUI(showFrames, badgeFrames, questFrames)
+	if game.CoreGui:FindFirstChild("ItemUi") then
+		game.CoreGui.ItemUi:Destroy()
+		task.wait(0.05)
+	end
+
+	local itemhandbook = Instance.new("ScreenGui", game.CoreGui)
+	itemhandbook.Name = "ItemUi"
+
+	-- 🖼️ กล่องหลัก
+	local mainFrame = Instance.new("Frame", itemhandbook)
+	mainFrame.Size = UDim2.new(0, 440, 0, 520)
+	mainFrame.AnchorPoint = Vector2.new(1, 0.5)
+	mainFrame.Position = UDim2.new(1, -15, 0.5, 0)
+	mainFrame.BackgroundColor3 = cozyTheme.bg_dark
+	mainFrame.BorderColor3 = cozyTheme.border
+	mainFrame.BorderSizePixel = 1
+	mainFrame.Active = true
+	Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 10)
+
+	local stroke = Instance.new("UIStroke", mainFrame)
+	stroke.Thickness = 1.5
+	stroke.Color = cozyTheme.border
+
+	-- 🎚️ Title Bar
+	local titleBar = Instance.new("Frame", mainFrame)
+	titleBar.Size = UDim2.new(1, 0, 0, 30)
+	titleBar.BackgroundColor3 = cozyTheme.bg_mid
+	titleBar.BorderSizePixel = 0
+	Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 10)
+
+	local title = Instance.new("TextLabel", titleBar)
+	title.Text = "☕ Bee Swarm Config Panel (Cozy Café Theme)"
+	title.Size = UDim2.new(1, -10, 1, 0)
+	title.Position = UDim2.new(0, 10, 0, 0)
+	title.BackgroundTransparency = 1
+	title.TextColor3 = cozyTheme.text_main
+	title.Font = Enum.Font.GothamBold
+	title.TextSize = 14
+	title.TextXAlignment = Enum.TextXAlignment.Left
+
+	-- 🔍 ช่องค้นหา
+	local searchBox = Instance.new("TextBox", mainFrame)
+	searchBox.PlaceholderText = "🔎 ค้นหา..."
+	searchBox.Size = UDim2.new(1, -16, 0, 26)
+	searchBox.Position = UDim2.new(0, 8, 0, 38)
+	searchBox.BackgroundColor3 = cozyTheme.bg_mid
+	searchBox.TextColor3 = cozyTheme.text_main
+	searchBox.PlaceholderColor3 = cozyTheme.text_sub
+	searchBox.BorderSizePixel = 0
+	searchBox.TextXAlignment = Enum.TextXAlignment.Left
+	searchBox.ClearTextOnFocus = false
+	searchBox.Font = Enum.Font.Gotham
+	searchBox.TextSize = 12
+	Instance.new("UICorner", searchBox).CornerRadius = UDim.new(0, 6)
+	local searchStroke = Instance.new("UIStroke", searchBox)
+	searchStroke.Color = cozyTheme.border
+	searchStroke.Thickness = 1
+
+	-- 🗂️ แถบแท็บ (เมนูหลัก)
+	local tabBar = Instance.new("Frame", mainFrame)
+	tabBar.Size = UDim2.new(1, 0, 0, 28)
+	tabBar.Position = UDim2.new(0, 0, 0, 72)
+	tabBar.BackgroundColor3 = cozyTheme.bg_mid
+	tabBar.BorderSizePixel = 0
+	Instance.new("UICorner", tabBar).CornerRadius = UDim.new(0, 10)
+
+	local tabs = {
+		{name = "Items", icon = "🎒"},
+		{name = "Quests", icon = "📜"},
+		{name = "Badges", icon = "🏅"},
+		{name = "Settings", icon = "⚙️"},
+	}
+
+	local tabButtons = {}
+	local activeTab = nil
+
+	-- 📜 ส่วนเนื้อหา
+	local contentTop = 72 + 34
+	local contentHeightOffset = -(contentTop + 8)
+
+	local function makeScroll(name)
+		local sc = Instance.new("ScrollingFrame", mainFrame)
+		sc.Name = name
+		sc.Size = UDim2.new(1, -8, 1, contentHeightOffset)
+		sc.Position = UDim2.new(0, 4, 0, contentTop)
+		sc.BackgroundColor3 = cozyTheme.bg_dark
+		sc.BorderSizePixel = 0
+		sc.ScrollBarThickness = 6
+		sc.AutomaticCanvasSize = Enum.AutomaticSize.Y
+		sc.Visible = false
+		Instance.new("UICorner", sc).CornerRadius = UDim.new(0, 8)
+		return sc
+	end
+
+	local scrollShow = makeScroll("scrollShow")
+	local scrollQuest = makeScroll("scrollQuest")
+	local scrollBadge = makeScroll("scrollBadge")
+	local scrollSettings = makeScroll("scrollSettings")
+
+	for i, frame in ipairs(showFrames) do
+		frame.Parent = scrollShow
+		frame.Position = UDim2.new(0, 0, 0, (i - 1) * 26)
+	end
+	for i, frame in ipairs(questFrames) do
+		frame.Parent = scrollQuest
+		frame.Position = UDim2.new(0, 0, 0, (i - 1) * 26)
+	end
+	for i, frame in ipairs(badgeFrames) do
+		frame.Parent = scrollBadge
+		frame.Position = UDim2.new(0, 0, 0, (i - 1) * 26)
+	end
+
+	local txt = Instance.new("TextLabel", scrollSettings)
+	txt.Text = "⚙️ Settings Tab — (ยังไม่เพิ่มเนื้อหา)"
+	txt.TextColor3 = cozyTheme.text_sub
+	txt.Font = Enum.Font.Gotham
+	txt.TextSize = 13
+	txt.BackgroundTransparency = 1
+	txt.Size = UDim2.new(1, 0, 0, 30)
+	txt.Position = UDim2.new(0, 8, 0, 8)
+	txt.TextXAlignment = Enum.TextXAlignment.Left
+
+	-- 🔘 ปุ่มแท็บแต่ละอัน
+	for i, tab in ipairs(tabs) do
+		local btn = Instance.new("TextButton", tabBar)
+		btn.Size = UDim2.new(1 / #tabs, -1, 1, 0)
+		btn.Position = UDim2.new((i - 1) / #tabs, i - 1, 0, 0)
+		btn.Text = tab.icon .. "  " .. tab.name
+		btn.Font = Enum.Font.GothamBold
+		btn.TextSize = 12
+		btn.TextColor3 = cozyTheme.text_main
+		btn.BackgroundColor3 = cozyTheme.bg_dark
+		btn.BorderSizePixel = 0
+		btn.AutoButtonColor = false
+		Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+		tabButtons[tab.name] = btn
+	end
+
+	-- 💡 ระบบเปลี่ยนแท็บ
+	local function switchTab(tabName)
+		scrollShow.Visible = (tabName == "Items")
+		scrollQuest.Visible = (tabName == "Quests")
+		scrollBadge.Visible = (tabName == "Badges")
+		scrollSettings.Visible = (tabName == "Settings")
+
+		for name, btn in pairs(tabButtons) do
+			btn.BackgroundColor3 = (name == tabName)
+				and cozyTheme.accent
+				or cozyTheme.bg_dark
+		end
+		activeTab = tabName
+	end
+
+	for name, btn in pairs(tabButtons) do
+		btn.MouseButton1Click:Connect(function()
+			switchTab(name)
+		end)
+	end
+
+	-- 🔍 ระบบค้นหา
+	local function filterFrames(frames, searchText)
+		local y = 0
+		for _, frame in ipairs(frames) do
+			local label = frame:FindFirstChildWhichIsA("TextLabel")
+			local visible = true
+			if label then
+				visible = string.find(string.lower(label.Text), string.lower(searchText), 1, true) ~= nil
+			end
+			frame.Visible = visible
+			if visible then
+				frame.Position = UDim2.new(0, 0, 0, y)
+				y = y + 26
+			end
+		end
+	end
+
+	searchBox:GetPropertyChangedSignal("Text"):Connect(function()
+		if activeTab == "Items" then
+			filterFrames(showFrames, searchBox.Text)
+		elseif activeTab == "Badges" then
+			filterFrames(badgeFrames, searchBox.Text)
+		elseif activeTab == "Quests" then
+			filterFrames(questFrames, searchBox.Text)
+		end
+	end)
+
+	-- ✳️ เปิดหน้าแรกเป็น Items
+	switchTab("Items")
+
+	print("☕ [CozyUI] โหลด UI ธีมคาเฟ่น้ำตาลอบอุ่นสำเร็จ 🐝")
+	return itemhandbook
+end
+
+
+-- โหลด config และสร้าง UI ตอนเริ่มต้น
+loadConfig()
+local showFrames = buildShowlistFrames()
+local badgeFrames = buildBadgeShowlistFrames()
+local questFrames = buildQuestFrames()
+createUI(showFrames, badgeFrames, questFrames)
+
+-- 🧩 PART 3 END
+
+
+-- 🧩 PART 4 START : Webhook Config + UI Panel (FULL MERGE VERSION)
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+
+-- 📁 โฟลเดอร์เก็บข้อมูล config
+local folderName = "ClematisHub/WebhookService"
+local configFile = folderName .. "/" .. LocalPlayer.UserId .. "_config.json"
+
+-- 💾 default config เริ่มต้น
+local config = {
+	WebhookUrl = "",
+	Enabled = false,
+	Delay = 3600,
+	Anonymous = false,
+	Flags = {
+		Item = false,
+		Quest = false,
+		Badge = false,
+		Honey = false,
+	},
+	WaitBeforeSend = false,
+	UIVisible = true -- ✅ ต้องอยู่ข้างในสุดก่อนปิดวงเล็บนี้
+}
+
+
+-- 📦 ฟังก์ชันบันทึก config 
+local function saveWebhookConfig()
+	if not isfolder("ClematisHub") then makefolder("ClematisHub") end
+	if not isfolder(folderName) then makefolder(folderName) end
+
+	local success, err = pcall(function()
+		writefile(configFile, HttpService:JSONEncode(config))
+	end)
+
+	if success then
+		print("💾 [Webhook] บันทึก config แล้ว:", configFile)
+	else
+		warn("❌ [Webhook] บันทึก config ไม่สำเร็จ:", err)
+	end
+end
+
+-- 📥 โหลด config จากไฟล์
+local function loadWebhookConfig()
+	if isfile(configFile) then
+		local success, data = pcall(function()
+			return HttpService:JSONDecode(readfile(configFile))
+		end)
+		if success and type(data) == "table" then
+			for k, v in pairs(data) do
+				if type(v) == "table" then
+					config[k] = config[k] or {}
+					for subK, subV in pairs(v) do
+						config[k][subK] = subV
+					end
+				else
+					config[k] = v
+				end
+			end
+		end
+	end
+end
+loadWebhookConfig()
+
+config.ItemTargets = config.ItemTargets or {}       -- เป้าหมายของแต่ละไอเท็ม
+config.ItemExtraFarm = config.ItemExtraFarm or {}   -- จำนวนที่ต้องฟาร์มเพิ่ม
+config.ItemCurrent = config.ItemCurrent or {}       -- จำนวนจริงจากในเกม
+
+
+------------------------------------------------------------
+-- 🖥️ สร้าง GUI หลัก
+------------------------------------------------------------
+if game.CoreGui:FindFirstChild("WebhookUI") then
+	game.CoreGui.WebhookUI:Destroy()
+	task.wait(0.05)
+end
+
+local screenGui = Instance.new("ScreenGui", game.CoreGui)
+screenGui.Name = "WebhookUI"
+
+local cozyTheme = {
+	bg_dark = Color3.fromRGB(60, 42, 33),
+	bg_mid  = Color3.fromRGB(75, 50, 40),     
+	bg_light = Color3.fromRGB(230, 200, 170),
+	border = Color3.fromRGB(180, 140, 90),    
+	text_main = Color3.fromRGB(255, 240, 210),
+	text_sub = Color3.fromRGB(230, 210, 180),
+	accent = Color3.fromRGB(200, 160, 110),   
+	success = Color3.fromRGB(110, 80, 50),
+	fail = Color3.fromRGB(90, 50, 40),
+}
+
+-- กล่องหลัก
+local frame = Instance.new("Frame", screenGui)
+frame.Name = "WebhookMainFrame"
+frame.Size = UDim2.new(0, 380, 0, 480)
+frame.Position = UDim2.new(0, 20, 0.5, -200)
+frame.BackgroundColor3 = Color3.fromRGB(23, 23, 23)
+frame.BorderColor3 = Color3.fromRGB(50, 50, 50)
+frame.Active = true
+frame.Draggable = true
+
+-- Title Bar
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, -10, 0, 30)
+title.Position = UDim2.new(0, 10, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "🌐 Webhook Auto Reporter"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamMedium
+title.TextSize = 14
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+------------------------------------------------------------
+-- 📦 ส่วนเนื้อหา UI
+------------------------------------------------------------
+local spacing = 8
+local nextY = 40
+
+-- URL Box
+local urlBox = Instance.new("TextBox", frame)
+urlBox.PlaceholderText = "ใส่ Webhook URL ของ Discord ตรงนี้"
+urlBox.Size = UDim2.new(1, -20, 0, 28)
+urlBox.Position = UDim2.new(0, 10, 0, nextY)
+urlBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+urlBox.BorderColor3 = Color3.fromRGB(60, 60, 60)
+urlBox.TextColor3 = Color3.fromRGB(220, 220, 220)
+urlBox.Font = Enum.Font.Gotham
+urlBox.TextSize = 12
+urlBox.Text = config.WebhookUrl or ""
+urlBox.FocusLost:Connect(function()
+	if urlBox.Text ~= "" then
+		config.WebhookUrl = urlBox.Text
+		saveWebhookConfig()
+	end
+end)
+nextY += 28 + spacing
+
+-- Delay Box
+local delayBox = Instance.new("TextBox", frame)
+delayBox.PlaceholderText = "ตั้งเวลา Delay (วินาที)"
+delayBox.Size = UDim2.new(0.5, -15, 0, 26)
+delayBox.Position = UDim2.new(0, 10, 0, nextY)
+delayBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+delayBox.BorderColor3 = Color3.fromRGB(60, 60, 60)
+delayBox.TextColor3 = Color3.fromRGB(220, 220, 220)
+delayBox.Font = Enum.Font.Gotham
+delayBox.TextSize = 12
+delayBox.Text = tostring(config.Delay)
+delayBox.FocusLost:Connect(function()
+	local val = tonumber(delayBox.Text)
+	if val then
+		config.Delay = val
+		saveWebhookConfig()
+	end
+end)
+nextY += 26 + spacing
+
+-- Enable Button
+local enableButton = Instance.new("TextButton", frame)
+enableButton.Size = UDim2.new(1, -20, 0, 32)
+enableButton.Position = UDim2.new(0, 10, 0, nextY)
+enableButton.Font = Enum.Font.GothamMedium
+enableButton.TextSize = 14
+enableButton.BorderSizePixel = 0
+
+local function updateEnableButton()
+	if config.Enabled then
+		enableButton.Text = "🟢 ENABLED (Click to Stop)"
+		enableButton.BackgroundColor3 = Color3.fromRGB(50, 130, 50)
+	else
+		enableButton.Text = "🔴 DISABLED (Click to Start)"
+		enableButton.BackgroundColor3 = Color3.fromRGB(130, 50, 50)
+	end
+end
+updateEnableButton()
+
+enableButton.MouseButton1Click:Connect(function()
+	config.Enabled = not config.Enabled
+	saveWebhookConfig()
+	updateEnableButton()
+	if config.Enabled then
+		startLoop(true)
+	else
+		stopLoop()
+	end
+end)
+nextY += 32 + spacing
+
+-- Anonymous Button
+local anonButton = Instance.new("TextButton", frame)
+anonButton.Size = UDim2.new(1, -20, 0, 28)
+anonButton.Position = UDim2.new(0, 10, 0, nextY)
+anonButton.Font = Enum.Font.Gotham
+anonButton.TextSize = 13
+anonButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+anonButton.BorderSizePixel = 0
+anonButton.Text = config.Anonymous and "🕵️ Anonymous: ON" or "🕵️ Anonymous: OFF"
+anonButton.BackgroundColor3 = config.Anonymous and Color3.fromRGB(50, 90, 50) or Color3.fromRGB(90, 50, 50)
+anonButton.MouseButton1Click:Connect(function()
+	config.Anonymous = not config.Anonymous
+	anonButton.Text = config.Anonymous and "🕵️ Anonymous: ON" or "🕵️ Anonymous: OFF"
+	anonButton.BackgroundColor3 = config.Anonymous and Color3.fromRGB(50, 90, 50) or Color3.fromRGB(90, 50, 50)
+	saveWebhookConfig()
+end)
+nextY += 28 + spacing
+
+-- Flag Buttons (4)
+local flagList = {"Item", "Quest", "Honey"}
+local flagSizeY = 30
+local flagSpacing = 6
+for i, name in ipairs(flagList) do
+	local btn = Instance.new("TextButton", frame)
+	btn.Size = UDim2.new(0.48, -10, 0, flagSizeY)
+	local row = math.floor((i - 1) / 2)
+	local col = (i % 2 == 0) and 1 or 0
+	btn.Position = UDim2.new(col == 1 and 0.52 or 0, col == 1 and -10 or 10, 0, nextY + row * (flagSizeY + flagSpacing))
+	btn.Text = (config.Flags[name] and "✅ " or "❌ ") .. name
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.Font = Enum.Font.Gotham
+	btn.TextSize = 14
+	btn.BorderSizePixel = 0
+	btn.BackgroundColor3 = config.Flags[name] and Color3.fromRGB(40, 90, 40) or Color3.fromRGB(90, 40, 40)
+	btn.MouseButton1Click:Connect(function()
+		config.Flags[name] = not config.Flags[name]
+		btn.Text = (config.Flags[name] and "✅ " or "❌ ") .. name
+		btn.BackgroundColor3 = config.Flags[name] and Color3.fromRGB(40, 90, 40) or Color3.fromRGB(90, 40, 40)
+		saveWebhookConfig()
+	end)
+end
+nextY += (flagSizeY * 2) + (flagSpacing * 2) + spacing
+
+-- WaitBeforeSend
+local waitCheck = Instance.new("TextButton", frame)
+waitCheck.Size = UDim2.new(1, -20, 0, 26)
+waitCheck.Position = UDim2.new(0, 10, 0, nextY)
+waitCheck.Font = Enum.Font.Gotham
+waitCheck.TextSize = 12
+waitCheck.TextColor3 = Color3.fromRGB(255, 255, 255)
+waitCheck.BorderSizePixel = 0
+local function updateWaitCheck()
+	waitCheck.Text = (config.WaitBeforeSend and "☑️ ") or "⬜ "
+	waitCheck.Text = waitCheck.Text .. "รอหน้าปิด UI ทั้งคู่ก่อนส่ง Webhook"
+	waitCheck.BackgroundColor3 = config.WaitBeforeSend and Color3.fromRGB(50, 90, 50) or Color3.fromRGB(70, 40, 40)
+end
+updateWaitCheck()
+waitCheck.MouseButton1Click:Connect(function()
+	config.WaitBeforeSend = not config.WaitBeforeSend
+	updateWaitCheck()
+	saveWebhookConfig()
+end)
+nextY += 26 + spacing
+
+-- ปรับขนาด Frame ให้อัตโนมัติ
+frame.Size = UDim2.new(0, 380, 0, nextY + 40)
+
+------------------------------------------------------------
+-- ⌨️ Ctrl + ซ้าย เพื่อเปิด/ปิด UI
+------------------------------------------------------------
+-- 🧩 ระบบเปิด/ปิด UI ด้วย Ctrl ซ้าย + จำสถานะ
+
+local uiVisible = config.UIVisible -- โหลดค่าจาก config ที่บันทึกไว้ก่อนหน้า
+
+local function toggleUI()
+	uiVisible = not uiVisible
+	config.UIVisible = uiVisible -- 💾 บันทึกสถานะใหม่
+
+	-- 🟢 UI หลัก (Webhook Panel)
+	local mainUI = game.CoreGui:FindFirstChild("WebhookUI")
+	if mainUI then
+		mainUI.Enabled = uiVisible
+	end
+
+	-- 🎒 UI ของ Item/Quest/Badge
+	local itemUI = game.CoreGui:FindFirstChild("ItemUi")
+	if itemUI then
+		itemUI.Enabled = uiVisible
+	end
+
+	saveWebhookConfig() -- ✅ เซฟสถานะทุกครั้งที่กด Ctrl ซ้าย
+
+	print("💾 [UI] เปลี่ยนสถานะ UI เป็น:", uiVisible and "เปิดอยู่" or "ปิดอยู่")
+end
+
+-- 🎮 ตรวจจับการกด Ctrl ซ้าย
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if input.KeyCode == Enum.KeyCode.LeftControl then
+		toggleUI()
+	end
+end)
+
+-- 🟢 โหลดสถานะ UI ตาม config ตอนเริ่มเกม
+task.defer(function()
+	local mainUI = game.CoreGui:FindFirstChild("WebhookUI")
+	local itemUI = game.CoreGui:FindFirstChild("ItemUi")
+
+	if mainUI then mainUI.Enabled = config.UIVisible end
+	if itemUI then itemUI.Enabled = config.UIVisible end
+
+	print("💾 [UI] โหลดสถานะตอนเริ่มเกม =", config.UIVisible and "เปิดอยู่" or "ปิดอยู่")
+end)
+-- 🧩 END PART 4 (Full Merged Edition)
+
+
+-- 🧩 PART 5 START : opentab + webhook services + loop system
+
+local function debugPrint(msg)
+	if config and config.DebugMode then
+		print("[🐝 DEBUG] " .. tostring(msg))
+	end
+end
+
+local function checkValidWebhookUrl(url)
+	if not url then return false end
+	return (type(url) == "string" and url:match("^https://discord.com/api/webhooks/"))
+end
+
+-- ✅ ฟังก์ชันส่ง Discord Embed ตัวจริง (สมบูรณ์)
+local function sendDiscordEmbed(url, embed)
+	if not checkValidWebhookUrl(url) then
+		warn("❌ URL Webhook ไม่ถูกต้อง หรือว่างเปล่า")
+		return false
+	end
+
+	local HttpService = game:GetService("HttpService")
+	local payload = {
+		username = config.Anonymous and "Anonymous" or LocalPlayer.Name,
+		embeds = { embed },
+	}
+
+	local req = http_request or (syn and syn.request)
+	if not req then
+		warn("❌ ไม่พบฟังก์ชัน request (http_request / syn.request)")
+		return false
+	end
+
+	local success, err = pcall(function()
+		req({
+			Url = url,
+			Method = "POST",
+			Headers = { ["Content-Type"] = "application/json" },
+			Body = HttpService:JSONEncode(payload)
+		})
+	end)
+
+	if not success then
+		warn("⚠️ ส่ง Webhook ไม่สำเร็จ:", err)
+		return false
+	end
+
+	debugPrint("✅ ส่งข้อมูลไปยัง Discord เรียบร้อยแล้ว (" .. (embed.title or "ไม่มีชื่อ") .. ")")
+	return true
+end
+
+local GuiService = game:GetService("GuiService")
+local VIM = game:GetService("VirtualInputManager")
+local LocalPlayer = game:GetService("Players").LocalPlayer
+
+-- 🔍 ฟังก์ชันหาปุ่มแท็บจากชื่อ
+local function getTabByNameLike(tabDisplayName)
+	local pg = LocalPlayer:FindFirstChild("PlayerGui")
+	local sg = pg and pg:FindFirstChild("ScreenGui")
+	local menus = sg and sg:FindFirstChild("Menus")
+	local childTabs = menus and menus:FindFirstChild("ChildTabs")
+	if not childTabs then return nil end
+
+	local target = string.lower(tabDisplayName)
+	for _, tab in ipairs(childTabs:GetChildren()) do
+		if (tab:IsA("ImageButton") or tab:IsA("TextButton")) then
+			if string.find(string.lower(tab.Name), target, 1, true) then
+				return tab
+			end
+		end
+	end
+	return nil
+end
+
+-- 📖 ฟังก์ชันเปิดเมนูหลัก (ให้โหลดแท็บก่อน)
+local function openMainMenu()
+	local pg = LocalPlayer:FindFirstChild("PlayerGui")
+	local buttons = pg and pg:FindFirstChild("ScreenGui") and pg.ScreenGui:FindFirstChild("Buttons")
+	if buttons and buttons:FindFirstChild("MainMenu") then
+		local btn = buttons.MainMenu
+		VIM:SendMouseButtonEvent(0, 0, 0, true, btn, 0)
+		VIM:SendMouseButtonEvent(0, 0, 0, false, btn, 0)
+		print("📖 [Menu] เปิดเมนูหลักเพื่อโหลดแท็บทั้งหมด")
+		task.wait(1)
+	end
+end
+
+
+-- 🧭 ฟังก์ชันเปิดแท็บ (เวอร์ชันเสถียร + ปิดก่อนคืน)
+function opentab(tabName)
+	print("🎯 [OpenTab] กำลังเปิดแท็บ: " .. tostring(tabName))
+
+	local pg = LocalPlayer:WaitForChild("PlayerGui", 5)
+	local screenGui = pg and pg:WaitForChild("ScreenGui", 5)
+	local menus = screenGui and screenGui:WaitForChild("Menus", 5)
+	local childTabs = menus and menus:WaitForChild("ChildTabs", 5)
+	if not childTabs then
+		warn("❌ [OpenTab] ไม่พบ ChildTabs ใน GUI")
+		return false
+	end
+
+	-- 🔍 หาแท็บจากชื่อ (ยืดหยุ่น)
+	local tabFound = nil
+	for _, tab in ipairs(childTabs:GetChildren()) do
+		if (tab:IsA("ImageButton") or tab:IsA("TextButton")) then
+			local lname = string.lower(tab.Name)
+			local target = string.lower(tabName)
+			if lname:find(target) or lname:find(target:gsub(" tab","")) then
+				tabFound = tab
+				break
+			end
+		end
+	end
+	if not tabFound then
+		warn("❌ [OpenTab] ไม่พบแท็บ: " .. tostring(tabName))
+		return false
+	end
+
+	-- 🟢 เปิดแท็บ (กด Enter 1 ครั้ง)
+	GuiService.SelectedObject = tabFound
+	task.wait(0.15)
+	VIM:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+	task.wait(0.05)
+	VIM:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+	print("🟩 [OpenTab] เปิดแท็บ " .. tabName .. " แล้ว...")
+
+	-- ⏳ รอโหลดเนื้อหา
+	local success = false
+	for i = 1, 15 do
+		local children = menus:FindFirstChild("Children")
+		local targetTab = children and (children:FindFirstChild(tabName:gsub(" Tab", "")) or children:FindFirstChild(tabName))
+		local content = targetTab and targetTab:FindFirstChild("Content")
+
+		if content and #content:GetChildren() >= 2 then
+			success = true
+			print("✅ [OpenTab] โหลดเนื้อหาแท็บ '" .. tabName .. "' สำเร็จ (รอบ " .. i .. ")")
+			break
+		end
+		task.wait(0.5)
+	end
+
+	if not success then
+		warn("⚠️ [OpenTab] โหลดแท็บไม่สำเร็จ: " .. tabName)
+		GuiService.SelectedObject = nil
+		return false
+	end
+
+	-- 🕓 รอเพิ่มอีกหน่อย กันข้อมูลโหลดไม่ครบ
+	task.wait(3)
+	print("✅ [OpenTab] เปิดแท็บและโหลดครบเรียบร้อย: " .. tabName)
+end
+
+-- 🔒 ปิดแท็บด้วยชื่อ (แบบเสถียร)
+function closetab(tabName)
+	print("📂 [CloseTab] พยายามปิดแท็บ: " .. tostring(tabName))
+
+	local pg = LocalPlayer:FindFirstChild("PlayerGui")
+	local sg = pg and pg:FindFirstChild("ScreenGui")
+	local menus = sg and sg:FindFirstChild("Menus")
+	local childTabs = menus and menus:FindFirstChild("ChildTabs")
+	if not childTabs then
+		warn("⚠️ [CloseTab] ไม่พบ ChildTabs")
+		return false
+	end
+
+	local tabFound = childTabs:FindFirstChild(tabName)
+	if not tabFound then
+		-- fallback หาด้วยชื่อยืดหยุ่น
+		for _, tab in ipairs(childTabs:GetChildren()) do
+			if string.find(string.lower(tab.Name), string.lower(tabName:gsub(" tab", ""))) then
+				tabFound = tab
+				break
+			end
+		end
+	end
+
+	if not tabFound then
+		warn("⚠️ [CloseTab] ไม่พบแท็บที่จะปิด: " .. tostring(tabName))
+		return false
+	end
+
+	-- 🔽 ส่ง Enter เพื่อปิด
+	GuiService.SelectedObject = tabFound
+	task.wait(0.15)
+	VIM:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+	task.wait(0.05)
+	VIM:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+	task.wait(0.25)
+
+	GuiService.SelectedObject = nil
+	print("✅ [CloseTab] ปิดแท็บ '" .. tabName .. "' สำเร็จแล้ว")
+	return true
+end
+
+------------------------------------------------------------
+-- 🧩 ฟังก์ชัน Helper สำหรับฟอร์แมตตัวเลข & ส่ง Embed
+------------------------------------------------------------
+
+-- 💬 ฟอร์แมตตัวเลขให้มีคอมมา (เช่น 1234567 → 1,234,567)
+local function formatNumberWithCommas(num)
+	local formatted = tostring(num)
+	while true do
+		formatted, k = formatted:gsub("^(-?%d+)(%d%d%d)", '%1,%2')
+		if k == 0 then break end
+	end
+	return formatted
+end
+
+-- 📡 ฟังก์ชันส่ง Discord Embed (รองรับ thumbnail และ footer)
+local function SendMessageEMBED(url, data)
+	if not url or url == "" then
+		warn("❌ Webhook URL ว่างเปล่า - ยกเลิกการส่ง")
+		return
+	end
+
+	local HttpService = game:GetService("HttpService")
+	local payload = {
+		username = "Bee Swarm Auto Reporter 🐝",
+		embeds = {
+			{
+				title = data.title or "Report",
+				color = data.color or 0xFFFF00,
+				thumbnail = { url = data.thumbnail or "" },
+				fields = data.fields or {},
+				footer = data.footer or { text = "Bee Swarm Reporter" },
+				timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") -- UTC timestamp
+			}
+		}
+	}
+
+	local req = http_request or (syn and syn.request)
+	if not req then
+		warn("❌ ไม่พบฟังก์ชัน request (http_request/syn.request)")
+		return
+	end
+
+	local success, err = pcall(function()
+		req({
+			Url = url,
+			Method = "POST",
+			Headers = { ["Content-Type"] = "application/json" },
+			Body = HttpService:JSONEncode(payload)
+		})
+	end)
+
+	if success then
+		print("✅ ส่ง Embed สำเร็จ:", data.title or "No title")
+	else
+		warn("⚠️ ส่ง Embed ไม่สำเร็จ:", err)
+	end
+end
+
+-- 🍯 honey --
+-- 💾 เก็บค่าสุดท้ายไว้ใช้เปรียบเทียบในรอบถัดไป
+local lastHoney = nil
+
+function honey_webhook_service()
+	if not (config.Flags and config.Flags.Honey) then return end
+	
+	local player = game.Players.LocalPlayer
+	local stats = player:FindFirstChild("CoreStats")
+	if not stats then return end
+
+	local honey = stats:FindFirstChild("Honey") and stats.Honey.Value or 0
+	local pollen = stats:FindFirstChild("Pollen") and stats.Pollen.Value or 0
+	local capacity = stats:FindFirstChild("Capacity") and stats.Capacity.Value or 0
+
+	-- 🧸 ดึง avatar
+	local avatarURL = "https://tr.rbxcdn.com/default_avatar.png"
+	pcall(function()
+		local url = "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=" .. player.UserId .. "&size=420x420&format=Png&isCircular=false"
+		local data = game:GetService("HttpService"):JSONDecode(game:HttpGet(url))
+		if data and data.data and data.data[1] and data.data[1].imageUrl then
+			avatarURL = data.data[1].imageUrl
+		end
+	end)
+
+	-- 💬 ฟังก์ชันฟอร์แมตตัวเลข
+	local function formatNumber(num)
+		local formatted = tostring(math.floor(num))
+		while true do
+			formatted, k = formatted:gsub("^(-?%d+)(%d%d%d)", "%1,%2")
+			if k == 0 then break end
+		end
+		return formatted
+	end
+
+	-- 📊 คำนวณเปอร์เซ็นต์การเติมกระเป๋า
+	local percentFull = 0
+	if capacity > 0 then
+		percentFull = math.floor((pollen / capacity) * 100)
+	end
+
+	-- 🌈 แถบ progress bar
+	local function progressBar(pct)
+		local filled = math.floor(pct / 10)
+		local bar = string.rep("🟩", filled) .. string.rep("⬛", 10 - filled)
+		return bar .. " `" .. tostring(pct) .. "%`"
+	end
+
+	-- 💰 คำนวณการเปลี่ยนแปลง Honey
+	local diffText = "🔸 (ข้อมูลรอบแรก)"
+	if lastHoney then
+		local diff = honey - lastHoney
+		if diff > 0 then
+			diffText = "🪙 เพิ่มขึ้น **+" .. formatNumber(diff) .. "** 🍯"
+		elseif diff < 0 then
+			diffText = "🔻 ลดลง **" .. formatNumber(diff) .. "** 🍯"
+		else
+			diffText = "⚖️ คงที่ — ไม่มีการเปลี่ยนแปลง"
+		end
+	end
+	lastHoney = honey  -- บันทึกค่าสุดท้ายไว้ใช้เทียบรอบหน้า
+
+	local honeyStr = formatNumber(honey)
+	local pollenStr = formatNumber(pollen)
+	local capacityStr = formatNumber(capacity)
+	local progress = progressBar(percentFull)
+
+	-- ✨ Embed layout สวยแบบพรีเมียม
+	local embed = {
+		title = "🍯 Honey Report",
+		color = 0xF1C40F, -- ทอง
+		thumbnail = { url = avatarURL },
+		description = table.concat({
+			"📊 รายงานสถานะทรัพยากรของผู้เล่น **" .. player.Name .. "**",
+			"",
+			"🍯 **Honey** : `" .. honeyStr .. "`",
+			diffText,
+			"",
+			"🌸 **Pollen** : `" .. pollenStr .. "`",
+			"📦 **Capacity** : `" .. capacityStr .. "`",
+			"",
+			"🧮 **การเติมกระเป๋า:**",
+			progress,
+			"",
+			"───────────────────────────────"
+		}, "\n"),
+
+		footer = {
+			text = os.date("📅 %d/%m/%Y ⏰ %H:%M:%S") .. " | Bee Swarm Auto Reporter",
+		}
+	}
+
+	sendDiscordEmbed(config.WebhookUrl, embed)
+	print("✅ [Honey] ส่งข้อมูล Honey Report สำเร็จ")
+end
+
+-- 🎒 Inventory Report (Bee Swarm Deluxe Edition)
+local function eggtab_webhook_service()
+	if not (config.Flags and config.Flags.Item) then return end
+	print("[EggTab] เริ่มเปิดแท็บ Eggs ...")
+
+	opentab("Eggs Tab")
+	task.wait(2.5)
+
+	local maintofind = nil
+	local tries, delay = 0, 0.6
+
+	while not maintofind and tries < 25 do
+		tries = tries + 1
+		local pg = LocalPlayer:FindFirstChild("PlayerGui")
+		local content = pg and pg:FindFirstChild("ScreenGui")
+			and pg.ScreenGui:FindFirstChild("Menus")
+			and pg.ScreenGui.Menus:FindFirstChild("Children")
+			and pg.ScreenGui.Menus.Children:FindFirstChild("Eggs")
+			and pg.ScreenGui.Menus.Children.Eggs:FindFirstChild("Content")
+
+		if content and #content:GetChildren() > 0 then
+			maintofind = content:FindFirstChild("EggRows")
+			if maintofind and #maintofind:GetChildren() > 0 then
+				print("[EggTab] พบ EggRows หลังจาก " .. tries .. " รอบ")
+				break
+			end
+		end
+		task.wait(delay)
+	end
+
+	if not maintofind then
+		warn("[EggTab] ไม่พบ EggRows - ยกเลิกการส่งข้อมูล")
+		return
+	end
+
+	-- 🧮 เก็บรายการไอเท็ม
+	local itemList, countShown = {}, 0
+
+	for _, row in ipairs(maintofind:GetChildren()) do
+		local n = row:FindFirstChild("TypeName")
+		local s = row:FindFirstChild("EggSlot")
+		local c = s and s:FindFirstChild("Count")
+
+		if n and c then
+			local itemName = n.Text
+			local itemCount = c.Text
+			local emoji = (Showlist[itemName] and Showlist[itemName].emoji) or ":package:"
+			local showFlag = Showlist[itemName] and Showlist[itemName].show
+
+			if showFlag then
+				countShown = countShown + 1
+				table.insert(itemList, string.format("%s **%s** — `%s`", emoji, itemName, itemCount))
+			end
+		end
+	end
+
+	-- ถ้าไม่มีข้อมูล
+	if #itemList == 0 then
+		table.insert(itemList, "❌ ไม่มีไอเท็มที่เลือกแสดง (เปิด 'Show' ใน Item Config ก่อน)")
+	end
+
+	-- 📦 ตกแต่งข้อความสวยงาม
+	local descText = table.concat({
+		"**🎒 รายงานกระเป๋าไอเท็มของคุณ**",
+		"----------------------------------",
+		table.concat(itemList, "\n"),
+		"----------------------------------",
+		string.format("**รวมทั้งหมด:** %d รายการ", countShown)
+	}, "\n")
+
+	-- ✉️ ส่ง Embed
+	sendDiscordEmbed(config.WebhookUrl, {
+		title = "🎒 Inventory Report",
+		color = 0x3498DB, -- ฟ้าเข้มสไตล์ Bee Swarm
+		description = descText,
+		footer = {
+			text = os.date("📅 %d/%m/%Y ⏰ %H:%M:%S") .. " | Bee Swarm Auto Reporter",
+		}
+	})
+
+	print("[EggTab] ✅ ส่ง Webhook สำเร็จ — ปิดแท็บ")
+	task.wait(1.5)
+	closetab("Eggs Tab")
+	print("[EggTab] 🔒 ปิดแท็บเรียบร้อย")
+	return true
+end
+
+
+-- 📜 Royal Quest Report — Epic Edition (1 Quest per Embed)
+local function questtab_webhook_service()
+	if not (config.Flags and config.Flags.Quest) then return end
+
+	print("👑 [QuestTab] เปิดแท็บ Quests เพื่อสร้างรายงานสุดหรู...")
+	opentab("Quests Tab")
+	task.wait(2.5)
+
+	-- 🧩 ดึง Content ของ Quest
+	local maintofind2
+	for i = 1, 30 do
+		local pg = game.Players.LocalPlayer:FindFirstChild("PlayerGui")
+		local content = pg
+			and pg:FindFirstChild("ScreenGui")
+			and pg.ScreenGui:FindFirstChild("Menus")
+			and pg.ScreenGui.Menus:FindFirstChild("Children")
+			and pg.ScreenGui.Menus.Children:FindFirstChild("Quests")
+			and pg.ScreenGui.Menus.Children.Quests:FindFirstChild("Content")
+		if content and #content:GetChildren() > 0 then
+			maintofind2 = content:FindFirstChild("Frame")
+			if maintofind2 then break end
+		end
+		task.wait(0.4)
+	end
+
+	if not maintofind2 then
+		warn("⚠️ [QuestTab] ไม่พบแท็บ Quests")
+		return
+	end
+
+	-- 🧭 อีโมจิ + สีประจำหมี (ธีม Royal)
+	local bearStyle = {
+		["Black Bear"] = { icon = "🐻", color = 0x2E86C1 },
+		["Brown Bear"] = { icon = "🍯", color = 0xAF601A },
+		["Panda Bear"] = { icon = "🥋", color = 0x212F3C },
+		["Science Bear"] = { icon = "⚗️", color = 0x5DADE2 },
+		["Polar Bear"] = { icon = "🍔", color = 0xAED6F1 },
+		["Spirit Bear"] = { icon = "🌸", color = 0xBB8FCE },
+		["Mother Bear"] = { icon = "🧸", color = 0xF1948A },
+		["Honey Bee"] = { icon = "🐝", color = 0xF1C40F },
+		["Riley Bee"] = { icon = "🔥", color = 0xE74C3C },
+		["Bucko Bee"] = { icon = "💧", color = 0x3498DB },
+		["Gummy Bear"] = { icon = "🍬", color = 0xF8C471 },
+		["Stick Bug"] = { icon = "🪳", color = 0x58D68D },
+		["Onett"] = { icon = "👑", color = 0xF7DC6F },
+		["Bubble Bee Man"] = { icon = "🫧", color = 0x85C1E9 },
+	}
+
+	-- 🧾 เก็บเควชทั้งหมด
+	local questList = {}
+	for _, questBox in ipairs(maintofind2:GetChildren()) do
 		if questBox:IsA("Frame") then
 			local titleBarBG = questBox:FindFirstChild("TitleBarBG")
-			if titleBarBG then
-				local titleBarText = titleBarBG:FindFirstChild("TitleBar")
-				if titleBarText and titleBarText:IsA("TextLabel") then
-					local mainQuestName = titleBarText.Text
+			local titleLabel = titleBarBG and titleBarBG:FindFirstChild("TitleBar")
+			if titleLabel and titleLabel:IsA("TextLabel") then
+				local questName = titleLabel.Text
+				local bear = QuestOwnerMap[questName] or "Unknown"
+				local style = bearStyle[bear] or { icon = "🐾", color = 0xB57EDC }
 
-					-- 🧠 หาเจ้าของเควชจาก Map
-					local bearName = QuestOwnerMap[mainQuestName]
+                if QuestShowlist[bear] and QuestShowlist[bear].show then
+                    local tasks = {}
 
-					if not bearName then
-						-- (ทางเลือก) log ไว้ช่วยแมพชื่อใหม่ทีหลัง
-						warn("[QuestOwnerMap] not found for quest:", mainQuestName)
-					end
+                    local function emojiByText(text)
+                        if text:find("Collect") then return "🌿"
+                        elseif text:find("Defeat") then return "🐞"
+                        elseif text:find("Feed") then return "🍯"
+                        elseif text:find("Raise") then return "🐝"
+                        elseif text:find("Craft") then return "🧺"
+                        elseif text:find("Convert") then return "🔁"
+                        elseif text:find("Use") then return "🎁"
+                        else return "📜"
+                        end
+                    end
 
-					-- ✅ เช็คว่าเจ้าของเควชถูกเปิด Show ในแท็บ Quests มั้ย
-				if bearName and QuestShowlist[bearName] and QuestShowlist[bearName].show then
-					table.insert(questTextLines, "")
-					table.insert(questTextLines, "📜 **[" .. bearName .. "] " .. mainQuestName .. "**")
-					table.insert(questTextLines, "───────────────────────────")
+                    for _, taskBar in ipairs(questBox:GetChildren()) do
+                        if taskBar.Name == "TaskBar" and taskBar:IsA("Frame") then
+                            local desc = taskBar:FindFirstChild("Description")
+                            if desc and desc:IsA("TextLabel") then
+                                local text = desc.Text:gsub("^%s+", ""):gsub("%s+$", "")
+                                local emoji = emojiByText(text)
 
-						-- เก็บรายละเอียด task แต่ละบรรทัด
-						local taskBars = questBox:GetChildren()
-						for _, taskBar in ipairs(taskBars) do
-							if taskBar.Name == "TaskBar" and taskBar:IsA("Frame") then
-								local descLabel = taskBar:FindFirstChild("Description")
-								if descLabel and descLabel:IsA("TextLabel") then
-									local text = descLabel.Text:gsub("^%s+", ""):gsub("%s+$", "")
+                                -- ✅ รองรับทั้ง ".1,398/..." และ ". 1,398/..."
+                                text = text:gsub("%.[ ]*(%d+/%d+)", ". %1")
 
-									-- แยกประเภทข้อความ
-									if string.find(text, "Complete!") then
-										-- ✅ เควชย่อยเสร็จแล้ว
-										table.insert(questTextLines, "  ✅ " .. text:gsub("Complete!", ""):gsub("%s+$", ""))
-									elseif string.find(text, "%d+/%d+") then
-										-- 🔸 Progress (ตัวเลข)
-										table.insert(questTextLines, "  🔸 " .. text)
-									else
-										-- 🔹 รายการเควชย่อยทั่วไป
-										table.insert(questTextLines, "- " .. text)
-									end
-								end
-							end
-						end
+                                if text:find("Complete!") then
+                                    text = text:gsub("Complete!", ""):gsub("%s+$", "")
+                                    table.insert(tasks, string.format("✅ **%s %s** — เสร็จแล้วเรียบร้อย 🍯", emoji, text))
+                                else
+                                    table.insert(tasks, string.format("🍂 **%s %s**", emoji, text))
+                                end
+                            end
+                        end
+                    end
 
-						table.insert(questTextLines, "")
-					end
+
+
+
+					table.insert(questList, {
+						bear = bear,
+						icon = style.icon,
+						color = style.color,
+						name = questName,
+						tasks = tasks
+					})
 				end
 			end
 		end
 	end
 
-	-- ต่อจากนี้จัด `questContent` / ส่ง webhook ตามของเดิม
-	local questContent = "```" .. "\n" ..
-	table.concat(questTextLines, "\n") .. "\n```"
-	if questContent == "" then
-		questContent = "❌ ไม่พบเควชที่เข้าเงื่อนไข (หมีที่เปิด Show)"
-	else
-		questContent = "```\n" .. questContent .. "\n```"
+	if #questList == 0 then
+		sendDiscordEmbed(config.WebhookUrl, {
+			title = "📜 Quest Report",
+			color = 0xB57EDC,
+			description = "❌ ไม่มีเควชที่เปิด Show อยู่ใน UI",
+			footer = { text = os.date("📅 %d/%m/%Y ⏰ %H:%M:%S") }
+		})
+		closetab("Quests Tab")
+		return
 	end
 
-    local userId = localPlayer.UserId
-    local apiURL = "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=" .. userId .. "&size=420x420&format=Png&isCircular=false"
+	-- 🌟 แสดง 1 Quest ต่อ Embed
+	for i, q in ipairs(questList) do
+		local lines = {}
+		table.insert(lines, "╭──────────────────────────────╮")
+		table.insert(lines, string.format("%s **%s — `%s`**", q.icon, q.bear, q.name))
+		table.insert(lines, "╰──────────────────────────────╯\n")
 
-    local avatarImageURL = "https://tr.rbxcdn.com/default_avatar.png"
-    local success, response = pcall(function()
-        local json = HttpService:JSONDecode(game:HttpGet(apiURL))
-        avatarImageURL = json.data[1].imageUrl
-    end)
+		local doneCount, total = 0, #q.tasks
+		for _, t in ipairs(q.tasks) do
+			table.insert(lines, t)
+			if t:find("✅") then doneCount += 1 end
+		end
 
-        beeCount = 0
+		table.insert(lines, "\n───────────────────────────────")
+		table.insert(lines, string.format("🎯 **สถานะความคืบหน้า:** %d/%d ภารกิจเสร็จสิ้น ✅", doneCount, total))
+		table.insert(lines, "───────────────────────────────")
 
-    local myname = game.Players.LocalPlayer.Name
-    local hives = workspace.Honeycombs:GetChildren()
-    local basemyhive = nil
+		local desc = table.concat(lines, "\n")
 
-    for _, hive in ipairs(hives) do
-        local owner = hive:FindFirstChild("Owner")
-        if owner and owner:IsA("ObjectValue") and owner.Value and owner.Value.Name == myname then
-            basemyhive = hive
-        end
-    end
+		sendDiscordEmbed(config.WebhookUrl, {
+			title = string.format("%s Quest Report — %s", q.icon, q.bear),
+			color = q.color,
+			description = desc,
+			footer = {
+				text = os.date("📅 %d/%m/%Y ⏰ %H:%M:%S") ..
+					string.format(" | Quest %d/%d | Bee Swarm Reporter", i, #questList)
+			}
+		})
 
-    if not basemyhive then
-        warn("❌ ไม่พบ Hive ของคุณ")
-    end
+		task.wait(2)
+	end
 
-    if basemyhive then
-    cells = basemyhive:FindFirstChild("Cells")
-
-    if cells then
-        for _, cell in ipairs(cells:GetChildren()) do
-            local cellType = cell:FindFirstChild("CellType")
-            if cellType and cellType:IsA("StringValue") and cellType.Value ~= "Empty" then
-            beeCount = beeCount + 1
-            end
-        end
-    else
-        warn("❌ ไม่พบ Cells ภายใน Hive")
-    end
-    end
-
-    local myhoney = localPlayer.CoreStats.Honey.Value
-    local mypollen = localPlayer.CoreStats.Pollen.Value
-    local mycapacity = localPlayer.CoreStats.Capacity.Value
-    if beeCount == 0 then
-        finalbeeCount = "```" .. "❌ ผู้เล่นไม่ได้รับช่องรัง" .. "```"
-    end
-
-        if beeCount >= 1 then
-        finalbeeCount = "```" .. "จำนวนผึ้ง : " .. tostring(beeCount) .. " ตัว" .. "```"
-    end
-
-    local sectionFields = {
-        { name = "<:user:1374753027625582682> Username ", value = "```" .. tostring(usernamemode) .. "```", inline = false },
-        { name = "**⸻ Information ⸻**", value = " ", inline = false }
-    }
-
-    local baseFields = {
-        { name = "<:Honey:1374751354622574763> **Honey**", value = "```" .. formatNumberWithCommas(myhoney) .. "```", inline = false },
-        { name = "<:Pollen:1374751948774969344> **Pollen/Capacity**", value = "```" .. formatNumberWithCommas(mypollen) .. "/" .. formatNumberWithCommas(mycapacity) .. "```", inline = true },
-        { name = "<:Basic_Egg:1374459785113763891> **Bee count**", value = tostring(finalbeeCount), inline = true },
-        { name = "<:QuestMenuIcon:1379030225748361236> **Quest**", value = questContent, inline = false }
-    }
-
-    local finalFields = {}
-    for _, field in ipairs(sectionFields) do table.insert(finalFields, field) end
-    for _, field in ipairs(baseFields) do table.insert(finalFields, field) end
-
-    if not config.WebhookUrl or config.WebhookUrl == "" then
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "❌ ล้มเหลว!",
-            Text = "ส่งไม่สำเร็จ: Webhook Url ว่างเปล่า",
-            Icon = "rbxthumb://type=Asset&id=6031071050&w=150&h=150",
-            Duration = 6
-        })
-        return
-    end
-
-    SendMessageEMBED(config.WebhookUrl, {
-        color = randomHexColor(),
-        thumbnail = avatarImageURL,
-        image = "https://cdn.discordapp.com/attachments/1371924996766564402/1374403252057149450/KhamKhomShop.jpg",
-        fields = finalFields,
-        footer = {
-            text = "⸻ » Powered by Clematis | Webhook Service « ⸻"
-        }
-    })
-
-    task.wait(1)
+	task.wait(1)
+	closetab("Quests Tab")
+	print("✅ [QuestTab] ส่ง Quest Report ครบ " .. tostring(#questList) .. " หน้าแล้ว!")
 end
 
-function badgetab_webhook_service()
-    if not config.Flags.Badge then 
-        print("[Debug] Badge flag ไม่ได้เปิดใช้งาน")
-        return 
-    end
 
-    local Players = game:GetService("Players")
-    local localPlayer = Players.LocalPlayer
-    local HttpService = game:GetService("HttpService")
-    local GuiService = game:GetService("GuiService")
-    local TeleportService = game:GetService("TeleportService")
-    opentab("Badges Tab")
-    task.wait(2)
+-- 🏅 Badge Report
+local function badgetab_webhook_service()
+	if not (config.Flags and config.Flags.Badge) then return end
 
-    local maintofind3
-    local maxRetries3 = 50
-    local tries3 = 0
+	print("🎯 [BadgeTab] เปิดแท็บ Badges ...")
+	opentab("Badge")
+	task.wait(2)
 
-    while not maintofind3 and tries3 < maxRetries3 do
-        tries3 = tries3 + 1
+	local maintofind = nil
+	for i = 1, 20 do
+		local pg = LocalPlayer:FindFirstChild("PlayerGui")
+		local content = pg
+			and pg:FindFirstChild("ScreenGui")
+			and pg.ScreenGui:FindFirstChild("Menus")
+			and pg.ScreenGui.Menus:FindFirstChild("Children")
+			and pg.ScreenGui.Menus.Children:FindFirstChild("Badges")
+			and pg.ScreenGui.Menus.Children.Badges:FindFirstChild("Content")
 
-        local playerGui = localPlayer:FindFirstChild("PlayerGui")
-        local screenGui = playerGui and playerGui:FindFirstChild("ScreenGui")
-        local menus = screenGui and screenGui:FindFirstChild("Menus")
-        local children = menus and menus:FindFirstChild("Children")
-        local badges = children and children:FindFirstChild("Badges")
-        local content = badges and badges:FindFirstChild("Content")
-        maintofind3 = content and content:FindFirstChild("Frame")
+		if content and #content:GetChildren() > 0 then
+			-- ✅ หาตัวแรกที่เป็น ScrollingFrame ภายใน Content
+			for _, obj in ipairs(content:GetChildren()) do
+				if obj:IsA("ScrollingFrame") then
+					maintofind = obj
+					break
+				end
+			end
+		end
 
-        if not maintofind3 then
-            warn("❌ ไม่พบ Badge Tab - Retry " .. tries3)
-            resettab()
-            task.wait(0.2)
-        else
-            print("[Debug] พบ Badge Tab หลังจากพยายาม " .. tries3 .. " ครั้ง")
-        end
-    end
+		if maintofind then
+			print("✅ [BadgeTab] พบ BadgeList หลังจาก " .. i .. " รอบ")
+			break
+		end
+		task.wait(0.5)
+	end
 
-    if not maintofind3 then
-        resettab()
-        warn("❌ หยุดการทำงานเนื่องจากไม่พบ Badge Tab")
-        return
-    end
+	if not maintofind then
+		warn("⚠️ [BadgeTab] ไม่พบ BadgeList หรือ Content ว่าง — ยกเลิกส่งข้อมูล")
+		return
+	end
 
-    local fields = {}
-    local countLimit = 0
-    local maxFields = 25
+	-- 🏅 ดึงข้อมูล Badge
+	local fields = {}
+	for _, b in ipairs(maintofind:GetChildren()) do
+		local name = b:FindFirstChild("BadgeTitle")
+		local level = b:FindFirstChild("BadgeLevel")
+		if name and level then
+			if BadgeShowlist[name.Text] then
+				table.insert(fields, { name = "🏅 " .. name.Text, value = level.Text })
+			end
+		end
+	end
 
-    for _, badgeBox in ipairs(maintofind3:GetChildren()) do
-        if countLimit >= maxFields then 
-            break 
-        end
-
-        local badgeNameLabel = badgeBox:FindFirstChild("TitleBar")
-        local taskBar = badgeBox:FindFirstChild("TaskBar")
-        local badgeDescLabel = taskBar and taskBar:FindFirstChild("Description")
-
-        if badgeNameLabel and badgeDescLabel
-            and badgeNameLabel:IsA("TextLabel")
-            and badgeDescLabel:IsA("TextLabel") then
-
-            local badgeName = badgeNameLabel.Text:lower()
-            local badgeDesc = badgeDescLabel.Text
-
-            for keyword, enabled in pairs(BadgeShowlist) do
-                if enabled and badgeName:find(keyword:lower(), 1, true) then
-                    print("[Debug] เจอ Badge ที่ตรงกับ keyword: " .. keyword .. " => " .. badgeNameLabel.Text)
-                    table.insert(fields, {
-                        name = badgeNameLabel.Text,
-                        value = badgeDesc,
-                        inline = false
-                    })
-                    countLimit = countLimit + 1
-                    break
-                end
-            end
-        end
-    end
-    local badgeContent = "```"
-
-if #fields > 0 then
-    for _, field in ipairs(fields) do
-        badgeContent = badgeContent .. field.name .. "\n" .. field.value .. "\n\n"
-    end
-else
-    badgeContent = badgeContent .. "ไม่มี badges ที่ตรงกับเงื่อนไข\n"
+	sendDiscordEmbed(config.WebhookUrl, {
+		title = "🏅 Badge Report",
+		color = 0x9B59B6,
+		fields = (#fields > 0 and fields) or {
+			{ name = "No Badge", value = "ไม่มี Badge ที่เลือกแสดง" }
+		},
+		footer = { text = os.date("📅 %d/%m/%Y ⏰ %H:%M:%S") }
+	})
+	print("✅ [BadgeTab] ส่งข้อมูล Badge ไปยัง Webhook สำเร็จ")
 end
 
-badgeContent = badgeContent .. "```"
-
-
-    local userId = localPlayer.UserId
-    local apiURL = "https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=" .. userId .. "&size=420x420&format=Png&isCircular=false"
-
-    local avatarImageURL = "https://tr.rbxcdn.com/default_avatar.png"
-    local success, response = pcall(function()
-        local json = HttpService:JSONDecode(game:HttpGet(apiURL))
-        avatarImageURL = json.data[1].imageUrl
-    end)
-
-    local beeCount = 0
-    local myname = localPlayer.Name
-    local hives = workspace.Honeycombs:GetChildren()
-    local basemyhive = nil
-
-    for _, hive in ipairs(hives) do
-        local owner = hive:FindFirstChild("Owner")
-        if owner and owner:IsA("ObjectValue") and owner.Value and owner.Value.Name == myname then
-            basemyhive = hive
-        end
-    end
-
-    if not basemyhive then
-        warn("❌ ไม่พบ Hive ของคุณ")
-    end
-
-    if basemyhive then
-        local cells = basemyhive:FindFirstChild("Cells")
-        if cells then
-            for _, cell in ipairs(cells:GetChildren()) do
-                local cellType = cell:FindFirstChild("CellType")
-                if cellType and cellType:IsA("StringValue") and cellType.Value ~= "Empty" then
-                    beeCount = beeCount + 1
-                end
-            end
-        else
-            warn("❌ ไม่พบ Cells ภายใน Hive")
-        end
-    end
-
-    local myhoney = localPlayer.CoreStats.Honey.Value
-    local mypollen = localPlayer.CoreStats.Pollen.Value
-    local mycapacity = localPlayer.CoreStats.Capacity.Value
-
-    local finalbeeCount = beeCount == 0 and "```❌ ผู้เล่นไม่ได้รับช่องรัง```" or ("```จำนวนผึ้ง : " .. tostring(beeCount) .. " ตัว```")
-
-    local sectionFields = {
-        { name = "<:user:1374753027625582682> Username ", value = "```" .. tostring(usernamemode) .. "```", inline = false },
-        { name = "**⸻ Information ⸻**", value = " ", inline = false }
-    }
-
-    local baseFields = {
-        { name = "<:Honey:1374751354622574763> **Honey**", value = "```" .. formatNumberWithCommas(myhoney) .. "```", inline = false },
-        { name = "<:Pollen:1374751948774969344> **Pollen/Capacity**", value = "```" .. formatNumberWithCommas(mypollen) .. "/" .. formatNumberWithCommas(mycapacity) .. "```", inline = true },
-        { name = "<:Basic_Egg:1374459785113763891> **Bee count**", value = tostring(finalbeeCount), inline = true },
-        { name = "<:BadgeIcon:1379063427208581160> **Badges**", value = badgeContent, inline = false }
-    }
-
-    local finalFields = {}
-    for _, field in ipairs(sectionFields) do table.insert(finalFields, field) end
-    for _, field in ipairs(baseFields) do table.insert(finalFields, field) end
-
-    if not config.WebhookUrl or config.WebhookUrl == "" then
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "❌ ล้มเหลว!",
-            Text = "ส่งไม่สำเร็จ: Webhook Url ว่างเปล่า",
-            Icon = "rbxthumb://type=Asset&id=6031071050&w=150&h=150",
-            Duration = 6
-        })
-        return
-    end
-
-    SendMessageEMBED(config.WebhookUrl, {
-        color = randomHexColor(),
-        thumbnail = avatarImageURL,
-        image = "https://cdn.discordapp.com/attachments/1371924996766564402/1374403252057149450/KhamKhomShop.jpg",
-        fields = finalFields,
-        footer = {
-            text = "⸻ » Powered by Clematis | Webhook Service « ⸻"
-        }
-    })
-
-    task.wait(1)
-end
-
+--- ===== Loop System  ===== - - -
 local looping = false
+local loopThread = nil
 
-local function startLoop()
-    if config.Enabled and not looping then
-        looping = true
-        task.spawn(function()
-            task.wait(1)
-            while config.Enabled do
-                    resettab()
-                    eggtab_webhook_service()
-                    questtab_webhook_service()
-                    badgetab_webhook_service()
-                    resettab()
-                task.wait(config.Delay)
-            end
-            looping = false
-        end)
-    end
+local function runOneCycle()
+	-- เรียกเฉพาะที่เลือก Flag ไว้จริง ๆ
+	if config.Flags.Honey then honey_webhook_service() task.wait(1) end
+	if not config.Enabled then return end
+
+	if config.Flags.Item then eggtab_webhook_service() task.wait(1) end
+	if not config.Enabled then return end
+
+	if config.Flags.Quest then questtab_webhook_service() task.wait(1) end
+	if not config.Enabled then return end
+
+	--if config.Flags.Badge then badgetab_webhook_service() task.wait(1) end
 end
 
-local toggleButton = createButton(config.Enabled and "Disable" or "Enable", UDim2.new(0, 10, 0, StartY + YGap * 2), config.Enabled and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0))
-toggleButton.MouseButton1Click:Connect(function()
-    config.Enabled = not config.Enabled
-    saveConfig()
+function startLoop(force)
+	if looping then return end
+	if not (force or config.Enabled) then return end
 
-    toggleButton.Text = config.Enabled and "Disable" or "Enable"
-    toggleButton.BackgroundColor3 = config.Enabled and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
+	looping = true
+	loopThread = task.spawn(function()
+		while looping and config.Enabled do
+			runOneCycle()
 
-    startLoop()
-end)
+			-- รอแบบเช็คหยุดได้ทุกวินาที
+			local secs = tonumber(config.Delay) or 3600
+			for i = 1, secs do
+				if (not looping) or (not config.Enabled) then break end
+				task.wait(1)
+			end
+		end
+		looping = false
+		loopThread = nil
+	end)
+end
 
-startLoop()
+function stopLoop()
+	config.Enabled = false
+	looping = false
+	saveWebhookConfig()
+	if loopThread then
+		task.cancel(loopThread)
+		loopThread = nil
+	end
+end
 
-local anonymousToggle = createButton(config.Anonymous and "Anonymous: ON" or "Anonymous: OFF", UDim2.new(0, 10, 0, StartY + YGap * 3), config.Anonymous and Color3.fromRGB(100, 200, 255) or Color3.fromRGB(80, 80, 80))
-anonymousToggle.MouseButton1Click:Connect(function()
-    config.Anonymous = not config.Anonymous
-    saveConfig()
+loadWebhookConfig()
 
-    anonymousToggle.Text = config.Anonymous and "Anonymous: ON" or "Anonymous: OFF"
-    anonymousToggle.BackgroundColor3 = config.Anonymous and Color3.fromRGB(100, 200, 255) or Color3.fromRGB(80, 80, 80)
+if config.Enabled then
+	print("🔄 [Auto Start] เริ่มทำงาน Webhook Loop อัตโนมัติหลังโหลด config")
+	startLoop(true)
+end
 
-    if config.Anonymous then
-        usernamemode = "Anonymous | ไม่เปิดเผยชื่อ"
-    else
-        usernamemode = game.Players.LocalPlayer.Name
-    end
-end)
+-- Test Webhook
+local testButton = Instance.new("TextButton", frame)
+testButton.Size = UDim2.new(1, -20, 0, 30)
+testButton.Position = UDim2.new(0, 10, 0, nextY)
+testButton.Text = "📡 TEST WEBHOOK (Send Preview)"
+testButton.Font = Enum.Font.GothamBold
+testButton.TextSize = 13
+testButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+testButton.BackgroundColor3 = Color3.fromRGB(60, 100, 160)
+testButton.BorderSizePixel = 0
 
-local testButton = createButton("Test Webhook", UDim2.new(0, 10, 0, StartY + YGap * 4), Color3.fromRGB(100, 100, 255))
+-- 🧩 ปุ่ม TEST WEBHOOK (ส่งทดสอบ)
 testButton.MouseButton1Click:Connect(function()
-    eggtab_webhook_service()
-    questtab_webhook_service()
-    badgetab_webhook_service()
-    resettab()
+	if not checkValidWebhookUrl(config.WebhookUrl) then
+		warn("❌ กรุณาใส่ Webhook URL ก่อน")
+		return
+	end
+
+	-- 🔒 ป้องกันกดซ้ำขณะกำลังทดสอบอยู่
+	if config._isTesting then
+		warn("⚠️ [Webhook] กำลังทดสอบอยู่แล้ว กรุณารอให้จบรอบก่อน")
+		return
+	end
+	config._isTesting = true
+
+	print("🚀 [Webhook] เริ่มทดสอบส่งข้อมูล (Preview Mode)...")
+
+	task.spawn(function()
+		local count = 0
+
+		if config.Flags.Honey then
+			count += 1
+			print("🍯 [TEST] ส่ง Honey Report ...")
+			honey_webhook_service()
+			task.wait(1.5)
+		end
+
+		if config.Flags.Item then
+			count += 1
+			print("🎒 [TEST] เปิดแท็บ Eggs และส่งข้อมูล...")
+			eggtab_webhook_service()
+			task.wait(2)
+		end
+
+		if config.Flags.Quest then
+			count += 1
+			print("📜 [TEST] เปิดแท็บ Quests และส่งข้อมูล...")
+			questtab_webhook_service()
+			task.wait(2)
+		end
+
+		if config.Flags.Badge then
+			count += 1
+			print("🏅 [TEST] เปิดแท็บ Badge และส่งข้อมูล...")
+			badgetab_webhook_service()
+			task.wait(2)
+		end
+
+		if count == 0 then
+			warn("⚠️ [Webhook] ไม่มีแท็บไหนถูกเลือกใน Flag — ไม่ได้ส่งอะไรเลย")
+		else
+			print("✅ [Webhook] การทดสอบส่งเสร็จสิ้น (" .. count .. " ส่วน)")
+		end
+
+		config._isTesting = false
+	end)
 end)
+nextY += 30 + spacing
 
-local hideCheckbox = Instance.new("TextButton", frame)
-hideCheckbox.Size = UDim2.new(0, 20, 0, 20)
-hideCheckbox.Position = UDim2.new(1, -30, 1, -30)
-hideCheckbox.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
-hideCheckbox.Text = config.HideAfterLoad and "✔" or ""
-hideCheckbox.TextColor3 = Color3.fromRGB(255, 255, 255)
-hideCheckbox.TextScaled = true
-hideCheckbox.BorderSizePixel = 0
-local cbCorner = Instance.new("UICorner", hideCheckbox)
-cbCorner.CornerRadius = UDim.new(0, 4)
+-- 🧩 PART 5 END
 
-local hideLabel = Instance.new("TextLabel", frame)
-hideLabel.Size = UDim2.new(0, 120, 0, 20)
-hideLabel.Position = UDim2.new(1, -160, 1, -30)
-hideLabel.BackgroundTransparency = 1
-hideLabel.Text = "hide ui after loaded"
-hideLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-hideLabel.TextScaled = true
-hideLabel.Font = Enum.Font.Gotham
-hideLabel.TextXAlignment = Enum.TextXAlignment.Left
+------------------------------------------------------------
+-- 🐝 Floating Player Info (มุมซ้ายล่าง)
+------------------------------------------------------------
 
-if config.HideAfterLoad == nil then
-    config.HideAfterLoad = false
-    saveConfig()
+-- ☕ สมสี - กล่องชื่อผู้เล่นโทนน้ำตาลอบอุ่น 🐝🍪
+if game.CoreGui:FindFirstChild("PlayerInfoGui") then
+	game.CoreGui.PlayerInfoGui:Destroy()
 end
 
-hideCheckbox.MouseButton1Click:Connect(function()
-    config.HideAfterLoad = not config.HideAfterLoad
-    hideCheckbox.Text = config.HideAfterLoad and "✔" or ""
-    saveConfig()
-end)
-
-if config.HideAfterLoad then
-    gui.Enabled = false
-    itemhandbook.Enabled = false
-end
-
-task.wait(2)
-
-local coreGui = game:GetService("CoreGui")
-local clematisGui = nil
-local webhookGui = nil
-
-for _, v in pairs(coreGui:GetDescendants()) do
-    if v:IsA("ScreenGui") then
-        if v.Name == "ClematisItemUI" then
-            clematisGui = v
-        elseif v.Name == "WebhookUI" then
-            webhookGui = v
-        end
-    end
-end
-
-if not clematisGui and not webhookGui then
-    warn("ไม่พบ GUI ทั้งสองตัว")
-    return
-end
-
-local player = game:GetService("Players").LocalPlayer
-local playerGui = player:FindFirstChild("PlayerGui")
-if not playerGui then
-    warn("PlayerGui not found!")
-    return
-end
-
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "ToggleShowHide"
-screenGui.IgnoreGuiInset = true
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global 
-screenGui.DisplayOrder = 9999
-screenGui.Parent = coreGui
-
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 100, 0, 100)
-frame.Position = UDim2.new(0, 20, 1, -120)
-frame.BackgroundTransparency = 1
-frame.BorderSizePixel = 0
-frame.BackgroundColor3 = Color3.fromRGB(153, 102, 204)
-frame.Parent = screenGui
-
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0.2, 0)
-corner.Parent = frame
-
-local button = Instance.new("ImageButton")
-button.Size = UDim2.new(0.5, 0, 0.5, 0)
-button.BackgroundTransparency = 1
-button.Image = ""  -- ไอคอนปุ่ม
-button.ImageColor3 = Color3.fromRGB(255, 255, 255)
-button.Parent = frame
-
-local isEnabled = true
-button.MouseButton1Click:Connect(function()
-    isEnabled = not isEnabled
-
-    if clematisGui then
-        clematisGui.Enabled = isEnabled
-    end
-    if webhookGui then
-        webhookGui.Enabled = isEnabled
-    end
-
-    local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-    local goal = {Size = UDim2.new(0, 60, 0, 60)}
-    local tween = game:GetService("TweenService"):Create(button, tweenInfo, goal)
-    tween:Play()
-    tween.Completed:Connect(function()
-        local returnTween = game:GetService("TweenService"):Create(button, tweenInfo, {Size = UDim2.new(0, 50, 0, 50)})
-        returnTween:Play()
-    end)
-end)
-
-local dragging = false
-local dragInput, mousePos, buttonPos
-local userInputService = game:GetService("UserInputService")
-
-button.InputBegan:Connect(function(input, gameProcessedEvent)
-    if gameProcessedEvent then return end
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        mousePos = input.Position
-        buttonPos = button.Position
-    end
-end)
-
-button.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - mousePos
-        button.Position = UDim2.new(buttonPos.X.Scale, buttonPos.X.Offset + delta.X, buttonPos.Y.Scale, buttonPos.Y.Offset + delta.Y)
-    end
-end)
-
-button.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = false
-    end
-end)
-
--- NameUI
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local player = Players.LocalPlayer
+local LocalPlayer = Players.LocalPlayer
 
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "NameUI"
-screenGui.Parent = player:WaitForChild("PlayerGui")
-screenGui.ResetOnSpawn = false
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
-screenGui.DisplayOrder = 9999
+-- 🍯 GUI หลัก
+local playerInfoGui = Instance.new("ScreenGui")
+playerInfoGui.Name = "PlayerInfoGui"
+playerInfoGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+playerInfoGui.IgnoreGuiInset = true
+playerInfoGui.ResetOnSpawn = false
+playerInfoGui.Parent = game.CoreGui
 
+-- 🪵 กล่องหลัก (โทนน้ำตาลอบอุ่น)
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 200, 0, 50)
-frame.Position = UDim2.new(0, 10, 1, -60)
-frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+frame.Name = "PlayerBox"
+frame.Size = UDim2.new(0, 240, 0, 60)
+frame.Position = UDim2.new(0, 20, 1, -100)
+frame.BackgroundColor3 = Color3.fromRGB(92, 64, 51) -- น้ำตาลเข้มอบอุ่น
 frame.BorderSizePixel = 0
-frame.Active = true
-frame.Draggable = false
-frame.Parent = screenGui
+frame.Parent = playerInfoGui
 
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 12)
-corner.Parent = frame
+-- ☁️ เงานุ่ม
+local shadow = Instance.new("ImageLabel", frame)
+shadow.Image = "rbxassetid://1316045217"
+shadow.ImageTransparency = 0.85
+shadow.Size = UDim2.new(1, 12, 1, 12)
+shadow.Position = UDim2.new(0, -6, 0, -6)
+shadow.ZIndex = 0
+shadow.BackgroundTransparency = 1
 
-local nameLabel = Instance.new("TextLabel")
-nameLabel.Size = UDim2.new(1, 0, 1, 0)
-nameLabel.BackgroundTransparency = 1
-nameLabel.Text = player.Name
-nameLabel.Font = Enum.Font.GothamMedium
-nameLabel.TextSize = 18
-nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-nameLabel.TextXAlignment = Enum.TextXAlignment.Center
-nameLabel.Parent = frame
+-- 🍫 มุมโค้งมน
+local corner = Instance.new("UICorner", frame)
+corner.CornerRadius = UDim.new(0, 10)
 
-local dragging = false
-local dragStart, startPos
+-- 🍪 ขอบกล่องสีน้ำตาลทอง
+local stroke = Instance.new("UIStroke", frame)
+stroke.Thickness = 1.5
+stroke.Color = Color3.fromRGB(190, 150, 100) -- น้ำตาลทองนุ่มๆ
 
-local function update(input)
-    local delta = input.Position - dragStart
-    frame.Position = UDim2.new(
-        startPos.X.Scale,
-        startPos.X.Offset + delta.X,
-        startPos.Y.Scale,
-        startPos.Y.Offset + delta.Y
-    )
-end
+-- 🧁 เส้นแบ่งกลาง
+local divider = Instance.new("Frame", frame)
+divider.Size = UDim2.new(0.9, 0, 0, 1)
+divider.Position = UDim2.new(0.05, 0, 0.55, 0)
+divider.BackgroundColor3 = Color3.fromRGB(150, 110, 80)
+divider.BorderSizePixel = 0
 
-frame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = frame.Position
+-- 🐝 ชื่อผู้เล่น
+local playerName = Instance.new("TextLabel")
+playerName.Name = "PlayerName"
+playerName.Size = UDim2.new(1, -20, 0, 28)
+playerName.Position = UDim2.new(0, 10, 0, 6)
+playerName.BackgroundTransparency = 1
+playerName.TextColor3 = Color3.fromRGB(255, 230, 180) -- ครีมทองอบอุ่น
+playerName.Font = Enum.Font.GothamBold
+playerName.TextSize = 18
+playerName.TextXAlignment = Enum.TextXAlignment.Left
+playerName.Text = "🐝 " .. LocalPlayer.DisplayName
+playerName.Parent = frame
 
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
+-- ⏱️ เวลาเล่นเกม
+local playtimeLabel = Instance.new("TextLabel")
+playtimeLabel.Name = "PlaytimeLabel"
+playtimeLabel.Size = UDim2.new(1, -20, 0, 24)
+playtimeLabel.Position = UDim2.new(0, 10, 0, 34)
+playtimeLabel.BackgroundTransparency = 1
+playtimeLabel.TextColor3 = Color3.fromRGB(230, 200, 160) -- น้ำตาลครีมละมุน
+playtimeLabel.Font = Enum.Font.Gotham
+playtimeLabel.TextSize = 14
+playtimeLabel.TextXAlignment = Enum.TextXAlignment.Left
+playtimeLabel.Text = "⏱️ เล่นมาแล้ว 0 วิ"
+playtimeLabel.Parent = frame
+
+-- ☕ เอฟเฟกต์นุ่มเวลาโหลด (fade in)
+frame.BackgroundTransparency = 1
+playerName.TextTransparency = 1
+playtimeLabel.TextTransparency = 1
+task.spawn(function()
+	for i = 1, 10 do
+		local alpha = i / 10
+		frame.BackgroundTransparency = 1 - (0.85 * alpha)
+		playerName.TextTransparency = 1 - alpha
+		playtimeLabel.TextTransparency = 1 - alpha
+		task.wait(0.05)
+	end
 end)
 
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        update(input)
-    end
+-- 🕒 นับเวลาเล่นแบบเรียลไทม์
+local startTime = os.time()
+task.spawn(function()
+	while task.wait(1) do
+		local elapsed = os.time() - startTime
+		local h = math.floor(elapsed / 3600)
+		local m = math.floor((elapsed % 3600) / 60)
+		local s = elapsed % 60
+
+		local text
+		if h > 0 then
+			text = string.format("⏱️ เล่นมาแล้ว %d ชม. %02d นาที", h, m)
+		elseif m > 0 then
+			text = string.format("⏱️ เล่นมาแล้ว %d นาที %02d วิ", m, s)
+		else
+			text = string.format("⏱️ เล่นมาแล้ว %d วิ", s)
+		end
+
+		playtimeLabel.Text = text
+	end
 end)
 
-local CoreGui = game:GetService("CoreGui")
-local UserInputService = game:GetService("UserInputService")
-
-local targets = {
-    CoreGui:FindFirstChild("ItemUi"),
-    CoreGui:FindFirstChild("WebhookUI")
-}
-
-local enabled = true
-
-local function toggleUI()
-    enabled = not enabled
-    for _, ui in ipairs(targets) do
-        if ui then
-            ui.Enabled = enabled
-        end
-    end
-end
-
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if not gameProcessed and input.KeyCode == Enum.KeyCode.LeftControl then
-        toggleUI()
-    end
-end)
+print("☕ [PlayerInfoGui] โหลดกล่องชื่อผู้เล่นโทนน้ำตาลอบอุ่นเรียบร้อย 🐝")
