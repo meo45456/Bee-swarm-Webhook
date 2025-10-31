@@ -360,8 +360,19 @@ local QuestOwnerMap = {
     ["Blue Request 15"] = "Bucko Bee",
 }
 
-
 -- 🧩 PART 1 END
+
+-- 🧩 PART 1.5 START : Prepare ExtraFarm Data
+-- เพิ่มช่องสำหรับจำนวนที่ต้องฟาร์มเพิ่ม (ExtraFarm)
+-- และแน่ใจว่าทุกอย่างมีค่าเริ่มต้นก่อนใช้งาน
+
+for k, v in pairs(Showlist) do
+	if v.extrafarm == nil then
+		v.extrafarm = 0  -- ตั้งค่าเริ่มต้นเป็น 0
+	end
+end
+-- 🧩 PART 1.5 END
+
 
 -- 🧩 PART 2 START : Save / Load Config + UI Builder
 
@@ -383,7 +394,11 @@ local function saveConfig()
 	}
 
 	for k, v in pairs(Showlist) do
-		dataToSave.Showlist[k] = { show = v.show, emoji = v.emoji }
+		dataToSave.Showlist[k] = {
+			show = v.show,
+			emoji = v.emoji,
+			extrafarm = tonumber(v.extrafarm) or 0
+		}
 	end
 	for k, v in pairs(BadgeShowlist) do
 		dataToSave.BadgeShowlist[k] = v
@@ -405,6 +420,7 @@ local function loadConfig()
 			for k, v in pairs(decoded.Showlist) do
 				if Showlist[k] then
 					Showlist[k].show = v.show
+					Showlist[k].extrafarm = tonumber(v.extrafarm) or 0
 				end
 			end
 		end
@@ -446,8 +462,9 @@ local function buildShowlistFrames()
 			or Color3.fromRGB(18, 18, 18)
 		frame.BorderSizePixel = 0
 
+		-- 🏷️ ชื่อไอเท็ม
 		local label = Instance.new("TextLabel", frame)
-		label.Size = UDim2.new(0.7, -10, 1, 0)
+		label.Size = UDim2.new(0.45, -10, 1, 0)
 		label.Position = UDim2.new(0, 10, 0, 0)
 		label.BackgroundTransparency = 1
 		label.Text = item.name
@@ -456,6 +473,116 @@ local function buildShowlistFrames()
 		label.Font = Enum.Font.Gotham
 		label.TextSize = 12
 
+		-- 🧮 ช่องกรอก ExtraFarm (อยู่ระหว่างชื่อกับปุ่ม)
+		local extraBox = Instance.new("TextBox", frame)
+		extraBox.Size = UDim2.new(0.2, -10, 0.9, 0)
+		extraBox.Position = UDim2.new(0.5, 0, 0.05, 0)
+		extraBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+		extraBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+		extraBox.PlaceholderText = "+"
+		extraBox.Text = tostring(item.data.extrafarm or 0)
+		extraBox.ClearTextOnFocus = false
+		extraBox.Font = Enum.Font.Gotham
+		extraBox.TextSize = 12
+		Instance.new("UICorner", extraBox).CornerRadius = UDim.new(0, 4)
+
+		-- 🧠 เมื่อคลิกช่อง ให้ล้างค่าทันที (เริ่มพิมพ์ใหม่ได้เลย)
+		extraBox.Focused:Connect(function()
+			extraBox.Text = ""
+		end)
+
+-- 💾 เมื่อคลิกออก (FocusLost) — เซฟค่าอัตโนมัติ + ปรับเป้าหมายต่อเนื่อง
+extraBox.FocusLost:Connect(function()
+
+config = config or {}
+config.ItemTargets = config.ItemTargets or {}
+
+
+	local val = tonumber(extraBox.Text)
+	if not val then
+		extraBox.Text = tostring(item.data.extrafarm or 0)
+		return
+	end
+
+	item.data.extrafarm = val
+
+	-- 🧮 ดึงค่าจริงจาก GUI ในเกม
+	local currentCount = 0
+	local player = game.Players.LocalPlayer
+	local pg = player:FindFirstChild("PlayerGui")
+	local content = pg and pg:FindFirstChild("ScreenGui")
+		and pg.ScreenGui:FindFirstChild("Menus")
+		and pg.ScreenGui.Menus:FindFirstChild("Children")
+		and pg.ScreenGui.Menus.Children:FindFirstChild("Eggs")
+		and pg.ScreenGui.Menus.Children.Eggs:FindFirstChild("Content")
+
+	if content then
+		local eggRows = content:FindFirstChild("EggRows")
+		if eggRows then
+			for _, row in ipairs(eggRows:GetChildren()) do
+				local n = row:FindFirstChild("TypeName")
+				local s = row:FindFirstChild("EggSlot")
+				local c = s and s:FindFirstChild("Count")
+				if n and n.Text == item.name and c then
+					currentCount = tonumber(c.Text:gsub(",", "")) or 0
+					break
+				end
+			end
+		end
+	end
+
+	-- 🧠 โหลดค่าก่อนหน้า
+	local oldTarget = config.ItemTargets[item.name] or 0
+	local oldExtra = item.data.oldExtraFarm or 0
+	local newTarget = oldTarget
+
+	-- 🧩 เงื่อนไขหลัก
+	if oldTarget > 0 and currentCount >= oldTarget then
+		-- ✅ ถึงเป้าแล้ว
+		if val > oldExtra then
+			-- 🚀 มึงเพิ่มเป้าใหม่หลังถึงเป้า — ตั้งเป้าใหม่จากของจริง
+			newTarget = currentCount + val
+			print(string.format("🎯 ตั้งเป้าใหม่หลังถึงเป้า (%s): %d → %d", item.name, oldTarget, newTarget))
+		else
+			-- ❌ ถึงเป้าแล้วแต่ไม่ได้เพิ่ม -> ล็อกไว้
+			print(string.format("✅ %s ถึงเป้าแล้ว (%d/%d) — ล็อกเป้าไว้", item.name, currentCount, oldTarget))
+			item.data.extrafarm = 0
+			config.ItemTargets[item.name] = oldTarget
+			saveConfig()
+			return
+		end
+	else
+		-- 🧮 ยังไม่ถึงเป้า — ปรับตามเงื่อนไขปกติ
+		if oldTarget == 0 then
+			newTarget = currentCount + val
+		elseif val > oldExtra then
+			local diff = val - oldExtra
+			newTarget = oldTarget + diff
+		elseif val < oldExtra then
+			newTarget = currentCount + val
+		end
+	end
+
+	config.ItemTargets[item.name] = newTarget
+	item.data.oldExtraFarm = val
+	saveConfig()
+
+	print(string.format("🎯 เป้าหมายของ %s = %d (ExtraFarm %d)", item.name, newTarget, val))
+	-- 🎨 แสดงผลว่าบันทึกสำเร็จ (สี + ✅)
+	extraBox.BackgroundColor3 = Color3.fromRGB(70, 180, 90) -- เขียวมะกอก
+	extraBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+	extraBox.Text = tostring(val) .. " ✅"
+
+	task.delay(1.2, function()
+		extraBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+		extraBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+		extraBox.Text = tostring(val)
+	end)
+
+end)
+
+
+		-- 🔘 ปุ่ม Show/Hide (อยู่ขวาสุด)
 		local toggle = Instance.new("TextButton", frame)
 		toggle.Size = UDim2.new(0.3, -8, 1, -8)
 		toggle.Position = UDim2.new(0.7, 8, 0, 4)
@@ -1475,8 +1602,8 @@ function honey_webhook_service()
 	print("✅ [Honey] ส่งข้อมูล Honey Report สำเร็จ")
 end
 
--- 🎒 Inventory Report (Bee Swarm Deluxe Edition)
-local function eggtab_webhook_service()
+-- 🎒 Inventory Report (Bee Swarm Blue Edition - Smart Goal System)
+function eggtab_webhook_service()
 	if not (config.Flags and config.Flags.Item) then return end
 	print("[EggTab] เริ่มเปิดแท็บ Eggs ...")
 
@@ -1487,7 +1614,7 @@ local function eggtab_webhook_service()
 	local tries, delay = 0, 0.6
 
 	while not maintofind and tries < 25 do
-		tries = tries + 1
+		tries += 1
 		local pg = LocalPlayer:FindFirstChild("PlayerGui")
 		local content = pg and pg:FindFirstChild("ScreenGui")
 			and pg.ScreenGui:FindFirstChild("Menus")
@@ -1506,13 +1633,26 @@ local function eggtab_webhook_service()
 	end
 
 	if not maintofind then
-		warn("[EggTab] ไม่พบ EggRows - ยกเลิกการส่งข้อมูล")
+		warn("[EggTab] ❌ ไม่พบ EggRows - ยกเลิกการส่งข้อมูล")
 		return
 	end
 
-	-- 🧮 เก็บรายการไอเท็ม
 	local itemList, countShown = {}, 0
 
+	-- 🧮 แปลงตัวเลขอย่างปลอดภัย
+	local function safeNumber(value)
+		if value == nil then return 0 end
+		local str = tostring(value)
+		str = str:gsub(",", ""):gsub("%s+", ""):gsub("[^%d%.%-]", "")
+		local num = tonumber(str)
+		if not num then num = 0 end
+		return num
+	end
+
+
+	-----------------------------------------------------
+	-- 🧩 วนเช็กข้อมูลในแท็บ (Fix: Sync ExtraFarm จาก UI)
+	-----------------------------------------------------
 	for _, row in ipairs(maintofind:GetChildren()) do
 		local n = row:FindFirstChild("TypeName")
 		local s = row:FindFirstChild("EggSlot")
@@ -1520,35 +1660,189 @@ local function eggtab_webhook_service()
 
 		if n and c then
 			local itemName = n.Text
-			local itemCount = c.Text
-			local emoji = (Showlist[itemName] and Showlist[itemName].emoji) or ":package:"
-			local showFlag = Showlist[itemName] and Showlist[itemName].show
+			local showData = Showlist[itemName] or {}
+			local emoji = showData.emoji or ":package:"
+			local showFlag = showData.show or false
+			local current = safeNumber(c.Text)
 
-			if showFlag then
-				countShown = countShown + 1
-				table.insert(itemList, string.format("%s **%s** — `%s`", emoji, itemName, itemCount))
-			end
-		end
+			-----------------------------------------------------
+			-- 🧠 โหลดค่าจาก UI (Showlist) ก่อนเสมอ
+			-----------------------------------------------------
+			local uiExtra = safeNumber(showData.extrafarm or 0)
+
+			config = config or {}
+			config.ItemExtraFarm = config.ItemExtraFarm or {}
+			config.ItemBaseCount = config.ItemBaseCount or {}
+			config.ItemTargets = config.ItemTargets or {}
+			config.ItemProgress = config.ItemProgress or {}
+			config.ItemCompleted = config.ItemCompleted or {}
+			config.ItemCurrent = config.ItemCurrent or {}
+
+			local storedExtra = safeNumber(config.ItemExtraFarm[itemName] or 0)
+			local baseCount = safeNumber(config.ItemBaseCount[itemName] or current)
+			local target = safeNumber(config.ItemTargets[itemName] or (baseCount + uiExtra))
+			local progress = safeNumber(current - baseCount)
+			local completed = config.ItemCompleted[itemName] or false
+
+	-----------------------------------------------------
+	-- 🧠 Logic ฟาร์มอัจฉริยะ v4.6 (Overgoal + Auto Reset + Zero Target Filter)
+	-----------------------------------------------------
+
+	local oldExtra = safeNumber(config.ItemExtraFarm[itemName] or 0)
+	local wasCompleted = config.ItemCompleted[itemName] or false
+
+	-- 🧩 แปลงค่า ExtraFarm ให้ปลอดภัย
+	uiExtra = safeNumber(uiExtra)
+	if uiExtra < 0 then uiExtra = 0 end
+
+	-- 🧩 ป้องกัน base ผิดกรณี current ลดลง
+	if baseCount > current then
+		--print(string.format("⚠️ [%s] Current ลดลง (%d→%d) รีฐานใหม่", itemName, baseCount, current))
+		baseCount = current
 	end
 
-	-- ถ้าไม่มีข้อมูล
+	-- 🧩 ครั้งแรก → ตั้งเป้าใหม่
+	if not config.ItemBaseCount[itemName] then
+		baseCount = current
+		target = baseCount + uiExtra
+		completed = false
+		--print(string.format("🆕 [%s] ตั้งเป้าครั้งแรก %d → %d (+%d)", itemName, baseCount, target, uiExtra))
+
+	-- ✅ ถึงเป้าหมาย (หรือเกินได้)
+	elseif current >= target then
+		completed = true
+		config.ItemCompleted[itemName] = true
+		--print(string.format("✅ [%s] ถึงเป้าหมาย (%d/%d)", itemName, current, target))
+
+		-- 🔁 ถ้าฟาร์มครบแล้ว แล้วใส่ค่า ExtraFarm ใหม่ (แม้ค่าเดิม) → รีรอบใหม่
+		if uiExtra > 0 and (uiExtra ~= oldExtra or wasCompleted) then
+			--print(string.format("🔁 [%s] เริ่มรอบใหม่หลังครบ หรือเปลี่ยนค่า (%d → %d)", itemName, oldExtra, uiExtra))
+			baseCount = current
+			target = baseCount + uiExtra
+			completed = false
+			config.ItemCompleted[itemName] = false
+		end
+
+	-- 🔄 เปลี่ยน ExtraFarm ระหว่างฟาร์ม
+	elseif uiExtra > 0 and uiExtra ~= oldExtra then
+		--print(string.format("🔄 [%s] ปรับเป้าระหว่างฟาร์ม %d → %d", itemName, oldExtra, uiExtra))
+		target = baseCount + uiExtra
+		completed = false
+		config.ItemCompleted[itemName] = false
+
+	-- 💤 ระหว่างฟาร์มปกติ
+	elseif uiExtra > 0 and not completed and current < target then
+		target = baseCount + uiExtra
+	end
+
+	-- 💾 คำนวณ progress
+	progress = math.max(0, current - baseCount)
+
+	-- 💾 เซฟกลับเข้า config
+	config.ItemBaseCount[itemName] = baseCount
+	config.ItemTargets[itemName] = target
+	config.ItemProgress[itemName] = progress
+	config.ItemCurrent[itemName] = current
+	config.ItemCompleted[itemName] = completed
+	config.ItemExtraFarm[itemName] = uiExtra
+
+	-----------------------------------------------------
+	-- 📊 แสดงผลใน Webhook (Fix: Preserve Text Like "12/250")
+	-----------------------------------------------------
+	if showFlag then
+		countShown += 1
+		local textLine
+
+		-- 🧾 ดึงข้อความดิบจาก UI (ป้องกัน "12/250" ถูกแปลงเป็น 12250)
+		local displayText = c and c.Text and tostring(c.Text) or tostring(current)
+		displayText = displayText:gsub("^%s+", ""):gsub("%s+$", "") -- ตัดช่องว่างหัวท้าย
+
+		-- ถ้าเป็นตัวเลขล้วน เช่น "1234" → ใช้ current ปกติ
+		if displayText:match("^%d+$") then
+			displayText = tostring(current)
+		end
+
+		-- ถ้าไม่ได้ตั้งเป้าหมายเลย (ExtraFarm = 0)
+		if uiExtra == 0 then
+			textLine = string.format("%s **%s** — `%s`", emoji, itemName, displayText)
+
+		else
+			-- ถ้ามีเป้าหมาย → แสดง progress ปกติ
+			local mark = completed and "✅" or ""
+			local progressText = string.format("(%d / %d)", progress, uiExtra)
+			textLine = string.format("%s **%s** — `%s` %s %s", emoji, itemName, displayText, progressText, mark)
+		end
+
+		table.insert(itemList, textLine)
+	end
+	end
+end
+
+	-----------------------------------------------------
+	-- 💾 เซฟ config หลังคำนวณทั้งหมด
+	-----------------------------------------------------
+	if saveWebhookConfig then pcall(saveWebhookConfig) end
+
+	-----------------------------------------------------
+	-- 📦 สร้างข้อความ Discord
+	-----------------------------------------------------
 	if #itemList == 0 then
 		table.insert(itemList, "❌ ไม่มีไอเท็มที่เลือกแสดง (เปิด 'Show' ใน Item Config ก่อน)")
 	end
 
-	-- 📦 ตกแต่งข้อความสวยงาม
-	local descText = table.concat({
-		"**🎒 รายงานกระเป๋าไอเท็มของคุณ**",
-		"----------------------------------",
-		table.concat(itemList, "\n"),
-		"----------------------------------",
-		string.format("**รวมทั้งหมด:** %d รายการ", countShown)
-	}, "\n")
+	-----------------------------------------------------
+	-- 💚 คำนวณ Progress Bar รวม (จาก progress / extraFarm)
+	-----------------------------------------------------
+	local totalProgress, countedItems, totalTarget, showProgress = 0, 0, 0, false
 
-	-- ✉️ ส่ง Embed
+	for name, data in pairs(Showlist) do
+		if data.show then
+			local progress = safeNumber(config.ItemProgress[name] or 0)
+			local extra = safeNumber(config.ItemExtraFarm[name] or data.extrafarm or 0)
+			if extra > 0 then
+				showProgress = true
+				local pct = math.clamp((progress / extra) * 100, 0, 100)
+				totalProgress += pct
+				countedItems += 1
+				totalTarget += extra -- ✅ รวมเฉพาะเป้าที่ตั้งไว้จริง
+			end
+		end
+	end
+
+	local avgProgress = countedItems > 0 and (totalProgress / countedItems) or 0
+	local filled = math.floor(avgProgress / 10)
+	local progressBar = string.rep("🟩", filled) .. string.rep("⬛", 10 - filled)
+	progressBar = string.format("%s %.0f%%", progressBar, avgProgress)
+
+
+
+	local descLines = {
+		"🎒 Inventory Status — Bee Swarm Report 🐝",
+		"───────────────────────────────",
+		table.concat(itemList, "\n"),
+		"─────────────────────────────── \n",
+	}
+
+	if showProgress then
+		table.insert(descLines, "📊 Farm Progress Status")
+		table.insert(descLines, progressBar)
+		table.insert(descLines, "")
+		table.insert(descLines, "📦 Total Items: " .. tostring(countShown) .. " | Total Goal: " .. tostring(totalTarget) .. " Items")
+	else
+		table.insert(descLines, "📦 Total Items: " .. tostring(countShown) .. " Items")
+	end
+
+	table.insert(descLines, "📚 Item data updates automatically in real-time")
+	table.insert(descLines, "───────────────────────────────")
+
+	local descText = table.concat(descLines, "\n")
+
+	-----------------------------------------------------
+	-- ✉️ ส่ง Embed ไป Discord
+	-----------------------------------------------------
 	sendDiscordEmbed(config.WebhookUrl, {
 		title = "🎒 Inventory Report",
-		color = 0x3498DB, -- ฟ้าเข้มสไตล์ Bee Swarm
+		color = 0x3498DB,
 		description = descText,
 		footer = {
 			text = os.date("📅 %d/%m/%Y ⏰ %H:%M:%S") .. " | Bee Swarm Auto Reporter",
@@ -1563,15 +1857,53 @@ local function eggtab_webhook_service()
 end
 
 
--- 📜 Royal Quest Report — Epic Edition (1 Quest per Embed)
+
+-- ✂️ ฟังก์ชันย่อเลข
+local function shortenNumber(num)
+	num = tostring(num):gsub(",", "")
+	local n = tonumber(num)
+	if not n then return num end
+	if n >= 1e9 then return string.format("%.1fB", n / 1e9)
+	elseif n >= 1e6 then return string.format("%.1fM", n / 1e6)
+	elseif n >= 1e3 then return string.format("%.0fK", n / 1e3)
+	else return tostring(math.floor(n)) end
+end
+
+-- ✂️ ฟังก์ชันย่อข้อความ (ลบคำซ้ำ / ตัด field / ย่อเลขในข้อความ)
+local function shortenText(text)
+	text = text
+		:gsub("pollen from the ", "from ")
+		:gsub("pollen from ", "from ")
+		:gsub("the ", "")
+		:gsub("Field", "")
+		:gsub("Collect%s+", "Collect ")
+		:gsub("Defeat%s+", "Defeat ")
+		:gsub("Feed%s+", "Feed ")
+		:gsub("Use%s+", "Use ")
+		:gsub("Convert%s+", "Convert ")
+		:gsub(" at your hive", "")
+		:gsub(" your bees", "")
+		:gsub("%s+", " ")
+	-- ย่อเลขในข้อความทั้งหมด
+	text = text:gsub("(%d[%d,]*)", function(num) return shortenNumber(num) end)
+	return text:gsub("^%s+", ""):gsub("%s+$", "")
+end
+
+-- 🎨 ฟังก์ชันสร้าง Progress Bar
+local function makeProgressBar(done, total, length)
+	local percent = total > 0 and math.floor((done / total) * 100) or 0
+	local filled = math.floor((percent / 100) * length)
+	return string.rep("🟩", filled) .. string.rep("⬛", length - filled), percent
+end
+
+--- 📜 Hybrid Log Quest Report — 🎯 Compact Summary + Task Detail
 local function questtab_webhook_service()
 	if not (config.Flags and config.Flags.Quest) then return end
 
-	print("👑 [QuestTab] เปิดแท็บ Quests เพื่อสร้างรายงานสุดหรู...")
+	print("🎯 [QuestTab] เปิดแท็บ Quests เพื่อสร้างรายงาน Hybrid Log...")
 	opentab("Quests Tab")
 	task.wait(2.5)
 
-	-- 🧩 ดึง Content ของ Quest
 	local maintofind2
 	for i = 1, 30 do
 		local pg = game.Players.LocalPlayer:FindFirstChild("PlayerGui")
@@ -1587,91 +1919,63 @@ local function questtab_webhook_service()
 		end
 		task.wait(0.4)
 	end
+	if not maintofind2 then warn("⚠️ ไม่พบแท็บ Quests") return end
 
-	if not maintofind2 then
-		warn("⚠️ [QuestTab] ไม่พบแท็บ Quests")
-		return
-	end
-
-	-- 🧭 อีโมจิ + สีประจำหมี (ธีม Royal)
+	-- 🎨 สี/อีโมจิหมี
 	local bearStyle = {
-		["Black Bear"] = { icon = "🐻", color = 0x2E86C1 },
-		["Brown Bear"] = { icon = "🍯", color = 0xAF601A },
-		["Panda Bear"] = { icon = "🥋", color = 0x212F3C },
-		["Science Bear"] = { icon = "⚗️", color = 0x5DADE2 },
-		["Polar Bear"] = { icon = "🍔", color = 0xAED6F1 },
 		["Spirit Bear"] = { icon = "🌸", color = 0xBB8FCE },
-		["Mother Bear"] = { icon = "🧸", color = 0xF1948A },
-		["Honey Bee"] = { icon = "🐝", color = 0xF1C40F },
-		["Riley Bee"] = { icon = "🔥", color = 0xE74C3C },
-		["Bucko Bee"] = { icon = "💧", color = 0x3498DB },
-		["Gummy Bear"] = { icon = "🍬", color = 0xF8C471 },
-		["Stick Bug"] = { icon = "🪳", color = 0x58D68D },
-		["Onett"] = { icon = "👑", color = 0xF7DC6F },
-		["Bubble Bee Man"] = { icon = "🫧", color = 0x85C1E9 },
+		["Science Bear"] = { icon = "⚗️", color = 0x5DADE2 },
+		["Panda Bear"] = { icon = "🥋", color = 0x212F3C },
+		["Brown Bear"] = { icon = "🍯", color = 0xAF601A },
+		["Black Bear"] = { icon = "🐻", color = 0x2E86C1 },
 	}
 
-	-- 🧾 เก็บเควชทั้งหมด
+	-- 📋 เก็บข้อมูลเควช
 	local questList = {}
 	for _, questBox in ipairs(maintofind2:GetChildren()) do
 		if questBox:IsA("Frame") then
 			local titleBarBG = questBox:FindFirstChild("TitleBarBG")
 			local titleLabel = titleBarBG and titleBarBG:FindFirstChild("TitleBar")
-			if titleLabel and titleLabel:IsA("TextLabel") then
+			if titleLabel then
 				local questName = titleLabel.Text
 				local bear = QuestOwnerMap[questName] or "Unknown"
 				local style = bearStyle[bear] or { icon = "🐾", color = 0xB57EDC }
 
-                if QuestShowlist[bear] and QuestShowlist[bear].show then
-                    local tasks = {}
+				if QuestShowlist[bear] and QuestShowlist[bear].show then
+					local tasks, doneCount = {}, 0
 
-                    local function emojiByText(text)
-                        if text:find("Collect") then return "🌿"
-                        elseif text:find("Defeat") then return "🐞"
-                        elseif text:find("Feed") then return "🍯"
-                        elseif text:find("Raise") then return "🐝"
-                        elseif text:find("Craft") then return "🧺"
-                        elseif text:find("Convert") then return "🔁"
-                        elseif text:find("Use") then return "🎁"
-                        else return "📜"
-                        end
-                    end
+					for _, taskBar in ipairs(questBox:GetChildren()) do
+						if taskBar.Name == "TaskBar" and taskBar:IsA("Frame") then
+							local desc = taskBar:FindFirstChild("Description")
+							if desc and desc:IsA("TextLabel") then
+								local text = shortenText(desc.Text)
+								local complete = text:find("Complete") or text:find("100%%")
+									or text:find("Done") or text:find("Finished")
 
-                    for _, taskBar in ipairs(questBox:GetChildren()) do
-                        if taskBar.Name == "TaskBar" and taskBar:IsA("Frame") then
-                            local desc = taskBar:FindFirstChild("Description")
-                            if desc and desc:IsA("TextLabel") then
-                                local text = desc.Text:gsub("^%s+", ""):gsub("%s+$", "")
-                                local emoji = emojiByText(text)
-
-                                -- ✅ รองรับทั้ง ".1,398/..." และ ". 1,398/..."
-                                text = text:gsub("%.[ ]*(%d+/%d+)", ". %1")
-
-                                if text:find("Complete!") then
-                                    text = text:gsub("Complete!", ""):gsub("%s+$", "")
-                                    table.insert(tasks, string.format("✅ **%s %s** — เสร็จแล้วเรียบร้อย 🍯", emoji, text))
-                                else
-                                    table.insert(tasks, string.format("🍂 **%s %s**", emoji, text))
-                                end
-                            end
-                        end
-                    end
-
-
-
+								if complete then
+									doneCount += 1
+									table.insert(tasks, "✅ " .. text)
+								else
+									table.insert(tasks, "❌ " .. text)
+								end
+							end
+						end
+					end
 
 					table.insert(questList, {
 						bear = bear,
 						icon = style.icon,
 						color = style.color,
 						name = questName,
-						tasks = tasks
+						tasks = tasks,
+						done = doneCount
 					})
 				end
 			end
 		end
 	end
 
+	-- ❌ ไม่มีเควช
 	if #questList == 0 then
 		sendDiscordEmbed(config.WebhookUrl, {
 			title = "📜 Quest Report",
@@ -1683,42 +1987,45 @@ local function questtab_webhook_service()
 		return
 	end
 
-	-- 🌟 แสดง 1 Quest ต่อ Embed
+	-- 🌟 สร้างรายงาน Hybrid Log Style
 	for i, q in ipairs(questList) do
-		local lines = {}
-		table.insert(lines, "╭──────────────────────────────╮")
-		table.insert(lines, string.format("%s **%s — `%s`**", q.icon, q.bear, q.name))
-		table.insert(lines, "╰──────────────────────────────╯\n")
+		local total = #q.tasks
+		local done = q.done
+		local percent = total > 0 and math.floor((done / total) * 100) or 0
+		local filled = math.floor(percent / 10)
+		local empty = 10 - filled
+		local bar = string.rep("🟩", filled) .. string.rep("⬛", empty)
 
-		local doneCount, total = 0, #q.tasks
+		local lines = {}
+		table.insert(lines, string.format("🎯 **Quest Tracker — %s**", q.bear))
+		table.insert(lines, "──────────────────────────────")
+		table.insert(lines, string.format("🟩  %d / %d Tasks Done | %d%%", done, total, percent))
+		table.insert(lines, string.format("🧮  %s", bar))
+		table.insert(lines, "──────────────────────────────")
+
+		-- ✅❌ รายการภารกิจย่อย
 		for _, t in ipairs(q.tasks) do
 			table.insert(lines, t)
-			if t:find("✅") then doneCount += 1 end
 		end
+		table.insert(lines, "──────────────────────────────")
+		table.insert(lines, string.format("🕒 %s", os.date("%d/%m/%Y ⏰ %H:%M:%S")))
 
-		table.insert(lines, "\n───────────────────────────────")
-		table.insert(lines, string.format("🎯 **สถานะความคืบหน้า:** %d/%d ภารกิจเสร็จสิ้น ✅", doneCount, total))
-		table.insert(lines, "───────────────────────────────")
-
-		local desc = table.concat(lines, "\n")
-
+		-- ส่งเข้า Discord
 		sendDiscordEmbed(config.WebhookUrl, {
-			title = string.format("%s Quest Report — %s", q.icon, q.bear),
+			title = string.format("%s Quest Report", q.icon),
 			color = q.color,
-			description = desc,
-			footer = {
-				text = os.date("📅 %d/%m/%Y ⏰ %H:%M:%S") ..
-					string.format(" | Quest %d/%d | Bee Swarm Reporter", i, #questList)
-			}
+			description = table.concat(lines, "\n"),
+			footer = { text = string.format("Quest %d/%d | Bee Swarm Reporter", i, #questList) }
 		})
 
-		task.wait(2)
+		task.wait(1.5)
 	end
 
-	task.wait(1)
+	-- ปิดแท็บหลังส่งเสร็จ
 	closetab("Quests Tab")
-	print("✅ [QuestTab] ส่ง Quest Report ครบ " .. tostring(#questList) .. " หน้าแล้ว!")
+	print("✅ [QuestTab] ส่งรายงาน Hybrid Log ครบแล้ว!")
 end
+
 
 
 -- 🏅 Badge Report
