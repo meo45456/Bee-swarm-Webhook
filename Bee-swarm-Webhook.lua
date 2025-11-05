@@ -2996,10 +2996,10 @@ end
 	if saveWebhookConfig then pcall(saveWebhookConfig) end
 	updateCraftTreeCounts()
 
-	-- ✅ ตรวจว่าใน showlist มีของที่เป็นสูตรคราฟไหม
+	-- ✅ ตรวจว่าใน showlist มีของที่เป็นสูตรคราฟ + ตั้งค่า ExtraFarm ไว้ไหม
 	local hasCraftItem = false
 	for name, showData in pairs(Showlist) do
-		if showData.show and CraftRecipes[name] then
+		if showData.show and CraftRecipes[name] and safeNumber(showData.extrafarm or 0) > 0 then
 			hasCraftItem = true
 			break
 		end
