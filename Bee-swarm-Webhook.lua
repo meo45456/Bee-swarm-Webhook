@@ -379,111 +379,140 @@ end
 -- เพิ่ม/แก้/ลบ ภายหลังได้ง่ายๆ โดยเพิ่มในตารางนี้
 ToolList = {
 
-    ["Scooper"] = {
-        show = false,
-        emoji = "🧹",
-        requirements = {}
-    },
-
     ["Rake"] = {
         show = false,
         emoji = "🪓",
-        requirements = {}
+        requirements = {
+			{ name = "Honey", goal = 800 },
+		}
     },
 
     ["Clippers"] = {
         show = false,
         emoji = "✂️",
-        requirements = {}
+        requirements = {
+			{ name = "Honey", goal = 2200 },
+		}
     },
 
     ["Magnet"] = {
         show = false,
         emoji = "🧲",
-        requirements = {}
+        requirements = {
+			{ name = "Honey", goal = 5500 },
+		}
     },
 
     ["Vacuum"] = {
         show = false,
         emoji = "🧺",
-        requirements = {}
+        requirements = {
+			{ name = "Honey", goal = 14000 },
+		}
     },
 
     ["Super-Scooper"] = {
         show = false,
         emoji = "💥",
-        requirements = {}
+        requirements = {
+			{ name = "Honey", goal = 40000 },
+		}
     },
 
     ["Pulsar"] = {
         show = false,
         emoji = "🔮",
-        requirements = {}
+        requirements = {
+			{ name = "Honey", goal = 125000 },
+		}
     },
 
     ["Electro-Magnet"] = {
         show = false,
         emoji = "⚡",
-        requirements = {}
+        requirements = {
+			{ name = "Honey", goal = 300000 },
+		}
     },
 
     ["Scissors"] = {
         show = false,
         emoji = "✂️",
-        requirements = {}
+        requirements = {
+			{ name = "Honey", goal = 850000 },
+		}
     },
 
     ["Honey Dipper"] = {
         show = false,
         emoji = "🍯",
-        requirements = {}
+        requirements = {
+			{ name = "Honey", goal = 1500000 },
+		}
     },
 
     ["Bubble Wand"] = {
         show = false,
         emoji = "🫧",
-        requirements = {}
+        requirements = {
+			{ name = "Honey", goal = 3500000 },
+		}
     },
 
     ["Scythe"] = {
         show = false,
         emoji = "🔪",
-        requirements = {}
+        requirements = {
+			{ name = "Honey", goal = 3500000 },
+		}
     },
 
     ["Sticker-Seeker"] = {
         show = false,
         emoji = "📜",
-        requirements = {}
+        requirements = {
+			{ name = "Honey", goal = 60000000 },
+			{ name = "Glue", goal = 1 },
+			{ name = "Oil", goal = 1 },
+			{ name = "Soft Wax", goal = 5 },
+			{ name = "Neonberry", goal = 5 },
+			{ name = "Micro-Converter", goal = 10 },
+		}
     },
 
     ["Golden Rake"] = {
         show = false,
         emoji = "🏆",
-        requirements = {}
+        requirements = {
+			{ name = "Honey", goal = 20000000   },
+		}
     },
 
     ["Spark Staff"] = {
         show = false,
         emoji = "⚡",
-        requirements = {}
+        requirements = {
+			{ name = "Honey", goal = 60000000  },
+		}
     },
 
     ["Porcelain Dipper"] = {
         show = false,
         emoji = "🏺",
-        requirements = {}
+        requirements = {
+			{ name = "Honey", goal = 150000000  },
+		}
     },
 
     ["Petal Wand"] = {
         show = false,
         emoji = "🌸",
         requirements = {
-            { name = "Honey",        goal = 1500000000 },
+            { name = "Honey", goal = 1500000000 },
             { name = "Spirit Petal", goal = 1 },
-            { name = "Enzymes",      goal = 75 },
-			{ name = "Star Jelly",  goal = 10 },
-            { name = "Glitter",      goal = 25 },
+            { name = "Enzymes", goal = 75 },
+			{ name = "Star Jelly", goal = 10 },
+            { name = "Glitter", goal = 25 },
         }
     },
 
@@ -491,10 +520,13 @@ ToolList = {
         show = false,
         emoji = "🗡️",
         requirements = {
-            { name = "Honey",       goal = 5000000000 },
-            { name = "Magic Bean",  goal = 100 },
-            { name = "Oil",         goal = 150 },
-            { name = "Enzymes",     goal = 100 },
+            { name = "Honey", goal = 2500000000000},
+            { name = "Red Extract", goal = 1500 },
+			{ name = "Stinger", goal = 150 },
+            { name = "Hard Wax", goal = 100 },
+			{ name = "Caustic Wax", goal = 50 },
+			{ name = "Super Smoothie", goal = 50 },
+			{ name = "Invigorating Vial", goal = 3 },
         }
     },
 
@@ -502,10 +534,13 @@ ToolList = {
         show = false,
         emoji = "🌊",
         requirements = {
-            { name = "Honey",         goal = 25000000000 },
-            { name = "Blue Extract",  goal = 250 },
-            { name = "Tropical Drink",goal = 150 },
-            { name = "Swirled Wax",   goal = 150 },
+            { name = "Honey", goal = 2500000000000},
+            { name = "Blue Extract", goal = 1500 },
+			{ name = "Stinger", goal = 150 },
+            { name = "Tropical Drink", goal = 150 },
+			{ name = "Swirled Wax", goal = 75 },
+			{ name = "Super Smoothie", goal = 50 },
+			{ name = "Comforting Vial", goal = 3 },
         }
     },
 
@@ -513,469 +548,598 @@ ToolList = {
         show = false,
         emoji = "🍬",
         requirements = {
-            { name = "Honey",        goal = 50000000000 },
-            { name = "Glue",         goal = 1000 },
-            { name = "Swirled Wax",  goal = 250 },
-            { name = "Caustic Wax",  goal = 25 },
+            { name = "Honey", goal = 10000000000000},
+            { name = "Glue", goal = 1500 },
+			{ name = "Gumdrops", goal = 2000 },
+            { name = "Caustic Wax", goal = 50 },
+			{ name = "Super Smoothie", goal = 50 },
+			{ name = "Turpentine", goal = 5 },
+			{ name = "Satisfying Vial", goal = 3 },
         }
-    },
-
-	    ["Pouch"] = {
-        show = false,
-        emoji = "🎒",
-        requirements = {}
     },
 
     ["Jar"] = {
         show = false,
         emoji = "🍯",
-        requirements = {}
+        requirements = {
+            { name = "Honey", goal = 650 },
+        }
     },
 
     ["Backpack"] = {
         show = false,
         emoji = "🎒",
-        requirements = {}
+        requirements = {
+            { name = "Honey", goal = 5500 },
+        }
     },
 
     ["Canister"] = {
         show = false,
         emoji = "🧴",
-        requirements = {}
+        requirements = {
+            { name = "Honey", goal = 22000 },
+        }
     },
 
     ["Mega-Jug"] = {
         show = false,
         emoji = "🫙",
-        requirements = {}
+        requirements = {
+            { name = "Honey", goal = 50000 },
+        }
     },
 
     ["Compressor"] = {
         show = false,
         emoji = "🧰",
-        requirements = {}
+        requirements = {
+            { name = "Honey", goal = 160000 },
+        }
     },
 
     ["Elite Barrel"] = {
         show = false,
         emoji = "🛢️",
-        requirements = {}
+        requirements = {
+            { name = "Honey", goal = 650000 },
+        }
     },
 
     ["Port-O-Hive"] = {
         show = false,
         emoji = "🐝",
-        requirements = {}
-    },
-
-    ["Red Port-O-Hive"] = {
-        show = false,
-        emoji = "🔴🐝",
-        requirements = {}
+        requirements = {
+            { name = "Honey", goal = 1250000 },
+        }
     },
 
     ["Blue Port-O-Hive"] = {
         show = false,
         emoji = "🔵🐝",
-        requirements = {}
+        requirements = {
+            { name = "Honey", goal = 12500000 },
+            { name = "Blue Extract", goal = 2 },
+            { name = "Soft Wax", goal = 2 },
+        }
+    },
+
+    ["Red Port-O-Hive"] = {
+        show = false,
+        emoji = "🔴🐝",
+        requirements = {
+            { name = "Honey", goal = 12500000 },
+            { name = "Red Extract", goal = 2 },
+            { name = "Soft Wax", goal = 2 },
+        }
     },
 
     ["Porcelain Port-O-Hive"] = {
         show = false,
         emoji = "🏺🐝",
-        requirements = {}
+        requirements = {
+            { name = "Honey", goal = 250000000 },
+            { name = "Glitter", goal = 3 },
+            { name = "Soft Wax", goal = 3 },
+            { name = "Moon Charm", goal = 10 },
+        }
     },
 
     ["Coconut Canister"] = {
         show = false,
         emoji = "🥥",
         requirements = {
-            { name = "Honey",    goal = 2500000000 },
-            { name = "Coconut",  goal = 150 },
-            { name = "Oil",      goal = 100 },
-            { name = "Enzymes",  goal = 150 },
-            { name = "Glue",     goal = 150 },
+            { name = "Honey", goal = 25000000000 },
+            { name = "Tropical Drink", goal = 150 },
+            { name = "Coconut", goal = 250 },
+            { name = "Red Extract", goal = 150 },
+            { name = "Blue Extract", goal = 150 },
+            { name = "Refreshing Vial", goal = 2 },
         }
     },
 
-	["Brave Guard"] = {
-        category = "Guards",
+	    ["Brave Guard"] = {
         show = false,
-        emoji = "🛡️",
-        requirements = {}
+        emoji = "🦁",
+        requirements = {
+            { name = "Honey", goal = 300000 },
+            { name = "Stinger", goal = 3 },
+        }
     },
 
     ["Hasty Guard"] = {
-        category = "Guards",
         show = false,
-        emoji = "⚡",
-        requirements = {}
+        emoji = "💨",
+        requirements = {
+            { name = "Honey", goal = 300000 },
+            { name = "Moon Charm", goal = 5 },
+        }
     },
 
     ["Bomber Guard"] = {
-        category = "Guards",
         show = false,
         emoji = "💣",
-        requirements = {}
+        requirements = {
+            { name = "Honey", goal = 300000 },
+            { name = "Sunflower Seed", goal = 25 },
+        }
     },
 
     ["Looker Guard"] = {
-        category = "Guards",
         show = false,
-        emoji = "👀",
-        requirements = {}
+        emoji = "👁️",
+        requirements = {
+            { name = "Honey", goal = 300000 },
+            { name = "Sunflower Seed", goal = 25 },
+        }
     },
 
     ["Blue Guard"] = {
-        category = "Guards",
         show = false,
-        emoji = "🔵",
-        requirements = {}
+        emoji = "🔵🛡️",
+        requirements = {
+            { name = "Honey", goal = 1000000 },
+            { name = "Blueberry", goal = 50 },
+            { name = "Royal Jelly", goal = 1 },
+            { name = "Moon Charm", goal = 3 },
+        }
     },
 
     ["Elite Blue Guard"] = {
-        category = "Guards",
         show = false,
-        emoji = "🔵⭐",
-        requirements = {}
+        emoji = "🔷🛡️",
+        requirements = {
+            { name = "Honey", goal = 5000000 },
+            { name = "Blue Extract", goal = 3 },
+            { name = "Blueberry", goal = 50 },
+            { name = "Royal Jelly", goal = 5 },
+            { name = "Moon Charm", goal = 15 },
+        }
     },
 
     ["Bucko Guard"] = {
-        category = "Guards",
         show = false,
-        emoji = "🔹",
-        requirements = {}
-    },
-
-    ["Cobalt Guard"] = {
-        category = "Guards",
-        show = false,
-        emoji = "💎",
+        emoji = "💙🛡️",
         requirements = {
-            { name = "Honey", goal = 150000000 },
-            { name = "Blue Extract", goal = 75 },
-            { name = "Oil", goal = 25 },
-            { name = "Glue", goal = 50 },
+            { name = "Honey", goal = 30000000 },
+            { name = "Blue Extract", goal = 10 },
+            { name = "Blueberry", goal = 100 },
+            { name = "Glue", goal = 5 },
+            { name = "Moon Charm", goal = 75 },
         }
     },
 
     ["Red Guard"] = {
-        category = "Guards",
         show = false,
-        emoji = "🔴",
-        requirements = {}
-    },
-
-    ["Elite Red Guard"] = {
-        category = "Guards",
-        show = false,
-        emoji = "🔴⭐",
-        requirements = {}
-    },
-
-    ["Riley Guard"] = {
-        category = "Guards",
-        show = false,
-        emoji = "🔥",
-        requirements = {}
-    },
-
-    ["Crimson Guard"] = {
-        category = "Guards",
-        show = false,
-        emoji = "❤️",
+        emoji = "🔴🛡️",
         requirements = {
-            { name = "Honey", goal = 150000000 },
-            { name = "Red Extract", goal = 75 },
-            { name = "Oil", goal = 25 },
-            { name = "Glue", goal = 50 },
+            { name = "Honey", goal = 750000 },
+            { name = "Strawberry", goal = 50 },
+            { name = "Royal Jelly", goal = 1 },
+            { name = "Stinger", goal = 1 },
         }
     },
 
-	["Helmet"] = {
-        category = "Hats",
+    ["Elite Red Guard"] = {
         show = false,
-        emoji = "🪖",
-        requirements = {}
+        emoji = "🟥🛡️",
+        requirements = {
+            { name = "Honey", goal = 5000000 },
+            { name = "Red Extract", goal = 3 },
+            { name = "Strawberry", goal = 50 },
+            { name = "Royal Jelly", goal = 5 },
+            { name = "Stinger", goal = 5 },
+        }
     },
 
-    ["Strange Goggles"] = {
-        category = "Hats",
+    ["Riley Guard"] = {
         show = false,
-        emoji = "🕶️",
-        requirements = {}
+        emoji = "❤️🛡️",
+        requirements = {
+            { name = "Honey", goal = 30000000 },
+            { name = "Red Extract", goal = 10 },
+            { name = "Strawberry", goal = 100 },
+            { name = "Glue", goal = 5 },
+            { name = "Stinger", goal = 25 },
+        }
+    },
+
+    ["Cobalt Guard"] = {
+        show = false,
+        emoji = "💠🛡️",
+        requirements = {
+            { name = "Honey", goal = 200000000 },
+            { name = "Blue Extract", goal = 100 },
+            { name = "Stinger", goal = 100 },
+            { name = "Enzymes", goal = 50 },
+            { name = "Glitter", goal = 25 },
+        }
+    },
+
+    ["Crimson Guard"] = {
+        show = false,
+        emoji = "🩸🛡️",
+        requirements = {
+            { name = "Honey", goal = 200000000 },
+            { name = "Red Extract", goal = 100 },
+            { name = "Stinger", goal = 100 },
+            { name = "Oil", goal = 50 },
+            { name = "Glitter", goal = 25 },
+        }
+    },
+
+    ["Helmet"] = {
+        show = false,
+        emoji = "🪖",
+        requirements = {
+            { name = "Honey", goal = 30000 },
+            { name = "Pineapple", goal = 5 },
+            { name = "Moon Charm", goal = 1 },
+        }
     },
 
     ["Propeller Hat"] = {
-        category = "Hats",
         show = false,
-        emoji = "🧢",
-        requirements = {}
+        emoji = "🌀",
+        requirements = {
+            { name = "Honey", goal = 2500000 },
+            { name = "Gumdrops", goal = 25 },
+            { name = "Pineapple", goal = 100 },
+            { name = "Moon Charm", goal = 5 },
+        }
     },
 
     ["Beekeeper's Mask"] = {
-        category = "Hats",
         show = false,
         emoji = "🐝",
-        requirements = {}
+        requirements = {
+            { name = "Honey", goal = 20000000 },
+            { name = "Enzymes", goal = 5 },
+            { name = "Glue", goal = 3 },
+            { name = "Glitter", goal = 1 },
+        }
     },
 
     ["Honey Mask"] = {
-        category = "Hats",
         show = false,
         emoji = "🍯",
         requirements = {
-            { name = "Honey", goal = 500000000 },
-            { name = "Oil", goal = 25 },
-            { name = "Enzymes", goal = 50 },
-            { name = "Glue", goal = 25 },
+            { name = "Honey", goal = 100000000 },
+            { name = "Treat", goal = 9999 },
+            { name = "Oil", goal = 50 },
+            { name = "Enzymes", goal = 25 },
+            { name = "Gold Egg", goal = 5 },
         }
     },
 
     ["Fire Mask"] = {
-        category = "Hats",
         show = false,
         emoji = "🔥",
         requirements = {
-            { name = "Honey", goal = 1000000000 },
+            { name = "Honey", goal = 100000000 },
+            { name = "Strawberry", goal = 500 },
             { name = "Red Extract", goal = 50 },
-            { name = "Oil", goal = 25 },
             { name = "Enzymes", goal = 25 },
-            { name = "Glue", goal = 25 },
+            { name = "Glue", goal = 15 },
         }
     },
 
     ["Bubble Mask"] = {
-        category = "Hats",
         show = false,
         emoji = "💧",
         requirements = {
-            { name = "Honey", goal = 1000000000 },
+            { name = "Honey", goal = 100000000 },
+            { name = "Blueberry", goal = 500 },
             { name = "Blue Extract", goal = 50 },
             { name = "Oil", goal = 25 },
-            { name = "Enzymes", goal = 25 },
-            { name = "Glue", goal = 25 },
+            { name = "Glitter", goal = 15 },
+        }
+    },
+
+    ["Gummy Mask"] = {
+        show = false,
+        emoji = "🍬",
+        requirements = {
+            { name = "Honey", goal = 5000000000 },
+            { name = "Glue", goal = 250 },
+            { name = "Enzymes", goal = 100 },
+            { name = "Oil", goal = 100 },
+            { name = "Glitter", goal = 100 },
+            { name = "Satisfying Vial", goal = 1 },
         }
     },
 
     ["Demon Mask"] = {
-        category = "Hats",
         show = false,
         emoji = "😈",
         requirements = {
             { name = "Honey", goal = 5000000000 },
+            { name = "Stinger", goal = 500 },
             { name = "Red Extract", goal = 250 },
-            { name = "Glue", goal = 250 },
-            { name = "Oil", goal = 100 },
-            { name = "Enzymes", goal = 100 },
+            { name = "Enzymes", goal = 150 },
+            { name = "Glue", goal = 100 },
+            { name = "Invigorating Vial", goal = 1 },
         }
     },
 
     ["Diamond Mask"] = {
-        category = "Hats",
         show = false,
         emoji = "💎",
         requirements = {
             { name = "Honey", goal = 5000000000 },
             { name = "Blue Extract", goal = 250 },
-            { name = "Glue", goal = 250 },
-            { name = "Oil", goal = 100 },
-            { name = "Enzymes", goal = 100 },
+            { name = "Oil", goal = 150 },
+            { name = "Glitter", goal = 100 },
+            { name = "Diamond Egg", goal = 5 },
+            { name = "Comforting Vial", goal = 1 },
         }
     },
 
-    ["Gummy Mask"] = {
-        category = "Hats",
+	    ["Belt Pocket"] = {
         show = false,
-        emoji = "🍭",
+        emoji = "🧷",
         requirements = {
-            { name = "Honey", goal = 5000000000 },
-            { name = "Glue", goal = 250 },
-            { name = "Oil", goal = 100 },
-            { name = "Enzymes", goal = 100 },
-            { name = "Gumdrops", goal = 1000 },
+            { name = "Honey", goal = 14000 },
+            { name = "Sunflower Seed", goal = 10 },
         }
-    },
-
-	["Belt Pocket"] = {
-        category = "Belts",
-        show = false,
-        emoji = "🎗️",
-        requirements = {}
     },
 
     ["Belt Bag"] = {
-        category = "Belts",
         show = false,
         emoji = "🎒",
-        requirements = {}
+        requirements = {
+            { name = "Honey", goal = 440000 },
+            { name = "Pineapple", goal = 50 },
+            { name = "Sunflower Seed", goal = 50 },
+            { name = "Stinger", goal = 3 },
+        }
     },
 
     ["Mondo Belt Bag"] = {
-        category = "Belts",
         show = false,
         emoji = "👜",
-        requirements = {}
+        requirements = {
+            { name = "Honey", goal = 12400000 },
+            { name = "Soft Wax", goal = 1 },
+            { name = "Pineapple", goal = 150 },
+            { name = "Sunflower Seed", goal = 150 },
+            { name = "Stinger", goal = 10 },
+        }
     },
 
     ["Honeycomb Belt"] = {
-        category = "Belts",
         show = false,
         emoji = "🍯",
-        requirements = {}
+        requirements = {
+            { name = "Honey", goal = 75000000 },
+            { name = "Enzymes", goal = 50 },
+            { name = "Glue", goal = 50 },
+            { name = "Oil", goal = 25 },
+        }
     },
 
     ["Petal Belt"] = {
-        category = "Belts",
         show = false,
-        emoji = "🧣",
+        emoji = "🌸",
         requirements = {
-            { name = "Honey",        goal = 1500000000 },
+            { name = "Honey", goal = 15000000000 },
+            { name = "Star Jelly", goal = 25 },
+            { name = "Glitter", goal = 50 },
+            { name = "Glue", goal = 100 },
             { name = "Spirit Petal", goal = 1 },
-            { name = "Tropical Drink", goal = 10 },
-            { name = "Swirled Wax",  goal = 100 },
-            { name = "Glitter",      goal = 75 },
-            { name = "Enzymes",      goal = 50 },
         }
     },
 
     ["Coconut Belt"] = {
-        category = "Belts",
         show = false,
         emoji = "🥥",
         requirements = {
-            { name = "Honey",    goal = 2000000000 },
-            { name = "Coconut",  goal = 150 },
-            { name = "Oil",      goal = 100 },
-            { name = "Glue",     goal = 75 },
-            { name = "Tropical Drink", goal = 10 },
+            { name = "Honey", goal = 7500000000000 },
+            { name = "Coconut", goal = 500 },
+            { name = "Tropical Drink", goal = 1500 },
+            { name = "Purple Potion", goal = 200 },
+            { name = "Hard Wax", goal = 200 },
+            { name = "Turpentine", goal = 3 },
+            { name = "Refreshing Vial", goal = 3 },
         }
     },
 
 	["Basic Boots"] = {
-        category = "Boots",
         show = false,
-        emoji = "👟",
-        requirements = {}
+        emoji = "👞",
+        requirements = {
+            { name = "Honey", goal = 4400 },
+            { name = "Sunflower Seed", goal = 3 },
+            { name = "Blueberry", goal = 3 },
+        }
     },
 
     ["Hiking Boots"] = {
-        category = "Boots",
         show = false,
         emoji = "🥾",
-        requirements = {}
+        requirements = {
+            { name = "Honey", goal = 2200000 },
+            { name = "Blueberry", goal = 50 },
+            { name = "Strawberry", goal = 50 },
+        }
     },
 
     ["Beekeeper's Boots"] = {
-        category = "Boots",
         show = false,
-        emoji = "🐝",
-        requirements = {}
+        emoji = "🐝👢",
+        requirements = {
+            { name = "Honey", goal = 15000000 },
+            { name = "Oil", goal = 5 },
+            { name = "Red Extract", goal = 3 },
+            { name = "Blue Extract", goal = 3 },
+        }
     },
 
     ["Coconut Clogs"] = {
-        category = "Boots",
         show = false,
-        emoji = "🥥",
+        emoji = "🥥👟",
         requirements = {
-            { name = "Honey",    goal = 1000000000 },
-            { name = "Coconut",  goal = 150 },
-            { name = "Oil",      goal = 50 },
-            { name = "Glue",     goal = 75 },
-            { name = "Tropical Drink", goal = 10 },
+            { name = "Honey", goal = 10000000000 },
+            { name = "Coconut", goal = 150 },
+            { name = "Tropical Drink", goal = 50 },
+            { name = "Glue", goal = 100 },
+            { name = "Oil", goal = 100 },
+            { name = "Refreshing Vial", goal = 1 },
         }
     },
 
     ["Gummy Boots"] = {
-        category = "Boots",
         show = false,
-        emoji = "🍬",
+        emoji = "🍬👟",
         requirements = {
-            { name = "Honey",    goal = 7500000000 },
-            { name = "Glue",     goal = 500 },
-            { name = "Enzymes",  goal = 250 },
-            { name = "Oil",      goal = 250 },
-            { name = "Gumdrops", goal = 2500 },
+            { name = "Honey", goal = 100000000000 },
+            { name = "Glue", goal = 500 },
+            { name = "Glitter", goal = 250 },
+            { name = "Red Extract", goal = 250 },
+            { name = "Blue Extract", goal = 250 },
+            { name = "Satisfying Vial", goal = 1 },
+            { name = "Motivating Vial", goal = 1 },
         }
     },
 
-	["Plastic Planter"] = {
-        category = "Planters",
+["Planter"] = {
         show = false,
         emoji = "🪴",
-        requirements = {}
+        requirements = {
+            { name = "Honey", goal = 750000 },
+            { name = "Magic Bean", goal = 3 },
+            { name = "Soft Wax", goal = 1 },
+        }
     },
 
     ["Candy Planter"] = {
-        category = "Planters",
         show = false,
-        emoji = "🍭",
-        requirements = {}
-    },
-
-    ["Red Clay Planter"] = {
-        category = "Planters",
-        show = false,
-        emoji = "🧱",
-        requirements = {}
-    },
-
-    ["Blue Clay Planter"] = {
-        category = "Planters",
-        show = false,
-        emoji = "🧱",
-        requirements = {}
+        emoji = "🍬🪴",
+        requirements = {
+            { name = "Honey", goal = 5000000 },
+            { name = "Magic Bean", goal = 5 },
+            { name = "Gumdrops", goal = 30 },
+            { name = "Jelly Bean", goal = 3 },
+            { name = "Soft Wax", goal = 5 },
+        }
     },
 
     ["Tacky Planter"] = {
-        category = "Planters",
         show = false,
-        emoji = "🩹",
-        requirements = {}
+        emoji = "🧫🪴",
+        requirements = {
+            { name = "Honey", goal = 50000000 },
+            { name = "Magic Bean", goal = 10 },
+            { name = "Purple Potion", goal = 1 },
+            { name = "Hard Wax", goal = 5 },
+            { name = "Soft Wax", goal = 20 },
+        }
     },
 
     ["Pesticide Planter"] = {
-        category = "Planters",
         show = false,
-        emoji = "🧴",
-        requirements = {}
+        emoji = "☠️🪴",
+        requirements = {
+            { name = "Honey", goal = 750000000 },
+            { name = "Magic Bean", goal = 25 },
+            { name = "Neonberry", goal = 25 },
+            { name = "Glue", goal = 15 },
+            { name = "Caustic Wax", goal = 3 },
+            { name = "Hard Wax", goal = 10 },
+        }
     },
 
-    ["Petal Planter"] = {
-        category = "Planters",
+    ["Blue Clay Planter"] = {
         show = false,
-        emoji = "🌸",
+        emoji = "🔵🪴",
         requirements = {
-            { name = "Honey",        goal = 5000000000 },
-            { name = "Spirit Petal", goal = 1 },
-            { name = "Swirled Wax",  goal = 100 },
-            { name = "Tropical Drink", goal = 25 },
+            { name = "Honey", goal = 10000000 },
+            { name = "Magic Bean", goal = 5 },
+            { name = "Blue Extract", goal = 15 },
+            { name = "Soft Wax", goal = 20 },
+        }
+    },
+
+    ["Red Clay Planter"] = {
+        show = false,
+        emoji = "🔴🪴",
+        requirements = {
+            { name = "Honey", goal = 10000000 },
+            { name = "Magic Bean", goal = 5 },
+            { name = "Red Extract", goal = 15 },
+            { name = "Soft Wax", goal = 20 },
         }
     },
 
     ["Heat-Treated Planter"] = {
-        category = "Planters",
         show = false,
-        emoji = "🔥",
-        requirements = {}
+        emoji = "🔥🪴",
+        requirements = {
+            { name = "Honey", goal = 750000000000 },
+            { name = "Magic Bean", goal = 75 },
+            { name = "Red Extract", goal = 750 },
+            { name = "Hard Wax", goal = 150 },
+            { name = "Swirled Wax", goal = 25 },
+            { name = "Turpentine", goal = 1 },
+        }
     },
 
     ["Hydroponic Planter"] = {
-        category = "Planters",
         show = false,
-        emoji = "💧",
-        requirements = {}
+        emoji = "💧🪴",
+        requirements = {
+            { name = "Honey", goal = 750000000000 },
+            { name = "Magic Bean", goal = 75 },
+            { name = "Blue Extract", goal = 750 },
+            { name = "Soft Wax", goal = 500 },
+            { name = "Caustic Wax", goal = 25 },
+            { name = "Turpentine", goal = 1 },
+        }
+    },
+
+    ["Petal Planter"] = {
+        show = false,
+        emoji = "🌸🪴",
+        requirements = {
+            { name = "Honey", goal = 5000000000000 },
+            { name = "Magic Bean", goal = 100 },
+            { name = "Glitter", goal = 100 },
+            { name = "Soft Wax", goal = 250 },
+            { name = "Swirled Wax", goal = 50 },
+            { name = "Super Smoothie", goal = 25 },
+        }
     },
 
     ["Planter Of Plenty"] = {
-        category = "Planters",
         show = false,
-        emoji = "🌾",
+        emoji = "💎🪴",
         requirements = {
-            { name = "Honey",        goal = 25000000000 },
-            { name = "Swirled Wax",  goal = 500 },
-            { name = "Caustic Wax",  goal = 50 },
-            { name = "Tropical Drink", goal = 50 },
+            { name = "Honey", goal = 100000000000000 },
+            { name = "Magic Bean", goal = 500 },
+            { name = "Super Smoothie", goal = 100 },
+            { name = "Swirled Wax", goal = 100 },
+            { name = "Caustic Wax", goal = 100 },
+            { name = "Turpentine", goal = 25 },
         }
     },
 	
@@ -1360,57 +1524,116 @@ local function buildQuestFrames()
 	return questFrames
 end
 
--- 🧰 ฟังก์ชันสร้าง Frame ของ ToolList (เป้าหมายฟิก)
+-- 🧰 ฟังก์ชันสร้าง Frame ของ ToolList (จัดหมวดหมู่)
 local function buildToolFrames()
-	local toolFrames, tools = {}, {}
+	local toolFrames = {}
+	local categorized = {}
+
+	-- 🗂️ จัดกลุ่มตามหมวดหมู่ (category)
 	for name, data in pairs(ToolList) do
-		table.insert(tools, { name = name, data = data })
-	end
-	table.sort(tools, function(a, b) return tostring(a.name):lower() < tostring(b.name):lower() end)
-
-	for i, tool in ipairs(tools) do
-		local frame = Instance.new("Frame")
-		frame.Size = UDim2.new(1, 0, 0, itemHeight)
-		frame.BackgroundColor3 = (i % 2 == 0)
-			and Color3.fromRGB(26, 26, 26)
-			or Color3.fromRGB(18, 18, 18)
-		frame.BorderSizePixel = 0
-
-		local label = Instance.new("TextLabel", frame)
-		label.Size = UDim2.new(0.7, -10, 1, 0)
-		label.Position = UDim2.new(0, 10, 0, 0)
-		label.BackgroundTransparency = 1
-		label.Text = string.format("%s %s", tool.data.emoji or "🧰", tool.name)
-		label.TextColor3 = Color3.fromRGB(230, 220, 200)
-		label.Font = Enum.Font.Gotham
-		label.TextSize = 12
-		label.TextXAlignment = Enum.TextXAlignment.Left
-
-		-- 🔘 ปุ่ม Show / Hide
-		local toggle = Instance.new("TextButton", frame)
-		toggle.Size = UDim2.new(0.3, -8, 1, -8)
-		toggle.Position = UDim2.new(0.7, 8, 0, 4)
-		toggle.Text = tool.data.show and "Show" or "Hide"
-		toggle.Font = Enum.Font.Gotham
-		toggle.TextSize = 12
-		toggle.BorderSizePixel = 0
-		local function updateColor()
-			if tool.data.show then
-				toggle.BackgroundColor3 = Color3.fromRGB(40, 90, 40)
-			else
-				toggle.BackgroundColor3 = Color3.fromRGB(90, 40, 40)
-			end
+		local cat = data.category or "Tools"
+		if not categorized[cat] then
+			categorized[cat] = {}
 		end
-		updateColor()
-		toggle.MouseButton1Click:Connect(function()
-			tool.data.show = not tool.data.show
-			toggle.Text = tool.data.show and "Show" or "Hide"
-			updateColor()
-			saveConfig()
+		table.insert(categorized[cat], { name = name, data = data })
+	end
+
+	-- 🎨 กำหนด emoji ของแต่ละหมวด
+	local categoryIcons = {
+		["Tools"] = "⚒️",
+		["Containers"] = "🥥",
+		["Guards"] = "🛡️",
+		["Hats"] = "🎩",
+		["Belts"] = "🎒",
+		["Boots"] = "👢",
+		["Planters"] = "🌱"
+	}
+
+	local cozyTheme = {
+		bg_dark = Color3.fromRGB(60, 42, 33),
+		bg_mid = Color3.fromRGB(75, 50, 40),
+		text_main = Color3.fromRGB(255, 240, 210),
+		text_sub = Color3.fromRGB(230, 210, 180),
+		accent = Color3.fromRGB(200, 160, 110),
+	}
+
+	local itemHeight = 26
+	local yOffset = 0
+
+	-- 🧩 วนสร้าง UI ของแต่ละหมวด
+	for category, tools in pairs(categorized) do
+		-- 🔹 Header ของหมวด
+		local header = Instance.new("TextLabel")
+		header.Size = UDim2.new(1, -8, 0, 28)
+		header.Position = UDim2.new(0, 4, 0, yOffset)
+		header.BackgroundColor3 = cozyTheme.bg_mid
+		header.BorderSizePixel = 0
+		header.TextColor3 = cozyTheme.text_main
+		header.Font = Enum.Font.GothamBold
+		header.TextSize = 13
+		header.TextXAlignment = Enum.TextXAlignment.Left
+		header.Text = string.format("%s  %s", categoryIcons[category] or "📦", category)
+		table.insert(toolFrames, header)
+
+		yOffset = yOffset + 30
+
+		-- 🔧 Tool แต่ละชิ้นในหมวด
+		table.sort(tools, function(a, b)
+			return tostring(a.name):lower() < tostring(b.name):lower()
 		end)
 
-		table.insert(toolFrames, frame)
+		for i, tool in ipairs(tools) do
+			local frame = Instance.new("Frame")
+			frame.Size = UDim2.new(1, -8, 0, itemHeight)
+			frame.Position = UDim2.new(0, 4, 0, yOffset)
+			frame.BackgroundColor3 = (i % 2 == 0)
+				and Color3.fromRGB(26, 26, 26)
+				or Color3.fromRGB(18, 18, 18)
+			frame.BorderSizePixel = 0
+
+			local label = Instance.new("TextLabel", frame)
+			label.Size = UDim2.new(0.7, -10, 1, 0)
+			label.Position = UDim2.new(0, 10, 0, 0)
+			label.BackgroundTransparency = 1
+			label.Text = string.format("%s %s", tool.data.emoji or "🧰", tool.name)
+			label.TextColor3 = Color3.fromRGB(230, 220, 200)
+			label.Font = Enum.Font.Gotham
+			label.TextSize = 12
+			label.TextXAlignment = Enum.TextXAlignment.Left
+
+			local toggle = Instance.new("TextButton", frame)
+			toggle.Size = UDim2.new(0.3, -8, 1, -8)
+			toggle.Position = UDim2.new(0.7, 8, 0, 4)
+			toggle.Text = tool.data.show and "Show" or "Hide"
+			toggle.Font = Enum.Font.Gotham
+			toggle.TextSize = 12
+			toggle.BorderSizePixel = 0
+
+			local function updateColor()
+				if tool.data.show then
+					toggle.BackgroundColor3 = Color3.fromRGB(40, 90, 40)
+				else
+					toggle.BackgroundColor3 = Color3.fromRGB(90, 40, 40)
+				end
+			end
+
+			updateColor()
+
+			toggle.MouseButton1Click:Connect(function()
+				tool.data.show = not tool.data.show
+				toggle.Text = tool.data.show and "Show" or "Hide"
+				updateColor()
+				saveConfig()
+			end)
+
+			table.insert(toolFrames, frame)
+			yOffset = yOffset + itemHeight
+		end
+
+		-- เว้นช่องว่างแต่ละหมวด
+		yOffset = yOffset + 10
 	end
+
 	return toolFrames
 end
 
@@ -2938,6 +3161,8 @@ local function sendIngredientSummaryWebhook(totalExtraFarm)
 
 	local totalNeed, totalHave, totalMissing = 0, 0, 0
 	local notCompleteCount = 0
+	config.ItemLastSummaryHave = config.ItemLastSummaryHave or {}
+	local previousData = config.ItemLastSummaryHave
 
 	for name, data in pairs(TotalSummary) do
 		local have = safeNumber(data.have or 0)
@@ -2945,21 +3170,37 @@ local function sendIngredientSummaryWebhook(totalExtraFarm)
 		local missing = math.max(0, need - have)
 		if need == 0 then continue end
 
+		-- 💬 ตรวจการเปลี่ยนแปลงจากรอบก่อน
+		local prevHave = safeNumber(previousData[name] or 0)
+		local diff = have - prevHave
+		local changeEmoji = ""
+		if diff > 0 then
+			if diff / math.max(1, prevHave) >= 0.1 then
+				changeEmoji = " 🔺" -- เพิ่มขึ้นมากกว่า 10%
+			else
+				changeEmoji = " ⬆️" -- เพิ่มขึ้นเล็กน้อย
+			end
+		end
+
 		-- แสดงเฉพาะที่ยังขาด
 		if missing > 0 then
 			notCompleteCount += 1
 			local emoji = (Showlist[name] and Showlist[name].emoji) or "📦"
-			table.insert(lines, string.format("%s %s — %s / %s (+%s)",
+			table.insert(lines, string.format("%s %s — %s / %s (+%s)%s",
 				emoji,
 				name,
 				shorten(have),
 				shorten(need),
-				shorten(missing)
+				shorten(missing),
+				changeEmoji
 			))
 			totalHave += have
 			totalNeed += need
 			totalMissing += missing
 		end
+
+		-- 🧾 บันทึกค่าล่าสุดไว้ใช้เทียบรอบหน้า
+		previousData[name] = have
 	end
 
 	if notCompleteCount == 0 then
@@ -2996,10 +3237,10 @@ end
 	if saveWebhookConfig then pcall(saveWebhookConfig) end
 	updateCraftTreeCounts()
 
-	-- ✅ ตรวจว่าใน showlist มีของที่เป็นสูตรคราฟ + ตั้งค่า ExtraFarm ไว้ไหม
+	-- ✅ ตรวจว่าใน showlist มีของที่เป็นสูตรคราฟไหม
 	local hasCraftItem = false
 	for name, showData in pairs(Showlist) do
-		if showData.show and CraftRecipes[name] and safeNumber(showData.extrafarm or 0) > 0 then
+		if showData.show and CraftRecipes[name] then
 			hasCraftItem = true
 			break
 		end
@@ -3202,80 +3443,95 @@ local function questtab_webhook_service()
 end
 
 
--- 🧰 Tool Craft Report — Craft + ToolList Integrated Version
+------------------------------------------------------------
+-- 🧰 Tool Craft Report — EggTab-Style (Per Tool + Recursive Children + Global Summary)
 function tooltab_webhook_service()
 	if not (config.Flags and config.Flags.Tool) then return end
-	print("🧰 [ToolTab] Starting Craft Tool Report...")
+	print("🧰 [ToolTab] เริ่มเปิดแท็บ Tool ...")
 
 	------------------------------------------------------------
-	-- 🍯 STEP 1: Sync Honey
+	-- 🔓 STEP 0: เปิดแท็บ Item (Eggs Tab) เพื่ออ่านข้อมูลจริง
 	------------------------------------------------------------
-	pcall(function()
-		local player = game.Players.LocalPlayer
-		local stats = player:FindFirstChild("CoreStats")
-		if not stats then return end
-		config.HoneyCurrent = stats:FindFirstChild("Honey") and stats.Honey.Value or 0
-		print("🍯 [ToolTab] Honey synced:", config.HoneyCurrent)
-	end)
+	opentab("Eggs Tab")
+	task.wait(2.5)
 
-	------------------------------------------------------------
-	-- 📦 STEP 2: Refresh Item Data via EggTab
-	------------------------------------------------------------
-	print("📂 [ToolTab] Refreshing item data via EggTab...")
-	local ok, err = pcall(function()
-		opentab("Eggs Tab")
-		task.wait(1.5)
-		eggtab_update_items()
-	end)
-	if not ok then
-		warn("⚠️ [ToolTab] EggTab refresh failed:", err)
+	local Players = game:GetService("Players")
+	local LocalPlayer = Players.LocalPlayer
+	local maintofind, tries, delay = nil, 0, 0.6
+
+	while not maintofind and tries < 25 do
+		tries += 1
+		local pg = LocalPlayer and LocalPlayer:FindFirstChild("PlayerGui")
+		local content = pg
+			and pg:FindFirstChild("ScreenGui")
+			and pg.ScreenGui:FindFirstChild("Menus")
+			and pg.ScreenGui.Menus:FindFirstChild("Children")
+			and pg.ScreenGui.Menus.Children:FindFirstChild("Eggs")
+			and pg.ScreenGui.Menus.Children.Eggs:FindFirstChild("Content")
+
+		if content and #content:GetChildren() > 0 then
+			maintofind = content:FindFirstChild("EggRows")
+			if maintofind and #maintofind:GetChildren() > 0 then
+				break
+			end
+		end
+		task.wait(delay)
+	end
+
+	if not maintofind then
+		warn("❌ [ToolTab] ไม่พบ EggRows - ยกเลิกการส่งข้อมูล")
+		return
 	end
 
 	------------------------------------------------------------
-	-- 🕓 STEP 3: Wait for EggTab to update
+	-- 🔢 Utilities (เหมือน EggTab)
 	------------------------------------------------------------
-	local waited, updated = 0, false
-	print("⏳ [ToolTab] Waiting for EggTab to update item data...")
+	local function safeNumber(value)
+		if value == nil then return 0 end
+		local str = tostring(value):gsub(",", ""):gsub("%s+", ""):gsub("[^%d%.%-]", "")
+		if str == "" or str == "-" or str == "." then return 0 end
+		return tonumber(str) or 0
+	end
 
-	for i = 1, 30 do
-		task.wait(0.5)
-		waited += 0.5
-		if config.ItemCurrent and next(config.ItemCurrent) then
-			updated = true
-			break
+	local function formatNumber(num)
+		num = math.floor(tonumber(num) or 0)
+		local s = tostring(num)
+		while true do
+			local new, k = s:gsub("^(-?%d+)(%d%d%d)", "%1,%2")
+			s = new
+			if k == 0 then break end
+		end
+		return s
+	end
+
+	local function safeSplitNumber(text)
+		if not text or text == "" then return 0, 0 end
+		text = tostring(text):gsub(",", ""):gsub("%s+", "")
+		local a, b = text:match("^(%d+)%s*/%s*(%d+)$")
+		if a and b then
+			return safeNumber(a), safeNumber(b)
+		else
+			return safeNumber(text), 0
 		end
 	end
 
-	if updated then
-		print(string.format("✅ [ToolTab] Item data synced after %.1fs", waited))
-	else
-		warn("⏰ [ToolTab] Timeout — EggTab didn't update item data.")
+	local function cleanItemName(name)
+		if not name then return "" end
+		name = tostring(name)
+		name = name:gsub("[%z\1-\31]", "")
+		name = name:gsub("[%s             　]", " ")
+		name = name:gsub("%s+", " ")
+		name = name:gsub("^%s+", "")
+		name = name:gsub("%s+$", "")
+		return name
 	end
 
-	------------------------------------------------------------
-	-- 🧪 STEP 4: Define Craft Recipes
-	------------------------------------------------------------
-
-	------------------------------------------------------------
-	-- 🔧 STEP 5: ToolList (แค่บอกว่าจะโชว์อันไหน + emoji)
-	------------------------------------------------------------
-	local ToolList = {
-		["Enzymes"] = { show = true, emoji = "🧪" },
-		["Glitter"] = { show = true, emoji = "✨" },
-		["Star Jelly"] = { show = true, emoji = "🌟" },
-		["Glue"] = { show = true, emoji = "🧉" },
-		["Special Tool"] = { show = true, emoji = "🧰" },
-	}
-
-	------------------------------------------------------------
-	-- ⚙️ STEP 6: Helper Functions
-	------------------------------------------------------------
-	local function shortNum(num)
-		local n = tonumber(num) or 0
-		if n >= 1e9 then return string.format("%.1fB", n / 1e9):gsub("%.0B", "B")
-		elseif n >= 1e6 then return string.format("%.1fM", n / 1e6):gsub("%.0M", "M")
-		elseif n >= 1e3 then return string.format("%.1fK", n / 1e3):gsub("%.0K", "K")
-		else return tostring(n) end
+	local function shorten(num)
+		num = tonumber(num) or 0
+		if num >= 1e9 then return (string.format("%.1fB", num / 1e9):gsub("%.0B","B"))
+		elseif num >= 1e6 then return (string.format("%.1fM", num / 1e6):gsub("%.0M","M"))
+		elseif num >= 1e3 then return (string.format("%.1fk", num / 1e3):gsub("%.0k","k"))
+		else return tostring(math.floor(num)) end
 	end
 
 	local function bar10(pct)
@@ -3283,169 +3539,319 @@ function tooltab_webhook_service()
 		return string.rep("🟩", filled) .. string.rep("⬛", 10 - filled)
 	end
 
-	local function getEmoji(name)
-		if ToolList[name] and ToolList[name].emoji then
-			return ToolList[name].emoji
-		elseif Showlist and Showlist[name] and Showlist[name].emoji then
-			return Showlist[name].emoji
-		else
-			return "•"
-		end
-	end
-
-	------------------------------------------------------------
-	-- 🧬 STEP 7: Craft Calculation (array-based)
-	------------------------------------------------------------
-	local function simulateCraft(haveData)
-		local newHave = table.clone(haveData or {})
-		local craftLog = {}
-		local craftedSomething = true
-
-		while craftedSomething do
-			craftedSomething = false
-			for itemName, recipe in pairs(CraftRecipes) do
-				local canMake = math.huge
-				for _, r in ipairs(recipe) do
-					local have = newHave[r.name] or 0
-					canMake = math.min(canMake, math.floor(have / r.goal))
-				end
-
-				if canMake > 0 and canMake < math.huge then
-					for _, r in ipairs(recipe) do
-						newHave[r.name] -= (r.goal * canMake)
-					end
-					newHave[itemName] = (newHave[itemName] or 0) + canMake
-					table.insert(craftLog, string.format("🧪 Crafted %s +%d", itemName, canMake))
-					craftedSomething = true
-				end
+	local function sendLongWebhook(url, title, color, text)
+		local limit = 1800
+		while #text > 0 do
+			local chunk = text:sub(1, limit)
+			local lastLine = chunk:match(".*\n")
+			if lastLine and #chunk < #text then
+				chunk = lastLine
 			end
-		end
-		return newHave, craftLog
-	end
-
-	local function getTotalMaterialNeeded(itemName, quantity)
-		local recipe = CraftRecipes[itemName]
-		if not recipe then return {[itemName] = quantity} end
-
-		local total = {}
-		for _, r in ipairs(recipe) do
-			local need = r.goal * quantity
-			if CraftRecipes[r.name] then
-				local sub = getTotalMaterialNeeded(r.name, need)
-				for k, v in pairs(sub) do
-					total[k] = (total[k] or 0) + v
-				end
-			else
-				total[r.name] = (total[r.name] or 0) + need
-			end
-		end
-		return total
-	end
-
-	local function buildCraftRequirement(itemName, haveData)
-		local totalNeed = getTotalMaterialNeeded(itemName, 1)
-		local result = {}
-		for mat, needQty in pairs(totalNeed) do
-			local have = haveData[mat] or 0
-			local diff = math.max(needQty - have, 0)
-			table.insert(result, {
-				name = mat,
-				have = have,
-				need = needQty,
-				diff = diff
+			sendDiscordEmbed(url or config.WebhookUrl, {
+				title = title,
+				color = color,
+				description = chunk,
+				footer = { text = "📊 Bee Swarm Automation" }
 			})
-		end
-		table.sort(result, function(a, b) return a.name < b.name end)
-		return result
-	end
-
-	local function sendWebhookSafe(payload)
-		local tries, success = 0, false
-		while tries < 3 and not success do
-			tries += 1
-			local ok, err = pcall(function()
-				sendDiscordEmbed(config.WebhookUrl, payload)
-			end)
-			if ok then
-				success = true
-				print(string.format("✅ [Webhook] Sent successfully on attempt #%d", tries))
-			else
-				warn(string.format("⚠️ [Webhook] Attempt #%d failed: %s", tries, tostring(err)))
-				task.wait(2)
-			end
-		end
-		return success
-	end
-
-	------------------------------------------------------------
-	-- 📊 STEP 8: Generate & Send Reports (auto-link CraftRecipes)
-	------------------------------------------------------------
-	for toolName, data in pairs(ToolList) do
-		if data.show and CraftRecipes[toolName] then
-			local haveData = table.clone(config.ItemCurrent or {})
-			haveData["Honey"] = config.HoneyCurrent or 0
-
-			local updatedHave, craftLog = simulateCraft(haveData)
-			local requirements = buildCraftRequirement(toolName, updatedHave)
-
-			local lines, totalPct, totalReq = {}, 0, 0
-			local readyToCraft = true
-
-			for _, req in ipairs(requirements) do
-				totalReq += 1
-				local pct = (req.need > 0) and math.min(req.have / req.need, 1) or 1
-				totalPct += pct
-				local mark = (req.diff <= 0) and "✅ Done" or string.format("(%s)", shortNum(req.diff))
-				local emoji = getEmoji(req.name)
-				table.insert(lines, string.format("%s **%s** — `%s / %s` %s",
-					emoji, req.name, shortNum(req.have), shortNum(req.need), mark))
-				if req.diff > 0 then readyToCraft = false end
-			end
-
-			local progress = math.floor((totalPct / totalReq) * 100)
-			local bar = bar10(progress)
-			local logText = (#craftLog > 0) and ("\n🧾 **Auto-Crafted:**\n" .. table.concat(craftLog, "\n")) or ""
-			local readyText = readyToCraft and ("\n✅ **Ready to Craft: " .. toolName .. "!**") or ""
-
-			local desc = table.concat({
-				string.format("%s **Craft Report — %s**", data.emoji or "🧰", toolName),
-				"───────────────────────────────",
-				table.concat(lines, "\n"),
-				logText,
-				"",
-				string.format("%s **%d%% Complete**", bar, progress),
-				readyText,
-				"───────────────────────────────",
-				"`🐝 Bee Swarm Auto Reporter`",
-				"`📅 " .. os.date("%d/%m/%Y ⏰ %H:%M:%S") .. "`"
-			}, "\n")
-
-			local payload = {
-				title = "🧰 Craft Status Report",
-				color = readyToCraft and 0x00FF00 or 0xC9A875,
-				description = desc,
-			}
-
-			local sent = sendWebhookSafe(payload)
-			if not sent then
-				warn("❌ [ToolTab] Failed to send webhook after retries.")
-			end
+			text = text:sub(#chunk + 1)
 			task.wait(1)
 		end
 	end
 
 	------------------------------------------------------------
-	-- 🔒 STEP 9: Close EggTab after webhook
+	-- 🧾 STEP 1: Sync ItemCurrent จาก GUI
 	------------------------------------------------------------
-	task.wait(1.5)
+	config.ItemCurrent = {}
+	for _, row in ipairs(maintofind:GetChildren()) do
+		local n = row:FindFirstChild("TypeName")
+		local s = row:FindFirstChild("EggSlot")
+		local c = s and s:FindFirstChild("Count")
+		if n and c then
+			local name = cleanItemName(n.Text)
+			local cur, _ = safeSplitNumber(c.Text)
+			config.ItemCurrent[name] = cur
+		end
+	end
+	print("✅ [ToolTab] อัปเดตข้อมูลในกระเป๋าสำเร็จ")
+
+	------------------------------------------------------------
+	-- 🍯 STEP 2: Sync Honey
+	------------------------------------------------------------
 	pcall(function()
-		closetab("Eggs Tab")
-		print("🔒 [ToolTab] Closed Eggs Tab safely after webhook sent.")
+		local stats = LocalPlayer:FindFirstChild("CoreStats")
+		if stats then
+			config.HoneyCurrent = stats:FindFirstChild("Honey") and stats.Honey.Value or 0
+			print("🍯 [ToolTab] Honey synced:", config.HoneyCurrent)
+		end
 	end)
 
-	print("✅ [ToolTab] Craft Report finished successfully.")
-end
+	------------------------------------------------------------
+	-- 🧩 STEP 3: CraftRecipes
+	------------------------------------------------------------
+		local CraftRecipes = {
+		["Blue Extract"] = {
+			{ name = "Blueberry", goal = 25 },
+			{ name = "Royal Jelly", goal = 10 },
+		},
+		["Red Extract"] = {
+			{ name = "Strawberry", goal = 50 },
+			{ name = "Royal Jelly", goal = 10 },
+		},
+		["Enzymes"] = {
+			{ name = "Pineapple", goal = 50 },
+			{ name = "Royal Jelly", goal = 10 },
+		},
+		["Oil"] = {
+			{ name = "Sunflower Seed", goal = 50 },
+			{ name = "Royal Jelly", goal = 10 },
+		},
+		["Glue"] = {
+			{ name = "Gumdrops", goal = 50 },
+			{ name = "Royal Jelly", goal = 10 },
+		},
+		["Gumdrops"] = {
+			{ name = "Strawberry", goal = 3 },
+			{ name = "Pineapple", goal = 3 },
+			{ name = "Blueberry", goal = 3 },
+		},
+		["Glitter"] = {
+			{ name = "Moon Charm", goal = 25 },
+			{ name = "Magic Bean", goal = 1 },
+		},
+		["Star Jelly"] = {
+			{ name = "Glitter", goal = 3 },
+			{ name = "Royal Jelly", goal = 100 },
+		},
+		["Tropical Drink"] = {
+			{ name = "Coconut", goal = 10 },
+			{ name = "Enzymes", goal = 2 },
+			{ name = "Oil", goal = 2 },
+		},
+		["Purple Potion"] = {
+			{ name = "Neonberry", goal = 3 },
+			{ name = "Red Extract", goal = 3 },
+			{ name = "Blue Extract", goal = 3 },
+			{ name = "Glue", goal = 3 },
+		},
+		["Soft Wax"] = {
+			{ name = "Honeysuckle", goal = 5 },
+			{ name = "Oil", goal = 1 },
+			{ name = "Enzymes", goal = 1 },
+			{ name = "Royal Jelly", goal = 10 },
+		},
+		["Hard Wax"] = {
+			{ name = "Soft Wax", goal = 3 },
+			{ name = "Enzymes", goal = 3 },
+			{ name = "Bitterberry", goal = 33 },
+			{ name = "Royal Jelly", goal = 33 },
+		},
+		["Swirled Wax"] = {
+			{ name = "Hard Wax", goal = 3 },
+			{ name = "Soft Wax", goal = 9 },
+			{ name = "Purple Potion", goal = 6 },
+			{ name = "Royal Jelly", goal = 3333 },
+		},
+		["Caustic Wax"] = {
+			{ name = "Hard Wax", goal = 5 },
+			{ name = "Enzymes", goal = 5 },
+			{ name = "Neonberry", goal = 25 },
+			{ name = "Royal Jelly", goal = 5252 },
+		},
+		["Super Smoothie"] = {
+			{ name = "Neonberry", goal = 3 },
+			{ name = "Star Jelly", goal = 3 },
+			{ name = "Purple Potion", goal = 3 },
+			{ name = "Tropical Drink", goal = 6 },
+		},
+		["Turpentine"] = {
+			{ name = "Super Smoothie", goal = 10 },
+			{ name = "Caustic Wax", goal = 10 },
+			{ name = "Star Jelly", goal = 100 },
+			{ name = "Honeysuckle", goal = 1000 },
+		},
+	}
 
+	------------------------------------------------------------
+	-- 🧩 STEP 4: ฟังก์ชันสร้างสูตรแม่ → ลูก
+	------------------------------------------------------------
+	local function buildCraftTreeBlock(itemName, amount)
+		local recipe = CraftRecipes[itemName]
+		if not recipe or (amount or 0) <= 0 then return "" end
+		local lines, totalSubs = {}, #recipe
+		for i, sub in ipairs(recipe) do
+			local have = safeNumber(config.ItemCurrent[sub.name] or 0)
+			local need = safeNumber(sub.goal) * safeNumber(amount)
+			local emoji = (Showlist[sub.name] and Showlist[sub.name].emoji) or "📦"
+			local mark = (have >= need) and "✅" or "❌"
+			local prefix = (i == totalSubs) and "└─" or "├─"
+			table.insert(lines, string.format("%s %s %s — %s/%s %s",
+				prefix, emoji, sub.name, formatNumber(have), formatNumber(need), mark))
+		end
+		return table.concat(lines, "\n")
+	end
+
+	------------------------------------------------------------
+	-- 🧰 STEP 5: ส่ง webhook “แยกต่ออุปกรณ์” ก่อน
+	------------------------------------------------------------
+	local GlobalSummary = {}
+	for toolName, tool in pairs(ToolList) do
+		if not (tool.show and tool.requirements) then continue end
+
+		local toolLines, totalPct, cnt, allDone = {}, 0, 0, true
+
+		for _, req in ipairs(tool.requirements) do
+			local need = safeNumber(req.goal)
+			local have = (req.name == "Honey") and (config.HoneyCurrent or 0)
+				or safeNumber(config.ItemCurrent[req.name] or 0)
+			local diff = math.max(0, need - have)
+			local pct = (need > 0) and math.min(1, have / need) or 1
+			totalPct += pct; cnt += 1
+			if diff > 0 then allDone = false end
+
+			local emoji = (Showlist[req.name] and Showlist[req.name].emoji) or "📦"
+			local mark = (diff <= 0) and "✅" or string.format("❌ (+%s)", shorten(diff))
+			table.insert(toolLines, string.format("%s **%s** — %s / %s %s", emoji, req.name, shorten(have), shorten(need), mark))
+
+			if CraftRecipes[req.name] then
+				table.insert(toolLines, buildCraftTreeBlock(req.name, need))
+			end
+
+			-- เก็บไว้สำหรับ Summary รวม
+			GlobalSummary[req.name] = GlobalSummary[req.name] or { have = 0, need = 0 }
+			GlobalSummary[req.name].have = math.max(GlobalSummary[req.name].have, have)
+			GlobalSummary[req.name].need = GlobalSummary[req.name].need + need
+		end
+
+		local avg = math.floor((totalPct / math.max(cnt, 1)) * 100)
+		local bar = bar10(avg)
+		local fullText =
+			string.format("%s **Tool Craft Report — %s 🧩**\n", tool.emoji or "🧰", toolName) ..
+			"───────────────────────────────\n" ..
+			table.concat(toolLines, "\n") ..
+			"\n───────────────────────────────\n" ..
+			string.format("%s **%d%% Complete**\n", bar, avg) ..
+			"───────────────────────────────\n" ..
+			"`📚 Tool Craft auto-updated`\n" ..
+			string.format("`📅 %s ⏰ %s`\n", os.date("%d/%m/%Y"), os.date("%H:%M:%S")) ..
+			"`Bee Swarm Auto Reporter`\n" ..
+			"───────────────────────────────"
+
+		sendDiscordEmbed(config.WebhookUrl_Tool or config.WebhookUrl, {
+			title = string.format("%s Tool Craft Report — %s", tool.emoji or "🧰", toolName),
+			color = allDone and 0x00FF00 or 0x9B59B6,
+			description = fullText,
+			footer = { text = os.date("📅 %d/%m/%Y ⏰ %H:%M:%S") .. " | Bee Swarm Auto Reporter" }
+		})
+		task.wait(2)
+	end
+
+	print("✅ [ToolTab] ส่ง webhook คราฟอุปกรณ์ครบทั้งหมดแล้ว")
+
+------------------------------------------------------------
+-- 📦 STEP 6: Summary รวมทุกอุปกรณ์ (Recursive ทุกชั้น)
+------------------------------------------------------------
+	task.wait(3)
+	print("📦 [ToolTab] กำลังสร้าง Summary รวมทุกอุปกรณ์ (Recursive)...")
+
+	-- 🧩 เก็บสูตรทั้งหมดแบบ recursive
+	local function collectAllIngredients(itemName, multiplier, total)
+		total = total or {}
+		local recipe = CraftRecipes[itemName]
+		if not recipe then return total end
+
+		for _, sub in ipairs(recipe) do
+			local need = safeNumber(sub.goal * multiplier)
+			local have = safeNumber(config.ItemCurrent[sub.name] or 0)
+			total[sub.name] = total[sub.name] or { have = 0, need = 0 }
+			total[sub.name].have = math.max(total[sub.name].have, have)
+			total[sub.name].need += need
+			-- ถ้ามีสูตรย่อยอีก → ไปต่อชั้นหลาน
+			if CraftRecipes[sub.name] then
+				collectAllIngredients(sub.name, need, total)
+			end
+		end
+
+		return total
+	end
+
+	-- 🧩 เริ่มจาก GlobalSummary ชั้นหลัก แล้วแตกไปทุกชั้น
+	local RecursiveSummary = {}
+	for name, data in pairs(GlobalSummary) do
+		local have = safeNumber(data.have)
+		local need = safeNumber(data.need)
+		RecursiveSummary[name] = RecursiveSummary[name] or { have = 0, need = 0 }
+		RecursiveSummary[name].have = math.max(RecursiveSummary[name].have, have)
+		RecursiveSummary[name].need += need
+		if CraftRecipes[name] then
+			collectAllIngredients(name, need, RecursiveSummary)
+		end
+	end
+
+	-- 📊 สร้างข้อความสรุป
+	local lines = {}
+	table.insert(lines, "📦 **Tool Ingredient Summary (Full Recursive)**")
+	table.insert(lines, "───────────────────────────────")
+
+	local totalNeed, totalHave, notComplete = 0, 0, 0
+	config.ToolLastSummaryHave = config.ToolLastSummaryHave or {}
+	local prev = config.ToolLastSummaryHave
+
+	-- เรียงจากที่ขาดมาก → น้อย
+	local sorted = {}
+	for name, d in pairs(RecursiveSummary) do
+		local have, need = safeNumber(d.have), safeNumber(d.need)
+		if need > 0 then
+			local missing = math.max(0, need - have)
+			table.insert(sorted, { name = name, have = have, need = need, missing = missing })
+		end
+	end
+	table.sort(sorted, function(a, b) return a.missing > b.missing end)
+
+	-- แสดงผลในบรรทัด
+	for _, it in ipairs(sorted) do
+		local miss = it.missing
+		if miss > 0 then notComplete += 1 end
+
+		local emoji = (Showlist[it.name] and Showlist[it.name].emoji) or "📦"
+		local mark = (miss <= 0) and "✅" or string.format("❌ (+%s)", shorten(miss))
+
+		local prevHave = safeNumber(prev[it.name] or 0)
+		local diff = it.have - prevHave
+		local change = ""
+		if diff > 0 then
+			if diff / math.max(1, prevHave) >= 0.1 then change = " 🔺" else change = " ⬆️" end
+		end
+
+		table.insert(lines, string.format("%s %s — %s / %s %s%s",
+			emoji, it.name, shorten(it.have), shorten(it.need), mark, change))
+
+		totalHave += it.have
+		totalNeed += it.need
+		prev[it.name] = it.have
+	end
+
+	-- แสดง Progress รวม
+	local pct = (totalNeed > 0) and math.floor((totalHave / totalNeed) * 100) or 100
+	table.insert(lines, "───────────────────────────────")
+	if notComplete == 0 then
+		table.insert(lines, "🎯 ครบทุกวัตถุดิบแล้ว พร้อมคราฟทุกอย่างเลย!! 🐝")
+	else
+		table.insert(lines, string.format("📊 Farm Progress\n%s %d%%", bar10(pct), pct))
+	end
+	table.insert(lines, "───────────────────────────────")
+	table.insert(lines, "`📚 Full Recursive Craft Tree for All Tools`")
+
+	sendDiscordEmbed(config.WebhookUrl_ToolSummary or config.WebhookUrl, {
+		title = "📦 Tool Ingredient Summary (Recursive)",
+		color = 0x1ABC9C,
+		description = table.concat(lines, "\n"),
+		footer = { text = os.date("📅 %d/%m/%Y ⏰ %H:%M:%S") .. " | Bee Swarm Auto Reporter" }
+	})
+
+	print("✅ [ToolTab] ส่ง Summary Recursive ครบทุกชั้นเรียบร้อย")
+	task.wait(1.2)
+	pcall(function() closetab("Eggs Tab") end)
+end
 
 
 
