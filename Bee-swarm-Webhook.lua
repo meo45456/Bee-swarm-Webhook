@@ -3231,38 +3231,40 @@ local function sendIngredientSummaryWebhook(totalExtraFarm)
 	})
 end
 
-	----------------------------------------------------
-	-- 🚀 เรียกใช้งาน webhook ตามสถานะของ showlist
-	----------------------------------------------------
-	if saveWebhookConfig then pcall(saveWebhookConfig) end
-	updateCraftTreeCounts()
+----------------------------------------------------
+-- 🚀 เรียกใช้งาน webhook ตามสถานะของ showlist
+----------------------------------------------------
+if saveWebhookConfig then pcall(saveWebhookConfig) end
+updateCraftTreeCounts()
 
-	-- ✅ ตรวจว่าใน showlist มีของที่เป็นสูตรคราฟไหม
-	local hasCraftItem = false
-	for name, showData in pairs(Showlist) do
-		if showData.show and CraftRecipes[name] then
-			hasCraftItem = true
+-- ✅ ตรวจว่าใน showlist มี "ไอเท็มที่มีสูตรคราฟ + มีเป้าฟาร์ม (extrafarm > 0)" หรือไม่
+local hasCraftItemWithGoal = false
+for name, showData in pairs(Showlist) do
+	if showData.show and CraftRecipes[name] then
+		local uiExtra = safeNumber(showData.extrafarm or 0)
+		if uiExtra > 0 then
+			hasCraftItemWithGoal = true
 			break
 		end
 	end
+end
 
-	if hasCraftItem then
-		-- 🧪 มีของที่เป็นสูตรคราฟ → ส่งครบ 3 webhook
-		print("[EggTab] 📦 พบไอเท็มที่มีสูตรคราฟ — ส่งครบทั้ง 3 webhook")
-		local totalExtraFarm = sendNormalItemsWebhook() or 0
-		sendCraftItemsWebhook()
-		sendIngredientSummaryWebhook(totalExtraFarm)
-	else
-		-- 📦 ไม่มีของคราฟ → ส่งเฉพาะ normal
-		print("[EggTab] ⏩ ไม่มีไอเท็มที่มีสูตรคราฟ — ส่งเฉพาะ Inventory Normal Report")
-		sendNormalItemsWebhook()
-	end
+-- 🚀 ตัดสินใจยิง webhook
+if hasCraftItemWithGoal then
+	print("[EggTab] 📦 พบไอเท็มที่มีสูตรคราฟและมีเป้าฟาร์ม — ส่งครบทั้ง 3 webhook")
+	local totalExtraFarm = sendNormalItemsWebhook() or 0
+	sendCraftItemsWebhook()
+	sendIngredientSummaryWebhook(totalExtraFarm)
+else
+	print("[EggTab] ⏩ ไม่มีไอเท็มที่มีสูตรคราฟ + extrafarm > 0 — ส่งเฉพาะ Inventory Normal Report")
+	sendNormalItemsWebhook()
+end
 
-	print("[EggTab] ✅ ส่ง Webhook ทั้งหมดเรียบร้อย")
-	task.wait(1.5)
-	closetab("Eggs Tab")
-	print("[EggTab] 🔒 ปิดแท็บเรียบร้อย")
-	return true
+print("[EggTab] ✅ ส่ง Webhook ทั้งหมดเรียบร้อย")
+task.wait(1.5)
+closetab("Eggs Tab")
+print("[EggTab] 🔒 ปิดแท็บเรียบร้อย")
+return true
 end
 
 -- ✂️ ฟังก์ชันย่อเลข
