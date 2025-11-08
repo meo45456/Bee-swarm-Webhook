@@ -3820,8 +3820,13 @@ function tooltab_webhook_service()
 		local prevHave = safeNumber(prev[it.name] or 0)
 		local diff = it.have - prevHave
 		local change = ""
+
 		if diff > 0 then
-			if diff / math.max(1, prevHave) >= 0.1 then change = " 🔺" else change = " ⬆️" end
+			change = " 🔺" -- เพิ่มขึ้น
+		elseif diff < 0 then
+			change = " 🔻" -- ลดลง
+		else
+			change = " ➖" -- ไม่เปลี่ยน
 		end
 
 		table.insert(lines, string.format("%s %s — %s / %s %s%s",
