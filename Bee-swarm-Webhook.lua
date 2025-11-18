@@ -2836,7 +2836,12 @@ local function buildCraftTreeBlock(itemName, uiExtra, depth)
 		CombinedIngredients[sub.name].need += need
 
 		local emoji = (Showlist[sub.name] and Showlist[sub.name].emoji) or "📦"
-		local mark = (have >= need) and "✅" or "❌"
+		local mark = ""
+		if have >= need then
+			mark = "✅"     -- ครบแล้ว
+		else
+			mark = ""       -- ยังไม่ครบ → ไม่ต้องใส่ ❌
+		end
 		if have < need then allEnough = false end
 
 		local prefix = (i == totalSubs) and "└─" or "├─"
@@ -2941,9 +2946,25 @@ local function sendNormalItemsWebhook()
 					completed = false
 				end
 
-				-- 🧮 คำนวณความต่างจากรอบก่อน
-				local progress = math.max(0, current - baseCount)
-				config.ItemBaseCount[itemName] = baseCount
+				-- 🧮 โหมด progress แบบสะสม-only
+				config.ItemAccumulated = config.ItemAccumulated or {}
+				config.ItemLastCurrent = config.ItemLastCurrent or {}
+
+				local lastCur = safeNumber(config.ItemLastCurrent[itemName] or current)
+
+				-- ฟาร์มเพิ่มเท่านั้นถึงสะสม (ห้ามลด)
+				local gained = current - lastCur
+				if gained > 0 then
+					config.ItemAccumulated[itemName] = (config.ItemAccumulated[itemName] or 0) + gained
+				end
+
+				-- progress = ยอดสะสม (ไม่ลดลง)
+				local progress = config.ItemAccumulated[itemName] or 0
+
+				-- เก็บ current ล่าสุดไว้ใช้ครั้งถัดไป
+				config.ItemLastCurrent[itemName] = current
+
+				-- เก็บ extrafarm แบบเดิม
 				config.ItemExtraFarm[itemName] = uiExtra
 
 				-- ✅ คำนวณและแสดงผล
@@ -2951,22 +2972,36 @@ local function sendNormalItemsWebhook()
 					and string.format("%s/%s", shorten(current), shorten(max))
 					or shorten(current)
 
+				-- สร้างบรรทัดแสดงผล (Normal items)
 				local line
 				if uiExtra > 0 then
+					-- ถ้ามีเป้าฟาร์ม (Extra)
 					extraFarmTotal += uiExtra
-					line = string.format("%s **%s** — %s (%s / %s)%s",
+					local missing = math.max(0, uiExtra - progress)
+					local mark = ""
+
+					if missing <= 0 then
+						mark = "✅"
+					else
+						mark = string.format("(+%s)", shorten(missing))
+					end
+
+					line = string.format("%s **%s** — %s (%s / %s) %s",
 						emoji, itemName, display,
 						shorten(progress), shorten(uiExtra),
-						completed and " ✅" or "")
+						mark
+					)
 				else
+					-- ไอเท็มปกติ ไม่มีเป้าฟาร์ม
 					line = string.format("%s **%s** — %s", emoji, itemName, display)
 				end
+
 				table.insert(list, line)
 
-				-- รวมเปอร์เซ็นต์เฉลี่ย
+				-- รวมเปอร์เซ็นต์เฉลี่ย (ยังอยู่ข้างใน loop แต่หลังการ insert)
 				if uiExtra > 0 then
 					itemCount += 1
-					local p = math.min(100, math.floor((progress / uiExtra) * 100))
+					local p = math.min(100, math.floor((progress / math.max(1, uiExtra)) * 100))
 					totalProgress += p
 				end
 			end
@@ -3001,6 +3036,19 @@ end
 	----------------------------------------------------
 	-- 🧪 ส่งเฉพาะ Craft Items ที่อยู่ในสูตรเท่านั้น
 	----------------------------------------------------
+	local function shorten(num)
+		num = tonumber(num) or 0
+		if num >= 1e9 then
+			return string.format("%.1fB", num / 1e9):gsub("%.0B", "B")
+		elseif num >= 1e6 then
+			return string.format("%.1fM", num / 1e6):gsub("%.0M", "M")
+		elseif num >= 1e3 then
+			return string.format("%.1fk", num / 1e3):gsub("%.0k", "k")
+		else
+			return tostring(math.floor(num))
+		end
+	end
+
 	local function sendCraftItemsWebhook()
 		local craftList = {}
 
@@ -3026,10 +3074,24 @@ end
 				end
 
 				local emoji = (Showlist[mainItem] and Showlist[mainItem].emoji) or "📦"
-				local header = string.format("%s **%s** — x%s (%s / %s) %s",
-					emoji, mainItem, formatNumber(current),
-					formatNumber(progress), formatNumber(uiExtra),
-					completed and "✅" or "")
+				-- คำนวณ missing สำหรับหัวข้อแม่ (craft item)
+				local need = uiExtra
+				local have = progress
+				local missing = math.max(0, need - have)
+
+				local mark = ""
+				if missing <= 0 then
+					mark = "✅"
+				else
+					mark = string.format("(+%s)", shorten(missing))
+				end
+
+				local header = string.format(
+					"%s **%s** — x%s (%s / %s) %s",
+					emoji, mainItem, shorten(current),
+					shorten(progress), shorten(need),
+					mark
+				)		
 
 				table.insert(craftList, header)
 
@@ -3164,44 +3226,54 @@ local function sendIngredientSummaryWebhook(totalExtraFarm)
 	config.ItemLastSummaryHave = config.ItemLastSummaryHave or {}
 	local previousData = config.ItemLastSummaryHave
 
-	for name, data in pairs(TotalSummary) do
-		local have = safeNumber(data.have or 0)
-		local need = safeNumber(data.need or 0)
-		local missing = math.max(0, need - have)
-		if need == 0 then continue end
+for name, data in pairs(TotalSummary) do
+	local have = safeNumber(data.have or 0)
+	local need = safeNumber(data.need or 0)
+	local missing = math.max(0, need - have)
+
+	-- ถ้าไม่มีความต้องการ (need == 0) ให้ข้ามรายการนี้
+	if need > 0 then
 
 		-- 💬 ตรวจการเปลี่ยนแปลงจากรอบก่อน
 		local prevHave = safeNumber(previousData[name] or 0)
 		local diff = have - prevHave
 		local changeEmoji = ""
 		if diff > 0 then
-			if diff / math.max(1, prevHave) >= 0.1 then
+			if prevHave > 0 and (diff / prevHave) >= 0.1 then
 				changeEmoji = " 🔺" -- เพิ่มขึ้นมากกว่า 10%
 			else
 				changeEmoji = " ⬆️" -- เพิ่มขึ้นเล็กน้อย
 			end
 		end
 
-		-- แสดงเฉพาะที่ยังขาด
+		-- แสดงเฉพาะที่ยังขาด (missing > 0)
 		if missing > 0 then
-			notCompleteCount += 1
+			notCompleteCount = notCompleteCount + 1
 			local emoji = (Showlist[name] and Showlist[name].emoji) or "📦"
-			table.insert(lines, string.format("%s %s — %s / %s (+%s)%s",
-				emoji,
-				name,
-				shorten(have),
-				shorten(need),
-				shorten(missing),
-				changeEmoji
+
+			local mark = ""
+			if missing <= 0 then
+				mark = "✅"
+			else
+				mark = string.format("(+%s)", shorten(missing))
+			end
+
+			-- ใส่บรรทัดสรุป (ไม่มี ❌ ตอนขาด)
+			table.insert(lines, string.format("%s %s — %s / %s %s%s",
+				emoji, name,
+				shorten(have), shorten(need),
+				mark, changeEmoji
 			))
-			totalHave += have
-			totalNeed += need
-			totalMissing += missing
+
+			totalHave = totalHave + have
+			totalNeed = totalNeed + need
+			totalMissing = totalMissing + missing
 		end
 
 		-- 🧾 บันทึกค่าล่าสุดไว้ใช้เทียบรอบหน้า
 		previousData[name] = have
 	end
+end
 
 	if notCompleteCount == 0 then
 		table.insert(lines, "🎯 วัตถุดิบครบทุกอย่างแล้ว! เยี่ยมมาก!! 🐝")
@@ -3676,21 +3748,33 @@ function tooltab_webhook_service()
 	------------------------------------------------------------
 	-- 🧩 STEP 4: ฟังก์ชันสร้างสูตรแม่ → ลูก
 	------------------------------------------------------------
-	local function buildCraftTreeBlock(itemName, amount)
-		local recipe = CraftRecipes[itemName]
-		if not recipe or (amount or 0) <= 0 then return "" end
-		local lines, totalSubs = {}, #recipe
-		for i, sub in ipairs(recipe) do
-			local have = safeNumber(config.ItemCurrent[sub.name] or 0)
-			local need = safeNumber(sub.goal) * safeNumber(amount)
-			local emoji = (Showlist[sub.name] and Showlist[sub.name].emoji) or "📦"
-			local mark = (have >= need) and "✅" or "❌"
-			local prefix = (i == totalSubs) and "└─" or "├─"
-			table.insert(lines, string.format("%s %s %s — %s/%s %s",
-				prefix, emoji, sub.name, formatNumber(have), formatNumber(need), mark))
-		end
-		return table.concat(lines, "\n")
-	end
+local function buildCraftTreeBlock(itemName, amount)
+    local recipe = CraftRecipes[itemName]
+    if not recipe or (amount or 0) <= 0 then return "" end
+
+    local lines, totalSubs = {}, #recipe
+
+    for i, sub in ipairs(recipe) do
+        local have = safeNumber(config.ItemCurrent[sub.name] or 0)
+        local need = safeNumber(sub.goal) * safeNumber(amount)
+        local emoji = (Showlist[sub.name] and Showlist[sub.name].emoji) or "📦"
+
+        -- สำคัญ! ต้องมี prefix
+        local prefix = (i == totalSubs) and "└─" or "├─"
+
+        local mark = ""
+        if have >= need then
+            mark = "✅"   -- ครบแล้ว
+        else
+            mark = ""     -- ยังไม่ครบ ไม่ต้องมี ❌
+        end
+
+        table.insert(lines, string.format("%s %s %s — %s/%s %s",
+            prefix, emoji, sub.name, formatNumber(have), formatNumber(need), mark))
+    end
+
+    return table.concat(lines, "\n")
+end
 
 	------------------------------------------------------------
 	-- 🧰 STEP 5: ส่ง webhook “แยกต่ออุปกรณ์” ก่อน
@@ -3711,7 +3795,14 @@ function tooltab_webhook_service()
 			if diff > 0 then allDone = false end
 
 			local emoji = (Showlist[req.name] and Showlist[req.name].emoji) or "📦"
-			local mark = (diff <= 0) and "✅" or string.format("❌ (+%s)", shorten(diff))
+			local mark = ""
+			if diff <= 0 then
+				-- ครบ → โชว์แค่เครื่องหมายถูก
+				mark = "✅"
+			else
+				-- ยังไม่ครบ → โชว์แค่ (+จำนวนที่ยังขาด)
+				mark = string.format("(+%s)", shorten(diff))
+			end
 			table.insert(toolLines, string.format("%s **%s** — %s / %s %s", emoji, req.name, shorten(have), shorten(need), mark))
 
 			if CraftRecipes[req.name] then
@@ -3815,18 +3906,25 @@ function tooltab_webhook_service()
 		if miss > 0 then notComplete += 1 end
 
 		local emoji = (Showlist[it.name] and Showlist[it.name].emoji) or "📦"
-		local mark = (miss <= 0) and "✅" or string.format("❌ (+%s)", shorten(miss))
+		local mark = ""
+		if miss <= 0 then
+			-- ของครบ → โชว์แค่เครื่องหมายเดียว
+			mark = "✅"
+		else
+			-- ของไม่ครบ → โชว์แค่จำนวนที่ยังขาด ไม่ต้องใส่ ❌
+			mark = string.format("(+%s)", shorten(miss))
+		end
+
 
 		local prevHave = safeNumber(prev[it.name] or 0)
 		local diff = it.have - prevHave
 		local change = ""
 
+		-- เฉพาะเพิ่มขึ้นเท่านั้นที่ใส่ icon
 		if diff > 0 then
-			change = " 🔺" -- เพิ่มขึ้น
-		elseif diff < 0 then
-			change = " 🔻" -- ลดลง
+			change = " 🔺"
 		else
-			change = " ➖" -- ไม่เปลี่ยน
+			change = "" -- เท่ากันหรือ ลดลง = ไม่แสดงอะไรเลย
 		end
 
 		table.insert(lines, string.format("%s %s — %s / %s %s%s",
