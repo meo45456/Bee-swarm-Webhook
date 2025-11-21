@@ -3240,7 +3240,7 @@ for name, data in pairs(TotalSummary) do
 		local changeEmoji = ""
 		if diff > 0 then
 			if prevHave > 0 and (diff / prevHave) >= 0.1 then
-				changeEmoji = " 🔺" -- เพิ่มขึ้นมากกว่า 10%
+				changeEmoji = " ⬆️" -- เพิ่มขึ้นมากกว่า 10%
 			else
 				changeEmoji = " ⬆️" -- เพิ่มขึ้นเล็กน้อย
 			end
@@ -3922,7 +3922,7 @@ end
 
 		-- เฉพาะเพิ่มขึ้นเท่านั้นที่ใส่ icon
 		if diff > 0 then
-			change = " 🔺"
+			change = " ⬆️"
 		else
 			change = "" -- เท่ากันหรือ ลดลง = ไม่แสดงอะไรเลย
 		end
