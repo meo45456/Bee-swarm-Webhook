@@ -1,3 +1,30 @@
+-- ✅ เพิ่มตอนต้นไฟล์ paste.txt ก่อน PART 1
+local player = game.Players.LocalPlayer
+local character = workspace:FindFirstChild(player.Name) or player.Character
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local QuestModule     = require(ReplicatedStorage:WaitForChild("Quests"))
+local BadgeModule     = require(ReplicatedStorage:WaitForChild("Badges"))
+local NumberCommas    = require(ReplicatedStorage:WaitForChild("NumberCommas"))
+local ClientStatCache = require(ReplicatedStorage:WaitForChild("ClientStatCache"))
+
+-- ✅ ดึง data ด้วย getgc() เหมือนกัน
+local data = nil
+for _, v in pairs(getgc(true)) do
+    if type(v) == "table" and rawget(v, "Honey") and rawget(v, "Eggs") then
+        if v.UserId == player.UserId then
+            data = v
+            break
+        end
+    end
+end
+
+if not data then
+    warn("❌ ไม่พบ data จาก getgc()")
+    -- ไม่ return เพราะ LocalScript หลักต้องรันต่อ
+    -- questtab_webhook_service จะ guard เองด้านใน
+end
+
 -- 🧩 PART 1 START : Map Check + Data Table
 
 if game.PlaceId ~= 1537690962 then
@@ -97,6 +124,8 @@ QuestShowlist = {
     ["Mother Bear"] = { show = false },
     ["Science Bear"] = { show = false },
 	["Onett"] = { show = false },
+    ["Riley Bee"]    = { show = false },
+    ["Bucko Bee"]    = { show = false },
 }
 
 -- 🧸 รายชื่อหมีและเควชที่เลือกได้
@@ -142,7 +171,7 @@ local QuestOwnerMap = {
     ["Sway Away"] = "Spirit Bear",
     ["Memories of Memories"] = "Spirit Bear",
     ["Beans Becoming"] = "Spirit Bear",
-    ["Do You Bee-lieve in Magic?"] = "Spirit Bear",
+    ["Do You Bee-lieve In Magic?"] = "Spirit Bear",
     ["The Ways Of The Winds / The Wind And Its Way"] = "Spirit Bear",
     ["Beauty Duty"] = "Spirit Bear",
     ["Witness Grandeur"] = "Spirit Bear",
@@ -348,16 +377,6 @@ local QuestOwnerMap = {
     ["Star Journey 3"] = "Onett",
     ["Star Journey 4"] = "Onett",
     ["Star Journey 5"] = "Onett",
-
-    -- 🦅 Riley Bee
-    ["Red Request 1"]  = "Riley Bee",
-    ["Red Request 10"] = "Riley Bee",
-    ["Red Request 15"] = "Riley Bee",
-
-    -- 💧 Bucko Bee
-    ["Blue Request 1"]  = "Bucko Bee",
-    ["Blue Request 10"] = "Bucko Bee",
-    ["Blue Request 15"] = "Bucko Bee",
 }
 
 -- 🧩 PART 1 END
@@ -1158,6 +1177,12 @@ local UserId = tostring(LocalPlayer.UserId)
 local folderPath = "KhamKhomShop"
 local fileName = folderPath .. "/" .. UserId .. "_Hook_Service.txt"
 local itemHeight = 26
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- ✅ เพิ่มบรรทัดเหล่านี้ถ้ายังไม่มี
+local QuestModule      = require(ReplicatedStorage:WaitForChild("Quests"))
+local NumberCommas     = require(ReplicatedStorage:WaitForChild("NumberCommas"))
+local ClientStatCache  = require(ReplicatedStorage:WaitForChild("ClientStatCache"))
 
 -- 💾 ฟังก์ชันบันทึกข้อมูล config (สถานะ Show/Hide)
 local function saveConfig()
@@ -2578,766 +2603,552 @@ end
 
 
 
--- 🎒 Inventory Report (Bee Swarm Blue Edition - Smart Goal System + Craft Tree + Ingredient Summary)
 function eggtab_webhook_service()
-	if not (config.Flags and config.Flags.Item) then return end
-	print("[EggTab] เริ่มเปิดแท็บ Eggs ...")
+    if not (config.Flags and config.Flags.Item) then return end
+    print("[EggTab] เริ่มดึงข้อมูล Items...")
 
-	opentab("Eggs Tab")
-	task.wait(2.5)
+    local freshData = nil
+    for _, v in pairs(getgc(true)) do
+        if type(v) == "table" and rawget(v, "Honey") and rawget(v, "Eggs") then
+            if v.UserId == player.UserId then
+                freshData = v
+                break
+            end
+        end
+    end
 
-	local maintofind = nil
-	local tries, delay = 0, 0.6
+    if not freshData or not freshData.Eggs then
+        warn("[EggTab] ❌ ไม่พบ data.Eggs — ยกเลิก")
+        return
+    end
 
-	while not maintofind and tries < 25 do
-		tries += 1
-		local pg = LocalPlayer:FindFirstChild("PlayerGui")
-		local content = pg and pg:FindFirstChild("ScreenGui")
-			and pg.ScreenGui:FindFirstChild("Menus")
-			and pg.ScreenGui.Menus:FindFirstChild("Children")
-			and pg.ScreenGui.Menus.Children:FindFirstChild("Eggs")
-			and pg.ScreenGui.Menus.Children.Eggs:FindFirstChild("Content")
+    print("[EggTab] ✅ ดึงข้อมูล Eggs สำเร็จ")
 
-		if content and #content:GetChildren() > 0 then
-			maintofind = content:FindFirstChild("EggRows")
-			if maintofind and #maintofind:GetChildren() > 0 then
-				--print("[EggTab] พบ EggRows หลังจาก " .. tries .. " รอบ")
-				break
-			end
-		end
-		task.wait(delay)
-	end
+    local itemList, UsedInCraft, CombinedIngredients = {}, {}, {}
 
-	if not maintofind then
-		warn("[EggTab] ❌ ไม่พบ EggRows - ยกเลิกการส่งข้อมูล")
-		return
-	end
+    local function safeNumber(value)
+        if value == nil then return 0 end
+        local str = tostring(value):gsub(",", ""):gsub("%s+", ""):gsub("[^%d%.%-]", "")
+        if str == "" or str == "-" or str == "." then return 0 end
+        return tonumber(str) or 0
+    end
 
-	local itemList, UsedInCraft, CombinedIngredients = {}, {}, {}
+    local function formatNumber(num)
+        num = math.floor(tonumber(num) or 0)
+        local s = tostring(num)
+        while true do
+            local new, k = s:gsub("^(-?%d+)(%d%d%d)", "%1,%2")
+            s = new
+            if k == 0 then break end
+        end
+        return s
+    end
 
-	-----------------------------------------------------
-	-- 🧮 Safe Number Conversion + Format
-	-----------------------------------------------------
-	local function safeNumber(value)
-		if value == nil then return 0 end
-		local str = tostring(value):gsub(",", ""):gsub("%s+", ""):gsub("[^%d%.%-]", "")
-		if str == "" or str == "-" or str == "." then return 0 end
-		return tonumber(str) or 0
-	end
+    local function cleanItemName(name)
+        if not name then return "" end
+        name = tostring(name)
+        name = name:gsub("[%z\1-\31]", "")
+        name = name:gsub("[%s             　]", " ")
+        name = name:gsub("%s+", " ")
+        name = name:gsub("^%s+", "")
+        name = name:gsub("%s+$", "")
+        return name
+    end
 
-	local function formatNumber(num)
-		num = math.floor(tonumber(num) or 0)
-		local s = tostring(num)
-		while true do
-			local new, k = s:gsub("^(-?%d+)(%d%d%d)", "%1,%2")
-			s = new
-			if k == 0 then break end
-		end
-		return s
-	end
+    local CraftRecipes = {
+        ["Blue Extract"] = {
+            { name = "Blueberry", goal = 25 },
+            { name = "Royal Jelly", goal = 10 },
+        },
+        ["Red Extract"] = {
+            { name = "Strawberry", goal = 50 },
+            { name = "Royal Jelly", goal = 10 },
+        },
+        ["Enzymes"] = {
+            { name = "Pineapple", goal = 50 },
+            { name = "Royal Jelly", goal = 10 },
+        },
+        ["Oil"] = {
+            { name = "Sunflower Seed", goal = 50 },
+            { name = "Royal Jelly", goal = 10 },
+        },
+        ["Glue"] = {
+            { name = "Gumdrops", goal = 50 },
+            { name = "Royal Jelly", goal = 10 },
+        },
+        ["Gumdrops"] = {
+            { name = "Strawberry", goal = 3 },
+            { name = "Pineapple", goal = 3 },
+            { name = "Blueberry", goal = 3 },
+        },
+        ["Glitter"] = {
+            { name = "Moon Charm", goal = 25 },
+            { name = "Magic Bean", goal = 1 },
+        },
+        ["Star Jelly"] = {
+            { name = "Glitter", goal = 3 },
+            { name = "Royal Jelly", goal = 100 },
+        },
+        ["Tropical Drink"] = {
+            { name = "Coconut", goal = 10 },
+            { name = "Enzymes", goal = 2 },
+            { name = "Oil", goal = 2 },
+        },
+        ["Purple Potion"] = {
+            { name = "Neonberry", goal = 3 },
+            { name = "Red Extract", goal = 3 },
+            { name = "Blue Extract", goal = 3 },
+            { name = "Glue", goal = 3 },
+        },
+        ["Soft Wax"] = {
+            { name = "Honeysuckle", goal = 5 },
+            { name = "Oil", goal = 1 },
+            { name = "Enzymes", goal = 1 },
+            { name = "Royal Jelly", goal = 10 },
+        },
+        ["Hard Wax"] = {
+            { name = "Soft Wax", goal = 3 },
+            { name = "Enzymes", goal = 3 },
+            { name = "Bitterberry", goal = 33 },
+            { name = "Royal Jelly", goal = 33 },
+        },
+        ["Swirled Wax"] = {
+            { name = "Hard Wax", goal = 3 },
+            { name = "Soft Wax", goal = 9 },
+            { name = "Purple Potion", goal = 6 },
+            { name = "Royal Jelly", goal = 3333 },
+        },
+        ["Caustic Wax"] = {
+            { name = "Hard Wax", goal = 5 },
+            { name = "Enzymes", goal = 5 },
+            { name = "Neonberry", goal = 25 },
+            { name = "Royal Jelly", goal = 5252 },
+        },
+        ["Super Smoothie"] = {
+            { name = "Neonberry", goal = 3 },
+            { name = "Star Jelly", goal = 3 },
+            { name = "Purple Potion", goal = 3 },
+            { name = "Tropical Drink", goal = 6 },
+        },
+        ["Turpentine"] = {
+            { name = "Super Smoothie", goal = 10 },
+            { name = "Caustic Wax", goal = 10 },
+            { name = "Star Jelly", goal = 100 },
+            { name = "Honeysuckle", goal = 1000 },
+        },
+    }
 
-	-----------------------------------------------------
-	-- 🧩 Safe Split Number: แยกค่าแบบ 276/500 ออกเป็น 2 ตัว
-	-----------------------------------------------------
-	local function safeSplitNumber(text)
-		if not text or text == "" then return 0, 0 end
-		text = tostring(text):gsub(",", ""):gsub("%s+", "")
-		local a, b = text:match("^(%d+)%s*/%s*(%d+)$")
-		if a and b then
-			return safeNumber(a), safeNumber(b)
-		else
-			return safeNumber(text), 0
-		end
-	end
+    local function updateCraftTreeCounts()
+        config = config or {}
+        config.ItemCurrent  = config.ItemCurrent  or {}
+        config.ItemMax      = config.ItemMax       or {}
+        config.ItemBaseCount = config.ItemBaseCount or {}
 
-	-----------------------------------------------------
-	-- 🧩 ฟังก์ชันล้างชื่อ item ป้องกันอักขระเพี้ยน
-	-----------------------------------------------------
-	local function cleanItemName(name)
-		if not name then return "" end
-		name = tostring(name)
-		name = name:gsub("[%z\1-\31]", "")
-		name = name:gsub("[%s             　]", " ")
-		name = name:gsub("%s+", " ")
-		name = name:gsub("^%s+", "")
-		name = name:gsub("%s+$", "")
-		return name
-	end
+        local function getItemCount(itemName)
+            return safeNumber(freshData.Eggs[itemName] or 0), 0
+        end
 
-	-----------------------------------------------------
-	-- 🔧 สูตรคราฟ (Craft Tree)
-	-----------------------------------------------------
-	local CraftRecipes = {
-		["Blue Extract"] = {
-			{ name = "Blueberry", goal = 25 },
-			{ name = "Royal Jelly", goal = 10 },
-		},
-		["Red Extract"] = {
-			{ name = "Strawberry", goal = 50 },
-			{ name = "Royal Jelly", goal = 10 },
-		},
-		["Enzymes"] = {
-			{ name = "Pineapple", goal = 50 },
-			{ name = "Royal Jelly", goal = 10 },
-		},
-		["Oil"] = {
-			{ name = "Sunflower Seed", goal = 50 },
-			{ name = "Royal Jelly", goal = 10 },
-		},
-		["Glue"] = {
-			{ name = "Gumdrops", goal = 50 },
-			{ name = "Royal Jelly", goal = 10 },
-		},
-		["Gumdrops"] = {
-			{ name = "Strawberry", goal = 3 },
-			{ name = "Pineapple", goal = 3 },
-			{ name = "Blueberry", goal = 3 },
-		},
-		["Glitter"] = {
-			{ name = "Moon Charm", goal = 25 },
-			{ name = "Magic Bean", goal = 1 },
-		},
-		["Star Jelly"] = {
-			{ name = "Glitter", goal = 3 },
-			{ name = "Royal Jelly", goal = 100 },
-		},
-		["Tropical Drink"] = {
-			{ name = "Coconut", goal = 10 },
-			{ name = "Enzymes", goal = 2 },
-			{ name = "Oil", goal = 2 },
-		},
-		["Purple Potion"] = {
-			{ name = "Neonberry", goal = 3 },
-			{ name = "Red Extract", goal = 3 },
-			{ name = "Blue Extract", goal = 3 },
-			{ name = "Glue", goal = 3 },
-		},
-		["Soft Wax"] = {
-			{ name = "Honeysuckle", goal = 5 },
-			{ name = "Oil", goal = 1 },
-			{ name = "Enzymes", goal = 1 },
-			{ name = "Royal Jelly", goal = 10 },
-		},
-		["Hard Wax"] = {
-			{ name = "Soft Wax", goal = 3 },
-			{ name = "Enzymes", goal = 3 },
-			{ name = "Bitterberry", goal = 33 },
-			{ name = "Royal Jelly", goal = 33 },
-		},
-		["Swirled Wax"] = {
-			{ name = "Hard Wax", goal = 3 },
-			{ name = "Soft Wax", goal = 9 },
-			{ name = "Purple Potion", goal = 6 },
-			{ name = "Royal Jelly", goal = 3333 },
-		},
-		["Caustic Wax"] = {
-			{ name = "Hard Wax", goal = 5 },
-			{ name = "Enzymes", goal = 5 },
-			{ name = "Neonberry", goal = 25 },
-			{ name = "Royal Jelly", goal = 5252 },
-		},
-		["Super Smoothie"] = {
-			{ name = "Neonberry", goal = 3 },
-			{ name = "Star Jelly", goal = 3 },
-			{ name = "Purple Potion", goal = 3 },
-			{ name = "Tropical Drink", goal = 6 },
-		},
-		["Turpentine"] = {
-			{ name = "Super Smoothie", goal = 10 },
-			{ name = "Caustic Wax", goal = 10 },
-			{ name = "Star Jelly", goal = 100 },
-			{ name = "Honeysuckle", goal = 1000 },
-		},
-	}
+        local function scanRecipeTree(mainItem)
+            local recipe = CraftRecipes[mainItem]
+            if not recipe then return end
+            for _, sub in ipairs(recipe) do
+                local cur, max = getItemCount(sub.name)
+                -- ✅ เก็บทุกตัวแม้ cur = 0
+                config.ItemCurrent[sub.name] = cur
+                config.ItemMax[sub.name] = max
+                UsedInCraft[sub.name] = true
+                if CraftRecipes[sub.name] then
+                    scanRecipeTree(sub.name)
+                end
+            end
+        end
 
------------------------------------------------------
--- 🌲 อัปเดตข้อมูล UsedInCraft (Recursive Tree System)
------------------------------------------------------
-local function updateCraftTreeCounts()
-	config = config or {}
-	config.ItemCurrent = config.ItemCurrent or {}
-	config.ItemMax = config.ItemMax or {}
+        for mainItem in pairs(CraftRecipes) do
+            scanRecipeTree(mainItem)
+        end
 
-	-- 🌀 ฟังก์ชันย่อย: สแกนหาของใน GUI
-	local function getItemCount(itemName)
-		for _, row in ipairs(maintofind:GetChildren()) do
-			local n = row:FindFirstChild("TypeName")
-			local s = row:FindFirstChild("EggSlot")
-			local c = s and s:FindFirstChild("Count")
-			if n and c and cleanItemName(n.Text) == itemName then
-				local cur, max = safeSplitNumber(c.Text)
-				return cur, max
-			end
-		end
-		return 0, 0
-	end
+        -- ✅ เก็บค่าไอเท็มหลัก + set BaseCount ครั้งแรก
+        for itemName in pairs(CraftRecipes) do
+            local amount = safeNumber(freshData.Eggs[itemName] or 0)
+            config.ItemCurrent[itemName] = amount
+            config.ItemMax[itemName] = 0
+            if not config.ItemBaseCount[itemName] then
+                config.ItemBaseCount[itemName] = amount
+            end
+        end
 
-	-- 🔁 ฟังก์ชันย่อยแบบ recursive สำหรับอัปเดตทุกชั้น
-	local function scanRecipeTree(mainItem)
-		local recipe = CraftRecipes[mainItem]
-		if not recipe then return end
+        print("[EggTab] ✅ อัปเดตข้อมูล Craft Tree สำเร็จ (Recursive)")
+    end
 
-		for _, sub in ipairs(recipe) do
-			local cur, max = getItemCount(sub.name)
-			if cur > 0 or max > 0 then
-				config.ItemCurrent[sub.name] = cur
-				config.ItemMax[sub.name] = max
-			end
-			UsedInCraft[sub.name] = true
+    local function buildCraftTreeBlock(itemName, uiExtra, depth)
+        depth = depth or 0
+        local recipe = CraftRecipes[itemName]
+        if not recipe or uiExtra <= 0 then return "" end
 
-			-- 🔁 ถ้าลูกตัวนี้ก็มีสูตรอีก → สแกนซ้ำ
-			if CraftRecipes[sub.name] then
-				scanRecipeTree(sub.name)
-			end
-		end
-	end
+        local indent = string.rep(" ", depth)
+        local lines = {}
+        local totalSubs = #recipe
+        local allEnough = true
 
-	-- 🔹 สแกนทุกสูตรหลัก (Blue Extract, Enzymes, Tropical Drink ฯลฯ)
-	for mainItem in pairs(CraftRecipes) do
-		scanRecipeTree(mainItem)
-	end
+        for i, sub in ipairs(recipe) do
+            local have = safeNumber(config.ItemCurrent[sub.name] or 0)
+            local need = sub.goal * uiExtra
 
-	-- 🧱 เพิ่มเติม: เก็บค่าของไอเท็มหลักที่มีใน CraftRecipes ด้วย
-	for _, row in ipairs(maintofind:GetChildren()) do
-		local n = row:FindFirstChild("TypeName")
-		local s = row:FindFirstChild("EggSlot")
-		local c = s and s:FindFirstChild("Count")
-		if n and c then
-			local itemName = cleanItemName(n.Text)
-			if CraftRecipes[itemName] then
-				local cur, max = safeSplitNumber(c.Text)
-				config.ItemCurrent[itemName] = cur
-				config.ItemMax[itemName] = max
-			end
-		end
-	end
+            CombinedIngredients[sub.name] = CombinedIngredients[sub.name] or { have = 0, need = 0 }
+            CombinedIngredients[sub.name].have += have
+            CombinedIngredients[sub.name].need += need
 
-	print("[EggTab] ✅ อัปเดตข้อมูล Craft Tree สำเร็จ (Recursive)")
-end
-	-----------------------------------------------------
--- 🧩 สร้างบล็อกสูตรคราฟ (แสดงเฉพาะ แม่ → ลูก)
------------------------------------------------------
-local function buildCraftTreeBlock(itemName, uiExtra, depth)
-	depth = depth or 0
-	local recipe = CraftRecipes[itemName]
-	if not recipe or uiExtra <= 0 then return "" end
+            local emoji = (Showlist[sub.name] and Showlist[sub.name].emoji) or "📦"
+            local mark = have >= need and "✅" or ""
+            if have < need then allEnough = false end
 
-	local indent = string.rep("	", depth)
-	local lines = {}
-	local totalSubs = #recipe
-	local allEnough = true
+            local prefix = (i == totalSubs) and "└─" or "├─"
+            local line = string.format("%s%s %s %s — %s/%s %s",
+                indent, prefix, emoji, sub.name,
+                formatNumber(have), formatNumber(need), mark)
+            table.insert(lines, line)
+        end
 
-	for i, sub in ipairs(recipe) do
-		local have = safeNumber(config.ItemCurrent[sub.name] or 0)
-		local need = sub.goal * uiExtra
+        if allEnough and depth == 0 then
+            table.insert(lines, "✅ วัตถุดิบครบแล้ว! คราฟได้เต็มจำนวน 🎯")
+        end
 
-		CombinedIngredients[sub.name] = CombinedIngredients[sub.name] or { have = 0, need = 0 }
-		CombinedIngredients[sub.name].have += have
-		CombinedIngredients[sub.name].need += need
+        return table.concat(lines, "\n")
+    end
 
-		local emoji = (Showlist[sub.name] and Showlist[sub.name].emoji) or "📦"
-		local mark = ""
-		if have >= need then
-			mark = "✅"     -- ครบแล้ว
-		else
-			mark = ""       -- ยังไม่ครบ → ไม่ต้องใส่ ❌
-		end
-		if have < need then allEnough = false end
+    local function sendNormalItemsWebhook()
+        local list = {}
+        local extraFarmTotal = 0
+        local totalProgress = 0
+        local itemCount = 0
 
-		local prefix = (i == totalSubs) and "└─" or "├─"
-		local line = string.format("%s%s %s %s — %s/%s %s",
-			indent, prefix, emoji, sub.name,
-			formatNumber(have), formatNumber(need), mark)
-		table.insert(lines, line)
-	end
+        config = config or {}
+        config.ItemBaseCount  = config.ItemBaseCount  or {}
+        config.ItemExtraFarm  = config.ItemExtraFarm  or {}
+        config.ItemCompleted  = config.ItemCompleted  or {}
+        config.ItemAccumulated = config.ItemAccumulated or {}
+        config.ItemLastCurrent = config.ItemLastCurrent or {}
 
-	if allEnough and depth == 0 then
-		table.insert(lines, "✅ วัตถุดิบครบแล้ว! คราฟได้เต็มจำนวน 🎯")
-	end
+        local function shorten(num)
+            num = tonumber(num) or 0
+            if num >= 1e9 then return string.format("%.1fB", num/1e9):gsub("%.0B","B")
+            elseif num >= 1e6 then return string.format("%.1fM", num/1e6):gsub("%.0M","M")
+            elseif num >= 1e3 then return string.format("%.1fk", num/1e3):gsub("%.0k","k")
+            else return tostring(math.floor(num)) end
+        end
 
-	return table.concat(lines, "\n")
-end
+        local function makeProgressBar(percent)
+            local filled = math.floor((percent/100) * 10)
+            return string.rep("🟩", filled) .. string.rep("⬛", 10 - filled)
+        end
 
------------------------------------------------------
--- 🧱 ระบบ Webhook ไอเท็มทั่วไป (พร้อม Progress Bar รวม)
------------------------------------------------------
-local function sendNormalItemsWebhook()
-	local list = {}
-	local extraFarmTotal = 0
-	local totalProgress = 0
-	local itemCount = 0
+        -- ✅ FIX 1: วน loop จาก Showlist แทน freshData.Eggs
+        -- เพื่อโชว์ทุกไอเทมที่ show = true แม้มี 0
+        for itemName, showData in pairs(Showlist) do
+            if showData and showData.show then
+                local emoji = showData.emoji or "📦"
+                -- ✅ ถ้าไม่มีใน Eggs ให้ current = 0
+                local current = safeNumber(freshData.Eggs[itemName] or 0)
 
-	config = config or {}
-	config.ItemBaseCount = config.ItemBaseCount or {}
-	config.ItemExtraFarm = config.ItemExtraFarm or {}
-	config.ItemCompleted = config.ItemCompleted or {}
+                local uiExtra  = safeNumber(showData.extrafarm or 0)
+                local oldExtra = safeNumber(config.ItemExtraFarm[itemName] or 0)
+                local baseCount = safeNumber(config.ItemBaseCount[itemName] or current)
+                local completed = config.ItemCompleted[itemName] or false
 
-	-- 🧮 ฟังก์ชันย่อเลข (ใช้ในนี้ด้วย)
-	local function shorten(num)
-		num = tonumber(num) or 0
-		if num >= 1e9 then
-			return string.format("%.1fB", num / 1e9):gsub("%.0B", "B")
-		elseif num >= 1e6 then
-			return string.format("%.1fM", num / 1e6):gsub("%.0M", "M")
-		elseif num >= 1e3 then
-			return string.format("%.1fk", num / 1e3):gsub("%.0k", "k")
-		else
-			return tostring(math.floor(num))
-		end
-	end
-
-	-- 🎨 ฟังก์ชันสร้าง progress bar รวม
-	local function makeProgressBar(percent)
-		local totalBars = 10
-		local filled = math.floor((percent / 100) * totalBars)
-		local empty = totalBars - filled
-		return string.rep("🟩", filled) .. string.rep("⬛", empty)
-	end
-
-	for _, row in ipairs(maintofind:GetChildren()) do
-		local n = row:FindFirstChild("TypeName")
-		local s = row:FindFirstChild("EggSlot")
-		local c = s and s:FindFirstChild("Count")
-		if n and c then
-			local itemName = cleanItemName(n.Text)
-			local showData = Showlist[itemName]
-
-			if showData and showData.show then
-				local emoji = showData.emoji or "📦"
-				local countText = tostring(c.Text or ""):gsub(",", ""):gsub("x", ""):gsub("X", "")
-				countText = countText:gsub("[^%d/]", "")
-				local current, max = safeSplitNumber(countText)
-
-				local uiExtra = safeNumber(showData.extrafarm or 0)
-				local oldExtra = safeNumber(config.ItemExtraFarm[itemName] or 0)
-				local baseCount = safeNumber(config.ItemBaseCount[itemName] or current)
-				local completed = config.ItemCompleted[itemName] or false
-
-				-- 🧠 เงื่อนไขพิเศษ 4 แบบ
-				-- 1️⃣ เริ่มต้นครั้งแรก
 				if not config.ItemBaseCount[itemName] then
+					-- 1️⃣ ครั้งแรก
 					baseCount = current
+					config.ItemBaseCount[itemName] = current
 					config.ItemCompleted[itemName] = false
+					config.ItemAccumulated[itemName] = 0
+					config.ItemLastCurrent[itemName] = current
 					completed = false
 
-				-- 2️⃣ ถึงเป้าแล้ว (คง complete จนกว่า extra จะเปลี่ยน)
+				elseif uiExtra > 0 and uiExtra ~= oldExtra then
+					-- 2️⃣ เปลี่ยน extrafarm (ทุกกรณี) → รีเซ็ตเสมอ
+					baseCount = current
+					config.ItemBaseCount[itemName] = current
+					config.ItemCompleted[itemName] = false
+					config.ItemAccumulated[itemName] = 0
+					config.ItemLastCurrent[itemName] = current
+					completed = false
+
 				elseif current >= baseCount + uiExtra and uiExtra > 0 then
+					-- 3️⃣ ถึงเป้าแล้ว
 					if not completed then
 						config.ItemCompleted[itemName] = true
 						completed = true
 					end
-					-- รีเฉพาะตอน ExtraFarm เปลี่ยนเท่านั้น
-					if uiExtra ~= oldExtra then
-						baseCount = current
-						config.ItemCompleted[itemName] = false
-						completed = false
-					end
 
-				-- 3️⃣ เปลี่ยน ExtraFarm ระหว่างฟาร์ม
-				elseif uiExtra > 0 and uiExtra ~= oldExtra then
-					baseCount = current
-					config.ItemCompleted[itemName] = false
-					completed = false
-
-				-- 4️⃣ ป้องกันกรณี current ลดลง
 				elseif current < baseCount then
+					-- 4️⃣ ของลดลง → นับต่อ ไม่รีเซ็ต
 					baseCount = current
+					config.ItemBaseCount[itemName] = current
 					config.ItemCompleted[itemName] = false
 					completed = false
 				end
 
-				-- 🧮 โหมด progress แบบสะสม-only
-				config.ItemAccumulated = config.ItemAccumulated or {}
-				config.ItemLastCurrent = config.ItemLastCurrent or {}
+                local lastCur = safeNumber(config.ItemLastCurrent[itemName] or current)
+                local gained = current - lastCur
+                if gained > 0 then
+                    config.ItemAccumulated[itemName] = (config.ItemAccumulated[itemName] or 0) + gained
+                end
 
-				local lastCur = safeNumber(config.ItemLastCurrent[itemName] or current)
+                local progress = config.ItemAccumulated[itemName] or 0
+                config.ItemLastCurrent[itemName] = current
+                config.ItemExtraFarm[itemName]   = uiExtra
 
-				-- ฟาร์มเพิ่มเท่านั้นถึงสะสม (ห้ามลด)
-				local gained = current - lastCur
-				if gained > 0 then
-					config.ItemAccumulated[itemName] = (config.ItemAccumulated[itemName] or 0) + gained
-				end
+                local display = shorten(current)
+                local line
+                if uiExtra > 0 then
+                    extraFarmTotal += uiExtra
+                    local missing = math.max(0, uiExtra - progress)
+                    local mark = missing <= 0 and "✅" or string.format("(+%s)", shorten(missing))
+                    line = string.format("%s **%s** — %s (%s / %s) %s",
+                        emoji, itemName, display, shorten(progress), shorten(uiExtra), mark)
+                else
+                    line = string.format("%s **%s** — %s", emoji, itemName, display)
+                end
 
-				-- progress = ยอดสะสม (ไม่ลดลง)
-				local progress = config.ItemAccumulated[itemName] or 0
+                table.insert(list, line)
 
-				-- เก็บ current ล่าสุดไว้ใช้ครั้งถัดไป
-				config.ItemLastCurrent[itemName] = current
+                if uiExtra > 0 then
+                    itemCount += 1
+                    local p = math.min(100, math.floor((progress / math.max(1, uiExtra)) * 100))
+                    totalProgress += p
+                end
+            end
+        end
 
-				-- เก็บ extrafarm แบบเดิม
-				config.ItemExtraFarm[itemName] = uiExtra
+        if #list == 0 then return 0 end
 
-				-- ✅ คำนวณและแสดงผล
-				local display = (max and max > 0)
-					and string.format("%s/%s", shorten(current), shorten(max))
-					or shorten(current)
+        local avgProgress = (itemCount > 0) and math.floor(totalProgress / itemCount) or 0
+        local bar = makeProgressBar(avgProgress)
 
-				-- สร้างบรรทัดแสดงผล (Normal items)
-				local line
-				if uiExtra > 0 then
-					-- ถ้ามีเป้าฟาร์ม (Extra)
-					extraFarmTotal += uiExtra
-					local missing = math.max(0, uiExtra - progress)
-					local mark = ""
+        local description =
+            "🎒 **Inventory Status — Bee Swarm Report 🐝**\n───────────────────────────────\n"
+            .. table.concat(list, "\n")
+            .. "\n───────────────────────────────\n"
+            .. string.format("📊 Farm Progress\n%s %d%%\n", bar, avgProgress)
+            .. "───────────────────────────────\n"
+            .. "`📚 Inventory auto-updated`\n───────────────────────────────"
 
-					if missing <= 0 then
-						mark = "✅"
-					else
-						mark = string.format("(+%s)", shorten(missing))
-					end
+        sendDiscordEmbed(config.WebhookUrl_Normal or config.WebhookUrl, {
+            title = "🎒 Inventory Normal Report",
+            color = 0x3498DB,
+            description = description,
+            footer = { text = os.date("📅 %d/%m/%Y ⏰ %H:%M:%S") .. " | Bee Swarm Auto Reporter" }
+        })
 
-					line = string.format("%s **%s** — %s (%s / %s) %s",
-						emoji, itemName, display,
-						shorten(progress), shorten(uiExtra),
-						mark
-					)
-				else
-					-- ไอเท็มปกติ ไม่มีเป้าฟาร์ม
-					line = string.format("%s **%s** — %s", emoji, itemName, display)
-				end
+        return extraFarmTotal
+    end
 
-				table.insert(list, line)
+    local function shorten(num)
+        num = tonumber(num) or 0
+        if num >= 1e9 then return string.format("%.1fB", num/1e9):gsub("%.0B","B")
+        elseif num >= 1e6 then return string.format("%.1fM", num/1e6):gsub("%.0M","M")
+        elseif num >= 1e3 then return string.format("%.1fk", num/1e3):gsub("%.0k","k")
+        else return tostring(math.floor(num)) end
+    end
 
-				-- รวมเปอร์เซ็นต์เฉลี่ย (ยังอยู่ข้างใน loop แต่หลังการ insert)
-				if uiExtra > 0 then
-					itemCount += 1
-					local p = math.min(100, math.floor((progress / math.max(1, uiExtra)) * 100))
-					totalProgress += p
-				end
-			end
-		end
-	end
+    local function sendCraftItemsWebhook()
+        local craftList = {}
 
-	if #list == 0 then return 0 end
+        for mainItem, recipe in pairs(CraftRecipes) do
+            -- ✅ FIX 2: แสดงถ้า extrafarm > 0 ไม่ว่า show จะเป็นอะไร
+				local showData = Showlist[mainItem]
+				local uiExtra = safeNumber(showData and showData.extrafarm or 0)
 
-	-- 🎯 คำนวณ progress เฉลี่ยทั้งหมด
-	local avgProgress = (itemCount > 0) and math.floor(totalProgress / itemCount) or 0
-	local bar = makeProgressBar(avgProgress)
+				if showData and showData.show and uiExtra > 0 then
+                local current = safeNumber(config.ItemCurrent[mainItem] or 0)
+                -- ✅ FIX 3: progress คำนวณจาก accumulated ถ้ามี ไม่ใช่ current - base
+                local progress = safeNumber(
+                    (config.ItemAccumulated and config.ItemAccumulated[mainItem]) or 0
+                )
 
-	-- 🧾 เพิ่ม progress bar เข้า description
-	local description =
-		"🎒 **Inventory Status — Bee Swarm Report 🐝**\n───────────────────────────────\n"
-		.. table.concat(list, "\n")
-		.. "\n───────────────────────────────\n"
-		.. string.format("📊 Farm Progress\n%s %d%%\n", bar, avgProgress)
-		.. "───────────────────────────────\n"
-		.. "`📚 Inventory auto-updated`\n───────────────────────────────"
+                local emoji = (showData and showData.emoji) or "📦"
+                local need = uiExtra
+                local missing = math.max(0, need - progress)
+                local mark = missing <= 0 and "✅" or string.format("(+%s)", shorten(missing))
 
-	sendDiscordEmbed(config.WebhookUrl_Normal or config.WebhookUrl, {
-		title = "🎒 Inventory Normal Report",
-		color = 0x3498DB,
-		description = description,
-		footer = { text = os.date("📅 %d/%m/%Y ⏰ %H:%M:%S") .. " | Bee Swarm Auto Reporter" }
-	})
+                local header = string.format(
+                    "%s **%s** — x%s (%s / %s) %s",
+                    emoji, mainItem, shorten(current),
+                    shorten(progress), shorten(need), mark
+                )
 
-	return extraFarmTotal
+                table.insert(craftList, header)
+
+                local craftBlock = buildCraftTreeBlock(mainItem, uiExtra, 1)
+                if craftBlock ~= "" then
+                    table.insert(craftList, craftBlock)
+                end
+
+                table.insert(craftList, "")
+            end
+        end
+
+        if #craftList == 0 then
+            print("[EggTab] ⚠️ ไม่มีไอเทมที่มี extrafarm > 0")
+            return
+        end
+
+        local function sendLongWebhook(title, color, text)
+            local limit = 1800
+            while #text > 0 do
+                local chunk = text:sub(1, limit)
+                local lastLine = chunk:match(".*\n")
+                if lastLine and #chunk < #text then chunk = lastLine end
+                sendDiscordEmbed(config.WebhookUrl_Craft or config.WebhookUrl, {
+                    title = title, color = color, description = chunk,
+                    footer = { text = "📊 Bee Swarm Crafting Automation" }
+                })
+                text = text:sub(#chunk + 1)
+                task.wait(1)
+            end
+        end
+
+        local fullText =
+            "🧪 **Inventory Craft Report — Smart Craft System 🧩**\n"
+            .. "───────────────────────────────\n"
+            .. table.concat(craftList, "\n")
+            .. "\n───────────────────────────────\n"
+            .. "`📚 Inventory auto-updated`\n───────────────────────────────\n"
+            .. string.format("`📅 %s ⏰ %s`\n", os.date("%d/%m/%Y"), os.date("%H:%M:%S"))
+            .. "`Bee Swarm Auto Reporter System`\n───────────────────────────────"
+
+        sendLongWebhook("🧪 Inventory Craft Report", 0x9B59B6, fullText)
+    end
+
+    local function sendIngredientSummaryWebhook(totalExtraFarm)
+        local TotalSummary = {}
+
+        local function collectAllIngredients(itemName, multiplier)
+            local recipe = CraftRecipes[itemName]
+            if not recipe then return end
+            for _, sub in ipairs(recipe) do
+                local need = safeNumber(sub.goal * multiplier)
+                local have = safeNumber(config.ItemCurrent[sub.name] or 0)
+                TotalSummary[sub.name] = TotalSummary[sub.name] or { have = 0, need = 0 }
+                TotalSummary[sub.name].have = math.max(TotalSummary[sub.name].have, have)
+                TotalSummary[sub.name].need = (TotalSummary[sub.name].need or 0) + need
+                if CraftRecipes[sub.name] then
+                    collectAllIngredients(sub.name, need)
+                end
+            end
+        end
+
+        for mainItem, showData in pairs(Showlist) do
+            local uiExtra = safeNumber(showData.extrafarm or 0)
+            -- ✅ สแกนทุกไอเทมที่มี extrafarm > 0 และมีสูตร ไม่จำกัดแค่ show = true
+            if uiExtra > 0 and CraftRecipes[mainItem] then
+                collectAllIngredients(mainItem, uiExtra)
+            end
+        end
+
+        local function shorten(num)
+            num = tonumber(num) or 0
+            if num >= 1e9 then return string.format("%.1fB", num/1e9):gsub("%.0B","B")
+            elseif num >= 1e6 then return string.format("%.1fM", num/1e6):gsub("%.0M","M")
+            elseif num >= 1e3 then return string.format("%.1fk", num/1e3):gsub("%.0k","k")
+            else return tostring(math.floor(num)) end
+        end
+
+        local function makeTotalProgressBar(percent)
+            local filled = math.floor((percent/100) * 10)
+            return string.rep("🟩", filled) .. string.rep("⬛", 10 - filled)
+        end
+
+        local lines = {}
+        table.insert(lines, "📦 **Ingredient Summary — (Recursive)**")
+        table.insert(lines, "───────────────────────────────")
+
+        local totalNeed, totalHave, totalMissing = 0, 0, 0
+        local notCompleteCount = 0
+        config.ItemLastSummaryHave = config.ItemLastSummaryHave or {}
+        local previousData = config.ItemLastSummaryHave
+
+        for name, data in pairs(TotalSummary) do
+            local have = safeNumber(data.have or 0)
+            local need = safeNumber(data.need or 0)
+            local missing = math.max(0, need - have)
+
+            if need > 0 then
+                local prevHave = safeNumber(previousData[name] or 0)
+                local changeEmoji = (have - prevHave) > 0 and " ⬆️" or ""
+
+                if missing > 0 then
+                    notCompleteCount += 1
+                    local emoji = (Showlist[name] and Showlist[name].emoji) or "📦"
+                    table.insert(lines, string.format("%s %s — %s / %s (+%s)%s",
+                        emoji, name, shorten(have), shorten(need),
+                        shorten(missing), changeEmoji))
+                    totalHave    += have
+                    totalNeed    += need
+                    totalMissing += missing
+                end
+
+                previousData[name] = have
+            end
+        end
+
+        if notCompleteCount == 0 then
+            table.insert(lines, "🎯 วัตถุดิบครบทุกอย่างแล้ว! เยี่ยมมาก!! 🐝")
+        else
+            table.insert(lines, "───────────────────────────────")
+            local totalPercent = (totalNeed > 0) and math.floor((totalHave / totalNeed) * 100) or 0
+            local bar = makeTotalProgressBar(totalPercent)
+            table.insert(lines, string.format("📊 Farm Progress Status\n%s %d%%", bar, totalPercent))
+            table.insert(lines, "")
+            table.insert(lines, string.format("📉 `Remaining to Farm:` %s", shorten(totalMissing)))
+            if totalExtraFarm and totalExtraFarm > 0 then
+                table.insert(lines, string.format("🎯 `Extra Farm Goals:` %s", shorten(totalExtraFarm)))
+            end
+        end
+
+        table.insert(lines, "───────────────────────────────")
+        table.insert(lines, "`📚 Summary auto-generated\n(Full Recursive Crafting Tree)`")
+        table.insert(lines, "───────────────────────────────")
+
+        sendDiscordEmbed(config.WebhookUrl_Summary or config.WebhookUrl, {
+            title = "📦 Ingredient Summary Report",
+            color = 0x1ABC9C,
+            description = table.concat(lines, "\n"),
+            footer = { text = os.date("📅 %d/%m/%Y ⏰ %H:%M:%S") .. " | Bee Swarm Auto Reporter" }
+        })
+    end
+
+    ----------------------------------------------------
+    -- 🚀 เรียกใช้งาน webhook
+    ----------------------------------------------------
+    if saveWebhookConfig then pcall(saveWebhookConfig) end
+    updateCraftTreeCounts()
+
+    -- ✅ ตรวจจาก extrafarm > 0 ไม่ต้องการ show = true
+    local hasCraftItemWithGoal = false
+    for name, showData in pairs(Showlist) do
+        if showData.show and CraftRecipes[name] and safeNumber(showData.extrafarm or 0) > 0 then
+            hasCraftItemWithGoal = true
+            break
+        end
+    end
+
+    if hasCraftItemWithGoal then
+        print("[EggTab] 📦 พบไอเท็มที่มีสูตรคราฟและมีเป้าฟาร์ม — ส่งครบทั้ง 3 webhook")
+        local totalExtraFarm = sendNormalItemsWebhook() or 0
+        sendCraftItemsWebhook()
+        sendIngredientSummaryWebhook(totalExtraFarm)
+    else
+        print("[EggTab] ⏩ ไม่มีไอเท็มที่มีสูตรคราฟ + extrafarm > 0 — ส่งเฉพาะ Normal Report")
+        sendNormalItemsWebhook()
+    end
+
+    print("[EggTab] ✅ ส่ง Webhook ทั้งหมดเรียบร้อย")
+    return true
 end
 
-	----------------------------------------------------
-	-- 🧪 ส่งเฉพาะ Craft Items ที่อยู่ในสูตรเท่านั้น
-	----------------------------------------------------
-	local function shorten(num)
-		num = tonumber(num) or 0
-		if num >= 1e9 then
-			return string.format("%.1fB", num / 1e9):gsub("%.0B", "B")
-		elseif num >= 1e6 then
-			return string.format("%.1fM", num / 1e6):gsub("%.0M", "M")
-		elseif num >= 1e3 then
-			return string.format("%.1fk", num / 1e3):gsub("%.0k", "k")
-		else
-			return tostring(math.floor(num))
-		end
-	end
 
-	local function sendCraftItemsWebhook()
-		local craftList = {}
 
-		for mainItem, recipe in pairs(CraftRecipes) do
-			-- ✅ ตรวจเฉพาะไอเทมที่มีในสูตรเท่านั้น
-			if Showlist[mainItem] and Showlist[mainItem].show then
-				local uiExtra = safeNumber(Showlist[mainItem].extrafarm or 0)
-				local current = safeNumber(config.ItemCurrent[mainItem] or 0)
-
-				local useFresh = (Showlist[mainItem] and Showlist[mainItem].farmmode) == true
-				local base = 0
-				if not useFresh then
-					base = safeNumber((config.ItemBaseCount and config.ItemBaseCount[mainItem]) or current)
-				end
-
-				local progress, completed
-				if useFresh then
-					progress = 0
-					completed = false
-				else
-					progress = math.max(0, current - base)
-					completed = (current >= (base + uiExtra))
-				end
-
-				local emoji = (Showlist[mainItem] and Showlist[mainItem].emoji) or "📦"
-				-- คำนวณ missing สำหรับหัวข้อแม่ (craft item)
-				local need = uiExtra
-				local have = progress
-				local missing = math.max(0, need - have)
-
-				local mark = ""
-				if missing <= 0 then
-					mark = "✅"
-				else
-					mark = string.format("(+%s)", shorten(missing))
-				end
-
-				local header = string.format(
-					"%s **%s** — x%s (%s / %s) %s",
-					emoji, mainItem, shorten(current),
-					shorten(progress), shorten(need),
-					mark
-				)		
-
-				table.insert(craftList, header)
-
-				-- 🔁 แสดงสูตรลูก (ถ้ามี)
-				local craftBlock = buildCraftTreeBlock(mainItem, uiExtra, 1)
-				if craftBlock ~= "" then
-					table.insert(craftList, craftBlock)
-				end
-
-				table.insert(craftList, "") -- เว้นบรรทัด
-			end
-		end
-
-		if #craftList == 0 then
-			print("[EggTab] ⚠️ ไม่มีไอเทมที่อยู่ในสูตรคราฟ ถูกตั้งค่า show ไว้")
-			return
-		end
-
-		-----------------------------------------------------
-		-- 🧩 ระบบแบ่งข้อความอัจฉริยะ (ไม่ตัดกลางบรรทัด)
-		-----------------------------------------------------
-		local function sendLongWebhook(title, color, text)
-			local limit = 1800
-			while #text > 0 do
-				local chunk = text:sub(1, limit)
-				local lastLine = chunk:match(".*\n")
-				if lastLine and #chunk < #text then
-					chunk = lastLine
-				end
-
-				sendDiscordEmbed(config.WebhookUrl_Craft or config.WebhookUrl, {
-					title = title,
-					color = color,
-					description = chunk,
-					footer = { text = "📊 Bee Swarm Crafting Automation" }
-				})
-
-				text = text:sub(#chunk + 1)
-				task.wait(1)
-			end
-		end
-
-	-----------------------------------------------------
-	-- 🧩 ส่งเฉพาะ Craft Report ที่อยู่ในสูตรเท่านั้น
-	-----------------------------------------------------
-	local fullText =
-		"🧪 **Inventory Craft Report — Smart Craft System 🧩**\n" ..
-		"───────────────────────────────\n" ..
-		table.concat(craftList, "\n") ..
-		"\n───────────────────────────────\n" ..
-		"`📚 Inventory auto-updated`\n───────────────────────────────\n" ..
-		string.format("`📅 %s ⏰ %s`\n", os.date("%d/%m/%Y"), os.date("%H:%M:%S")) ..
-		"`Bee Swarm Auto Reporter System`\n───────────────────────────────"
-
-	sendLongWebhook("🧪 Inventory Craft Report", 0x9B59B6, fullText)
-end
-
------------------------------------------------------
--- 🧾 Ingredient Summary (รวมทุกชั้น + ย่อเลข + แสดงแค่ขาด + บาร์รวม)
------------------------------------------------------
-local function sendIngredientSummaryWebhook(totalExtraFarm)
-	local TotalSummary = {}
-
-	-----------------------------------------------------
-	-- 🔁 รวมทุกชั้นของสูตรคราฟ (recursive ลึกสุด)
-	-----------------------------------------------------
-	local function collectAllIngredients(itemName, multiplier)
-		local recipe = CraftRecipes[itemName]
-		if not recipe then return end
-
-		for _, sub in ipairs(recipe) do
-			local need = safeNumber(sub.goal * multiplier)
-			local have = safeNumber(config.ItemCurrent[sub.name] or 0)
-
-			TotalSummary[sub.name] = TotalSummary[sub.name] or { have = 0, need = 0 }
-			TotalSummary[sub.name].have = math.max(TotalSummary[sub.name].have, have)
-			TotalSummary[sub.name].need = (TotalSummary[sub.name].need or 0) + need
-
-			if CraftRecipes[sub.name] then
-				collectAllIngredients(sub.name, need)
-			end
-		end
-	end
-
-	-----------------------------------------------------
-	-- 🚀 สแกนทุกสูตรหลักใน Showlist ที่เปิดใช้งาน
-	-----------------------------------------------------
-	for mainItem, showData in pairs(Showlist) do
-		if showData.show and CraftRecipes[mainItem] then
-			local uiExtra = safeNumber(showData.extrafarm or 0)
-			if uiExtra > 0 then
-				collectAllIngredients(mainItem, uiExtra)
-			end
-		end
-	end
-
-	-----------------------------------------------------
-	-- 🔢 ฟังก์ชันย่อเลข (6,000 → 6k / 1,200,000 → 1.2M)
-	-----------------------------------------------------
-	local function shorten(num)
-		num = tonumber(num) or 0
-		if num >= 1e9 then
-			return string.format("%.1fB", num / 1e9):gsub("%.0B", "B")
-		elseif num >= 1e6 then
-			return string.format("%.1fM", num / 1e6):gsub("%.0M", "M")
-		elseif num >= 1e3 then
-			return string.format("%.1fk", num / 1e3):gsub("%.0k", "k")
-		else
-			return tostring(math.floor(num))
-		end
-	end
-
-	-----------------------------------------------------
-	-- 🎨 ฟังก์ชันสร้าง progress bar รวม
-	-----------------------------------------------------
-	local function makeTotalProgressBar(percent)
-		local totalBars = 10
-		local filled = math.floor((percent / 100) * totalBars)
-		local empty = totalBars - filled
-		return string.rep("🟩", filled) .. string.rep("⬛", empty)
-	end
-
-	-----------------------------------------------------
-	-- 📊 สร้างข้อความสรุป
-	-----------------------------------------------------
-	local lines = {}
-	table.insert(lines, "📦 **Ingredient Summary — (Recursive)**")
-	table.insert(lines, "───────────────────────────────")
-
-	local totalNeed, totalHave, totalMissing = 0, 0, 0
-	local notCompleteCount = 0
-	config.ItemLastSummaryHave = config.ItemLastSummaryHave or {}
-	local previousData = config.ItemLastSummaryHave
-
-for name, data in pairs(TotalSummary) do
-	local have = safeNumber(data.have or 0)
-	local need = safeNumber(data.need or 0)
-	local missing = math.max(0, need - have)
-
-	-- ถ้าไม่มีความต้องการ (need == 0) ให้ข้ามรายการนี้
-	if need > 0 then
-
-		-- 💬 ตรวจการเปลี่ยนแปลงจากรอบก่อน
-		local prevHave = safeNumber(previousData[name] or 0)
-		local diff = have - prevHave
-		local changeEmoji = ""
-		if diff > 0 then
-			if prevHave > 0 and (diff / prevHave) >= 0.1 then
-				changeEmoji = " ⬆️" -- เพิ่มขึ้นมากกว่า 10%
-			else
-				changeEmoji = " ⬆️" -- เพิ่มขึ้นเล็กน้อย
-			end
-		end
-
-		-- แสดงเฉพาะที่ยังขาด (missing > 0)
-		if missing > 0 then
-			notCompleteCount = notCompleteCount + 1
-			local emoji = (Showlist[name] and Showlist[name].emoji) or "📦"
-
-			local mark = ""
-			if missing <= 0 then
-				mark = "✅"
-			else
-				mark = string.format("(+%s)", shorten(missing))
-			end
-
-			-- ใส่บรรทัดสรุป (ไม่มี ❌ ตอนขาด)
-			table.insert(lines, string.format("%s %s — %s / %s %s%s",
-				emoji, name,
-				shorten(have), shorten(need),
-				mark, changeEmoji
-			))
-
-			totalHave = totalHave + have
-			totalNeed = totalNeed + need
-			totalMissing = totalMissing + missing
-		end
-
-		-- 🧾 บันทึกค่าล่าสุดไว้ใช้เทียบรอบหน้า
-		previousData[name] = have
-	end
-end
-
-	if notCompleteCount == 0 then
-		table.insert(lines, "🎯 วัตถุดิบครบทุกอย่างแล้ว! เยี่ยมมาก!! 🐝")
-	else
-		table.insert(lines, "───────────────────────────────")
-		local totalPercent = (totalNeed > 0) and math.floor((totalHave / totalNeed) * 100) or 0
-		local bar = makeTotalProgressBar(totalPercent)
-		table.insert(lines, string.format("📊 Farm Progress Status\n%s %d%%", bar, totalPercent))
-		table.insert(lines, "")
-		table.insert(lines, string.format("📉 `Remaining to Farm:` %s", shorten(totalMissing)))
-		if totalExtraFarm and totalExtraFarm > 0 then
-			table.insert(lines, string.format("🎯 `Extra Farm Goals:` %s", shorten(totalExtraFarm)))
-		end
-	end
-
-	table.insert(lines, "───────────────────────────────")
-	table.insert(lines, "`📚 Summary auto-generated\n(Full Recursive Crafting Tree)`")
-	table.insert(lines, "───────────────────────────────")
-
-	local summaryText = table.concat(lines, "\n")
-
-	sendDiscordEmbed(config.WebhookUrl_Summary or config.WebhookUrl, {
-		title = "📦 Ingredient Summary Report",
-		color = 0x1ABC9C,
-		description = summaryText,
-		footer = { text = os.date("📅 %d/%m/%Y ⏰ %H:%M:%S") .. " | Bee Swarm Auto Reporter" }
-	})
-end
-
-----------------------------------------------------
--- 🚀 เรียกใช้งาน webhook ตามสถานะของ showlist
-----------------------------------------------------
-if saveWebhookConfig then pcall(saveWebhookConfig) end
-updateCraftTreeCounts()
-
--- ✅ ตรวจว่าใน showlist มี "ไอเท็มที่มีสูตรคราฟ + มีเป้าฟาร์ม (extrafarm > 0)" หรือไม่
-local hasCraftItemWithGoal = false
-for name, showData in pairs(Showlist) do
-	if showData.show and CraftRecipes[name] then
-		local uiExtra = safeNumber(showData.extrafarm or 0)
-		if uiExtra > 0 then
-			hasCraftItemWithGoal = true
-			break
-		end
-	end
-end
-
--- 🚀 ตัดสินใจยิง webhook
-if hasCraftItemWithGoal then
-	print("[EggTab] 📦 พบไอเท็มที่มีสูตรคราฟและมีเป้าฟาร์ม — ส่งครบทั้ง 3 webhook")
-	local totalExtraFarm = sendNormalItemsWebhook() or 0
-	sendCraftItemsWebhook()
-	sendIngredientSummaryWebhook(totalExtraFarm)
-else
-	print("[EggTab] ⏩ ไม่มีไอเท็มที่มีสูตรคราฟ + extrafarm > 0 — ส่งเฉพาะ Inventory Normal Report")
-	sendNormalItemsWebhook()
-end
-
-print("[EggTab] ✅ ส่ง Webhook ทั้งหมดเรียบร้อย")
-task.wait(1.5)
-closetab("Eggs Tab")
-print("[EggTab] 🔒 ปิดแท็บเรียบร้อย")
-return true
-end
 
 -- ✂️ ฟังก์ชันย่อเลข
 local function shortenNumber(num)
@@ -3350,24 +3161,26 @@ local function shortenNumber(num)
 	else return tostring(math.floor(n)) end
 end
 
--- ✂️ ฟังก์ชันย่อข้อความ (ลบคำซ้ำ / ตัด field / ย่อเลขในข้อความ)
+-- ✅ แก้ shortenText เพิ่ม trim จุดท้าย
 local function shortenText(text)
-	text = text
-		:gsub("pollen from the ", "from ")
-		:gsub("pollen from ", "from ")
-		:gsub("the ", "")
-		:gsub("Field", "")
-		:gsub("Collect%s+", "Collect ")
-		:gsub("Defeat%s+", "Defeat ")
-		:gsub("Feed%s+", "Feed ")
-		:gsub("Use%s+", "Use ")
-		:gsub("Convert%s+", "Convert ")
-		:gsub(" at your hive", "")
-		:gsub(" your bees", "")
-		:gsub("%s+", " ")
-	-- ย่อเลขในข้อความทั้งหมด
-	text = text:gsub("(%d[%d,]*)", function(num) return shortenNumber(num) end)
-	return text:gsub("^%s+", ""):gsub("%s+$", "")
+    text = text
+        :gsub("pollen from the ", "from ")
+        :gsub("pollen from ", "from ")
+        :gsub("the ", "")
+        :gsub("Field", "")
+        :gsub("Collect%s+", "Collect ")
+        :gsub("Defeat%s+", "Defeat ")
+        :gsub("Feed%s+", "Feed ")
+        :gsub("Use%s+", "Use ")
+        :gsub("Convert%s+", "Convert ")
+        :gsub(" at your hive", "")
+        :gsub(" your bees", "")
+        :gsub("%s+", " ")
+    text = text:gsub("(%d[%d,]*)", function(num) return shortenNumber(num) end)
+    text = text:gsub("^%s+", ""):gsub("%s+$", "")
+    -- ✅ เพิ่ม: ตัด . หรือ , หรือ space ท้ายสุดออก
+    text = text:gsub("[%s%.,%s]+$", "")
+    return text
 end
 
 -- 🎨 ฟังก์ชันสร้าง Progress Bar
@@ -3377,144 +3190,244 @@ local function makeProgressBar(done, total, length)
 	return string.rep("🟩", filled) .. string.rep("⬛", length - filled), percent
 end
 
---- 📜 Hybrid Log Quest Report — 🎯 Compact Summary + Task Detail
 local function questtab_webhook_service()
-	if not (config.Flags and config.Flags.Quest) then return end
+    if not (config.Flags and config.Flags.Quest) then return end
 
-	print("🎯 [QuestTab] เปิดแท็บ Quests เพื่อสร้างรายงาน Hybrid Log...")
-	opentab("Quests Tab")
-	task.wait(2.5)
+    if not QuestModule then
+        warn("⚠️ QuestModule เป็น nil — ตรวจสอบ require")
+        return
+    end
 
-	local maintofind2
-	for i = 1, 30 do
-		local pg = game.Players.LocalPlayer:FindFirstChild("PlayerGui")
-		local content = pg
-			and pg:FindFirstChild("ScreenGui")
-			and pg.ScreenGui:FindFirstChild("Menus")
-			and pg.ScreenGui.Menus:FindFirstChild("Children")
-			and pg.ScreenGui.Menus.Children:FindFirstChild("Quests")
-			and pg.ScreenGui.Menus.Children.Quests:FindFirstChild("Content")
-		if content and #content:GetChildren() > 0 then
-			maintofind2 = content:FindFirstChild("Frame")
-			if maintofind2 then break end
-		end
-		task.wait(0.4)
-	end
-	if not maintofind2 then warn("⚠️ ไม่พบแท็บ Quests") return end
+    -- ✅ re-fetch ข้อมูลใหม่ทุกครั้งที่เรียก function นี้
+    local freshData = nil
+    for _, v in pairs(getgc(true)) do
+        if type(v) == "table" and rawget(v, "Honey") and rawget(v, "Eggs") then
+            if v.UserId == player.UserId then
+                freshData = v
+                break
+            end
+        end
+    end
 
-	-- 🎨 สี/อีโมจิหมี
-	local bearStyle = {
-		["Spirit Bear"] = { icon = "🌸", color = 0xBB8FCE },
-		["Science Bear"] = { icon = "⚗️", color = 0x5DADE2 },
-		["Panda Bear"] = { icon = "🥋", color = 0x212F3C },
-		["Brown Bear"] = { icon = "🍯", color = 0xAF601A },
-		["Black Bear"] = { icon = "🐻", color = 0x2E86C1 },
-	}
+    if not freshData then
+        warn("⚠️ re-fetch data ไม่สำเร็จ")
+        return
+    end
+    if not (freshData.Quests and freshData.Quests.Active) then
+        warn("⚠️ ไม่พบ Quests.Active")
+        return
+    end
 
-	-- 📋 เก็บข้อมูลเควช
-	local questList = {}
-	for _, questBox in ipairs(maintofind2:GetChildren()) do
-		if questBox:IsA("Frame") then
-			local titleBarBG = questBox:FindFirstChild("TitleBarBG")
-			local titleLabel = titleBarBG and titleBarBG:FindFirstChild("TitleBar")
-			if titleLabel then
-				local questName = titleLabel.Text
-				local bear = QuestOwnerMap[questName] or "Unknown"
-				local style = bearStyle[bear] or { icon = "🐾", color = 0xB57EDC }
+    print("🎯 [QuestTab] กำลังดึงข้อมูลเควชจาก data โดยตรง...")
 
-				if QuestShowlist[bear] and QuestShowlist[bear].show then
-					local tasks, doneCount = {}, 0
+local bearStyle = {
+    ["Spirit Bear"]  = { icon = "<:Hivesticker_honey_bee_bear:1477626618787659887>", color = 0xBB8FCE },
+    ["Science Bear"] = { icon = "<:Hivesticker_honey_bee_bear:1477626618787659887>", color = 0xBB8FCE },
+    ["Panda Bear"]   = { icon = "<:Hivesticker_honey_bee_bear:1477626618787659887>", color = 0xBB8FCE },
+    ["Brown Bear"]   = { icon = "<:Hivesticker_honey_bee_bear:1477626618787659887>", color = 0xBB8FCE },
+    ["Black Bear"]   = { icon = "<:Hivesticker_honey_bee_bear:1477626618787659887>", color = 0xBB8FCE },
+    ["Riley Bee"]    = { icon = "<:Hivesticker_honey_bee_bear:1477626618787659887>", color = 0xFF9999 },
+    ["Bucko Bee"]    = { icon = "<:Hivesticker_honey_bee_bear:1477626618787659887>", color = 0x85C1E9 },
+    ["Mother Bear"]  = { icon = "<:Hivesticker_honey_bee_bear:1477626618787659887>", color = 0xBB8FCE }, -- ✅ เพิ่ม
+    ["Polar Bear"]   = { icon = "<:Hivesticker_honey_bee_bear:1477626618787659887>", color = 0xBB8FCE }, -- ✅ เพิ่ม
+    ["Onett"]        = { icon = "<:Hivesticker_honey_bee_bear:1477626618787659887>", color = 0xBB8FCE }, -- ✅ เพิ่ม
+}
 
-					for _, taskBar in ipairs(questBox:GetChildren()) do
-						if taskBar.Name == "TaskBar" and taskBar:IsA("Frame") then
-							local desc = taskBar:FindFirstChild("Description")
-							if desc and desc:IsA("TextLabel") then
-								local text = shortenText(desc.Text)
-								local complete = text:find("Complete") or text:find("100%%")
-									or text:find("Done") or text:find("Finished")
 
-								if complete then
-									doneCount += 1
-									table.insert(tasks, "✅ " .. text)
-								else
-									table.insert(tasks, "❌ " .. text)
-								end
-							end
-						end
-					end
+    -- ✅ เพิ่มใหม่: รูปของแต่ละ Bear/Bee
+    local bearImages = {
+        ["Spirit Bear"]  = "https://static.wikia.nocookie.net/bee-swarm-simulator/images/2/24/Spiritcloseup.png/revision/latest/scale-to-width-down/120?cb=20230410073957",
+        ["Science Bear"] = "https://static.wikia.nocookie.net/bee-swarm-simulator/images/d/d5/Sciencecloseup.png/revision/latest/scale-to-width-down/120?cb=20230410073140",
+        ["Panda Bear"]   = "https://static.wikia.nocookie.net/bee-swarm-simulator/images/a/a0/Pandacloseup.png/revision/latest/scale-to-width-down/120?cb=20230410073120",
+        ["Brown Bear"]   = "https://static.wikia.nocookie.net/bee-swarm-simulator/images/3/33/Browncloseup.png/revision/latest/scale-to-width-down/120?cb=20230410073111",
+        ["Black Bear"]   = "https://static.wikia.nocookie.net/bee-swarm-simulator/images/c/c2/Blackcloseup.png/revision/latest/scale-to-width-down/120?cb=20230410072910",
+        ["Mother Bear"]  = "https://static.wikia.nocookie.net/bee-swarm-simulator/images/1/15/Mothercloseup.png/revision/latest/scale-to-width-down/120?cb=20230410073103",
+        ["Polar Bear"]   = "https://static.wikia.nocookie.net/bee-swarm-simulator/images/d/d4/Polarcloseup.png/revision/latest/scale-to-width-down/120?cb=20230410073142",
+        ["Onett"]        = "https://static.wikia.nocookie.net/bee-swarm-simulator/images/d/d0/OnettNPC.png/revision/latest/scale-to-width-down/150?cb=20240413003313",
+        ["Riley Bee"]    = "https://static.wikia.nocookie.net/bee-swarm-simulator/images/3/37/Gifted_Riley_Bee_NPC.png/revision/latest?cb=20210907175830",
+        ["Bucko Bee"]    = "https://static.wikia.nocookie.net/bee-swarm-simulator/images/9/9e/Gifted_Bucko_Bee_NPC.png/revision/latest?cb=20210907180446",
+    }
 
-					table.insert(questList, {
-						bear = bear,
-						icon = style.icon,
-						color = style.color,
-						name = questName,
-						tasks = tasks,
-						done = doneCount
-					})
+    local stats = ClientStatCache:Get()
+    local rileyCount = (stats and stats.Totals and stats.Totals.QuestPoolCounts["Riley Bee"]) or 0
+    local buckoCount = (stats and stats.Totals and stats.Totals.QuestPoolCounts["Bucko Bee"]) or 0
+
+    local TaskTypes = QuestModule:GetTaskTypes()
+
+    local questList = {}
+
+for _, activeData in ipairs(freshData.Quests.Active) do   -- ✅
+    local questName = activeData.Name
+    if type(questName) == "number" then
+        questName = QuestModule:IDToName(questName)
+    end
+	
+	-- ✅ เพิ่ม log ตรงนี้
+    print(string.format("📋 [QuestTab] พบเควช: %s", tostring(questName)))
+
+    local questBase = QuestModule:Get(questName)
+    if not questBase or questBase.Hidden then continue end
+
+    local owner = QuestOwnerMap[questName] or "Unknown"
+    local style = bearStyle[owner] or { icon = "🐾", color = 0xB57EDC }
+
+    if not (QuestShowlist[owner] and QuestShowlist[owner].show) then continue end
+
+    local tasks, doneCount = {}, 0
+
+    local taskList = (type(questBase.Tasks) == "function") and questBase.Tasks(freshData) or questBase.Tasks   -- ✅
+    if taskList then
+        for taskIndex, taskInfo in ipairs(taskList) do
+            local description = "n/a"
+            pcall(function()
+                local descVal = taskInfo.Description or QuestModule.GetTaskDescription(freshData, taskInfo)   -- ✅
+                description = (type(descVal) == "function") and descVal(freshData) or tostring(descVal)       -- ✅
+            end)
+
+            local current = (TaskTypes[taskInfo.Type].GetStat(taskInfo, freshData) or 0)   -- ✅
+                - (activeData.StartValues[taskIndex] or 0)
+            local target = (type(taskInfo.Amount) == "function")
+                and taskInfo.Amount(freshData) or (taskInfo.Amount or 1)   -- ✅
+
+            local isDone = current >= target
+            if isDone then doneCount += 1 end
+
+			if description ~= "n/a" then
+				local shortDesc = shortenText(description)
+				if isDone then
+					table.insert(tasks, "<:Hivesticker_green_check_mark:1477630788152328263> " .. shortDesc)
+				else
+				local progText = string.format("%s / %s",
+					shortenNumber(math.floor(math.max(current, 0))),
+					shortenNumber(math.floor(target)))
+					table.insert(tasks, "<:Hivesticker_red_x:1477630810994774127> " .. shortDesc .. " . " .. progText)
 				end
 			end
+        end
+    end
+
+
+        local extraInfo = ""
+        if owner == "Riley Bee" then
+            extraInfo = string.format("🔴 Completed Total: **%s Quests**", NumberCommas(rileyCount))
+        elseif owner == "Bucko Bee" then
+            extraInfo = string.format("🔵 Completed Total: **%s Quests**", NumberCommas(buckoCount))
+        end
+
+        table.insert(questList, {
+            bear      = owner,
+            icon      = style.icon,
+            color     = style.color,
+            name      = tostring(questBase.DisplayName or questName),
+            tasks     = tasks,
+            done      = doneCount,
+            extraInfo = extraInfo,
+        })
+    end
+
+		if QuestShowlist["Riley Bee"] and QuestShowlist["Riley Bee"].show then
+			local style = bearStyle["Riley Bee"] or { icon = "🔴", color = 0xFF9999 }
+			table.insert(questList, {
+				bear      = "Riley Bee",
+				icon      = style.icon,   -- ✅ ดึงจาก bearStyle
+				color     = style.color,
+				name      = "Quest Pool Tracker",
+				tasks     = {},
+				done      = 0,
+				extraInfo = string.format("%s Completed Total: **%s Quests**", style.icon, NumberCommas(rileyCount)),
+				isBeePool = true,
+			})
 		end
-	end
 
-	-- ❌ ไม่มีเควช
-	if #questList == 0 then
-		sendDiscordEmbed(config.WebhookUrl, {
-			title = "📜 Quest Report",
-			color = 0xB57EDC,
-			description = "❌ ไม่มีเควชที่เปิด Show อยู่ใน UI",
-			footer = { text = os.date("📅 %d/%m/%Y ⏰ %H:%M:%S") }
-		})
-		closetab("Quests Tab")
-		return
-	end
-
-	-- 🌟 สร้างรายงาน Hybrid Log Style
-	for i, q in ipairs(questList) do
-		local total = #q.tasks
-		local done = q.done
-		local percent = total > 0 and math.floor((done / total) * 100) or 0
-		local filled = math.floor(percent / 10)
-		local empty = 10 - filled
-		local bar = string.rep("🟩", filled) .. string.rep("⬛", empty)
-
-		local lines = {}
-		table.insert(lines, string.format("🎯 **Quest Tracker — %s**", q.bear))
-		table.insert(lines, "──────────────────────────────")
-		table.insert(lines, string.format("📜 **%s**", q.name))
-		table.insert(lines, "──────────────────────────────")
-		table.insert(lines, string.format("🟩  %d / %d Tasks Done | %d%%", done, total, percent))
-		table.insert(lines, string.format("🧮  %s", bar))
-		table.insert(lines, "──────────────────────────────")
-
-		-- ✅❌ รายการภารกิจย่อย
-		for _, t in ipairs(q.tasks) do
-			table.insert(lines, t)
+		if QuestShowlist["Bucko Bee"] and QuestShowlist["Bucko Bee"].show then
+			local style = bearStyle["Bucko Bee"] or { icon = "🔵", color = 0x85C1E9 }
+			table.insert(questList, {
+				bear      = "Bucko Bee",
+				icon      = style.icon,   -- ✅ ดึงจาก bearStyle
+				color     = style.color,
+				name      = "Quest Pool Tracker",
+				tasks     = {},
+				done      = 0,
+				extraInfo = string.format("%s Completed Total: **%s Quests**", style.icon, NumberCommas(buckoCount)),
+				isBeePool = true,
+			})
 		end
-		table.insert(lines, "──────────────────────────────")
 
-		-- 💬 เพิ่มกรอบสรุปท้าย report (สวยแบบเดียวกับ Craft)
-		local footerBlock = string.format(
-			"`📚 Quest log auto-updated\n──────────────────────────────\n📅 %s ⏰ %s\nBee Swarm Auto Reporter System`",
-			os.date("%d/%m/%Y"), os.date("%H:%M:%S")
-		)
-		table.insert(lines, footerBlock)
-		table.insert(lines, "──────────────────────────────")
+    if #questList == 0 then
+        sendDiscordEmbed(config.WebhookUrl, {
+            title       = "📜 Quest Report",
+            color       = 0xB57EDC,
+            description = "❌ ไม่มีเควชที่เปิด Show อยู่ใน UI",
+            footer      = { text = os.date("📅 %d/%m/%Y ⏰ %H:%M:%S") }
+        })
+        return
+    end
 
-		-- ส่งเข้า Discord (เพิ่มชื่อเควชใน Title)
-		sendDiscordEmbed(config.WebhookUrl, {
-			title = string.format("%s %s — %s", q.icon, q.bear, q.name),
-			color = q.color,
-			description = table.concat(lines, "\n"),
-			footer = { text = string.format("Quest %d/%d | Bee Swarm Reporter", i, #questList) }
-		})
+    for i, q in ipairs(questList) do
+        local lines = {}
 
-		task.wait(1.5)
-	end
+        if q.isBeePool then
+            table.insert(lines, string.format("🎯 **Quest Pool — %s**", q.bear))
+            table.insert(lines, "───────────────────────────")
+            table.insert(lines, q.extraInfo)
+            table.insert(lines, "───────────────────────────")
+            local footerBlock = string.format(
+                "`📚 Quest log auto-updated\n───────────────────────────\n📅 %s ⏰ %s\nBee Swarm Auto Reporter System`",
+                os.date("%d/%m/%Y"), os.date("%H:%M:%S")
+            )
+            table.insert(lines, footerBlock)
+        else
+            local total   = #q.tasks
+            local done    = q.done
+            local percent = total > 0 and math.floor((done / total) * 100) or 0
+            local filled  = math.floor(percent / 10)
+            local bar     = string.rep("🟩", filled) .. string.rep("⬛", 10 - filled)
 
-	-- ปิดแท็บหลังส่งเสร็จ
-	closetab("Quests Tab")
-	print("✅ [QuestTab] ส่งรายงาน Hybrid Log ครบแล้ว!")
+            table.insert(lines, string.format("🎯 **Quest Tracker — %s**", q.bear))
+            table.insert(lines, "───────────────────────────")
+            table.insert(lines, string.format("<:Hivesticker_yellow_right_arrow:1477636042327588978> **%s**", q.name))
+            if q.extraInfo ~= "" then
+                table.insert(lines, q.extraInfo)
+            end
+            table.insert(lines, "───────────────────────────")
+			table.insert(lines, string.format("<:Hivesticker_green_plus_sign:1477633271738269746>  %d / %d Tasks Done | %d%%", done, total, percent))           
+			table.insert(lines, string.format("<:Hivesticker_green_circle:1477635917257900094>  %s", bar))
+            table.insert(lines, "───────────────────────────")
+            for _, t in ipairs(q.tasks) do
+                table.insert(lines, t)
+            end
+            table.insert(lines, "───────────────────────────")
+            local footerBlock = string.format(
+                "`📚 Quest log auto-updated\n──────────────────────────\n📅 %s ⏰ %s\nBee Swarm Auto Reporter System`",
+                os.date("%d/%m/%Y"), os.date("%H:%M:%S")
+            )
+            table.insert(lines, footerBlock)
+            table.insert(lines, "───────────────────────────")
+        end
+
+        local targetUrl
+        if (q.bear == "Riley Bee" or q.bear == "Bucko Bee")
+            and config.WebhookUrlBee and config.WebhookUrlBee ~= "" then
+            targetUrl = config.WebhookUrlBee
+        else
+            targetUrl = config.WebhookUrl
+        end
+
+        sendDiscordEmbed(targetUrl, {
+            title       = string.format("%s %s — %s", q.icon, q.bear, q.name),
+            color       = q.color,
+            description = table.concat(lines, "\n"),
+            -- ✅ เพิ่มใหม่: thumbnail รูปของ bear/bee แต่ละตัว
+            thumbnail   = { url = bearImages[q.bear] or "" },
+            footer      = { text = string.format("Quest %d/%d | Bee Swarm Reporter", i, #questList) }
+        })
+
+        task.wait(1.5)
+    end
+
+    print("✅ [QuestTab] ส่งรายงาน Hybrid Log ครบแล้ว!")
 end
+
 
 
 ------------------------------------------------------------
