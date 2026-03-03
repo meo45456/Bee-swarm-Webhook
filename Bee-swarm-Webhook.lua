@@ -1075,7 +1075,7 @@ ToolList = {
 
     ["Candy Planter"] = {
         show = false,
-        emoji = "<:Plastic_Planter:1478071027488653412>",
+        emoji = "<:Candy_Planter:1478077432736125161>",
         requirements = {
             { name = "Honey", goal = 5000000 },
             { name = "MagicBean", goal = 5 },
@@ -1087,7 +1087,7 @@ ToolList = {
 
     ["Tacky Planter"] = {
         show = false,
-        emoji = "<:Plastic_Planter:1478071027488653412>",
+        emoji = "<:Tacky_Planter:1478414443086872576>",
         requirements = {
             { name = "Honey", goal = 50000000 },
             { name = "MagicBean", goal = 10 },
@@ -1099,7 +1099,7 @@ ToolList = {
 
     ["Pesticide Planter"] = {
         show = false,
-        emoji = "<:Plastic_Planter:1478071027488653412>",
+        emoji = "<:Pesticide_Planter:1478418332192473258>",
         requirements = {
             { name = "Honey", goal = 750000000 },
             { name = "MagicBean", goal = 25 },
@@ -1112,7 +1112,7 @@ ToolList = {
 
     ["Blue Clay Planter"] = {
         show = false,
-        emoji = "<:Plastic_Planter:1478071027488653412>",
+        emoji = "<:Blue_Clay_Planter:1478414412871372910>",
         requirements = {
             { name = "Honey", goal = 10000000 },
             { name = "MagicBean", goal = 5 },
@@ -1123,7 +1123,7 @@ ToolList = {
 
     ["Red Clay Planter"] = {
         show = false,
-        emoji = "<:Plastic_Planter:1478071027488653412>",
+        emoji = "<:Red_Clay_Planter:1478077434896322764>",
         requirements = {
             { name = "Honey", goal = 10000000 },
             { name = "MagicBean", goal = 5 },
@@ -1134,7 +1134,7 @@ ToolList = {
 
     ["Heat-Treated Planter"] = {
         show = false,
-        emoji = "<:Plastic_Planter:1478071027488653412>",
+        emoji = "<:HeatTreated_Planter:1478414514792828989>",
         requirements = {
             { name = "Honey", goal = 750000000000 },
             { name = "MagicBean", goal = 75 },
@@ -1147,7 +1147,7 @@ ToolList = {
 
     ["Hydroponic Planter"] = {
         show = false,
-        emoji = "<:Plastic_Planter:1478071027488653412>",
+        emoji = "<:Hydroponic_Planter:1478414551568486513>",
         requirements = {
             { name = "Honey", goal = 750000000000 },
             { name = "MagicBean", goal = 75 },
@@ -1160,7 +1160,7 @@ ToolList = {
 
     ["Petal Planter"] = {
         show = false,
-        emoji = "<:Plastic_Planter:1478071027488653412>",
+        emoji = "<:Petal_Planter:1478414487533916436>",
         requirements = {
             { name = "Honey", goal = 5000000000000 },
             { name = "MagicBean", goal = 100 },
@@ -1173,7 +1173,7 @@ ToolList = {
 
     ["Planter Of Plenty"] = {
         show = false,
-        emoji = "<:Plastic_Planter:1478071027488653412>",
+        emoji = "<:The_Planter_Of_Plenty:1478418708983709907>",
         requirements = {
             { name = "Honey", goal = 100000000000000 },
             { name = "MagicBean", goal = 500 },
