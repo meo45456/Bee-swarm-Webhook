@@ -1063,128 +1063,126 @@ ToolList = {
         },
 
 
-    ["Planter"] = {
-        show = false,
-        emoji = "<:Plastic_Planter:1478071027488653412>",
-        requirements = {
-            { name = "Honey", goal = 750000 },
-            { name = "MagicBean", goal = 3 },
-            { name = "SoftWax", goal = 1 },
-        }
-    },
+["Planter"] = {
+    show = false,
+    emoji = "<:Plastic_Planter:1478071027488653412>",
+    requirements = {
+        { name = "Honey", goal = 750000 },
+        { name = "MagicBean", goal = 3 },
+        { name = "SoftWax", goal = 1 },
+    }
+},
 
-    ["Candy Planter"] = {
-        show = false,
-        emoji = "<:Plastic_Planter:1478071027488653412>",
-        requirements = {
-            { name = "Honey", goal = 5000000 },
-            { name = "MagicBean", goal = 5 },
-            { name = "Gumdrops", goal = 30 },
-            { name = "JellyBeans", goal = 3 },
-            { name = "SoftWax", goal = 5 },
-        }
-    },
+["Candy Planter"] = {
+    show = false,
+    emoji = "<:Candy_Planter:1478077432736125161>",
+    requirements = {
+        { name = "Honey", goal = 5000000 },
+        { name = "MagicBean", goal = 5 },
+        { name = "Gumdrops", goal = 30 },
+        { name = "JellyBeans", goal = 3 },
+        { name = "SoftWax", goal = 5 },
+    }
+},
 
-    ["Tacky Planter"] = {
-        show = false,
-        emoji = "<:Plastic_Planter:1478071027488653412>",
-        requirements = {
-            { name = "Honey", goal = 50000000 },
-            { name = "MagicBean", goal = 10 },
-            { name = "PurplePotion", goal = 1 },
-            { name = "HardWax", goal = 5 },
-            { name = "SoftWax", goal = 20 },
-        }
-    },
+["Tacky Planter"] = {
+    show = false,
+    emoji = "<:Tacky_Planter:1478414443086872576>",
+    requirements = {
+        { name = "Honey", goal = 50000000 },
+        { name = "MagicBean", goal = 10 },
+        { name = "PurplePotion", goal = 1 },
+        { name = "HardWax", goal = 5 },
+        { name = "SoftWax", goal = 20 },
+    }
+},
 
-    ["Pesticide Planter"] = {
-        show = false,
-        emoji = "<:Plastic_Planter:1478071027488653412>",
-        requirements = {
-            { name = "Honey", goal = 750000000 },
-            { name = "MagicBean", goal = 25 },
-            { name = "Neonberry", goal = 25 },
-            { name = "Glue", goal = 15 },
-            { name = "CausticWax", goal = 3 },
-            { name = "HardWax", goal = 10 },
-        }
-    },
+["Pesticide Planter"] = {
+    show = false,
+    emoji = "<:Plastic_Planter:1478071027488653412>", -- ยังไม่มีอิโมจิแยกที่ให้มา
+    requirements = {
+        { name = "Honey", goal = 750000000 },
+        { name = "MagicBean", goal = 25 },
+        { name = "Neonberry", goal = 25 },
+        { name = "Glue", goal = 15 },
+        { name = "CausticWax", goal = 3 },
+        { name = "HardWax", goal = 10 },
+    }
+},
 
-    ["Blue Clay Planter"] = {
-        show = false,
-        emoji = "<:Plastic_Planter:1478071027488653412>",
-        requirements = {
-            { name = "Honey", goal = 10000000 },
-            { name = "MagicBean", goal = 5 },
-            { name = "BlueExtract", goal = 15 },
-            { name = "SoftWax", goal = 20 },
-        }
-    },
+["Blue Clay Planter"] = {
+    show = false,
+    emoji = "<:Blue_Clay_Planter:1478414412871372910>",
+    requirements = {
+        { name = "Honey", goal = 10000000 },
+        { name = "MagicBean", goal = 5 },
+        { name = "BlueExtract", goal = 15 },
+        { name = "SoftWax", goal = 20 },
+    }
+},
 
-    ["Red Clay Planter"] = {
-        show = false,
-        emoji = "<:Plastic_Planter:1478071027488653412>",
-        requirements = {
-            { name = "Honey", goal = 10000000 },
-            { name = "MagicBean", goal = 5 },
-            { name = "RedExtract", goal = 15 },
-            { name = "SoftWax", goal = 20 },
-        }
-    },
+["Red Clay Planter"] = {
+    show = false,
+    emoji = "<:Red_Clay_Planter:1478077434896322764>",
+    requirements = {
+        { name = "Honey", goal = 10000000 },
+        { name = "MagicBean", goal = 5 },
+        { name = "RedExtract", goal = 15 },
+        { name = "SoftWax", goal = 20 },
+    }
+},
 
-    ["Heat-Treated Planter"] = {
-        show = false,
-        emoji = "<:Plastic_Planter:1478071027488653412>",
-        requirements = {
-            { name = "Honey", goal = 750000000000 },
-            { name = "MagicBean", goal = 75 },
-            { name = "RedExtract", goal = 750 },
-            { name = "HardWax", goal = 150 },
-            { name = "SwirledWax", goal = 25 },
-            { name = "Turpentine", goal = 1 },
-        }
-    },
+["Heat-Treated Planter"] = {
+    show = false,
+    emoji = "<:HeatTreated_Planter:1478414514792828989>",
+    requirements = {
+        { name = "Honey", goal = 750000000000 },
+        { name = "MagicBean", goal = 75 },
+        { name = "RedExtract", goal = 750 },
+        { name = "HardWax", goal = 150 },
+        { name = "SwirledWax", goal = 25 },
+        { name = "Turpentine", goal = 1 },
+    }
+},
 
-    ["Hydroponic Planter"] = {
-        show = false,
-        emoji = "<:Plastic_Planter:1478071027488653412>",
-        requirements = {
-            { name = "Honey", goal = 750000000000 },
-            { name = "MagicBean", goal = 75 },
-            { name = "BlueExtract", goal = 750 },
-            { name = "SoftWax", goal = 500 },
-            { name = "CausticWax", goal = 25 },
-            { name = "Turpentine", goal = 1 },
-        }
-    },
+["Hydroponic Planter"] = {
+    show = false,
+    emoji = "<:Hydroponic_Planter:1478414551568486513>",
+    requirements = {
+        { name = "Honey", goal = 750000000000 },
+        { name = "MagicBean", goal = 75 },
+        { name = "BlueExtract", goal = 750 },
+        { name = "SoftWax", goal = 500 },
+        { name = "CausticWax", goal = 25 },
+        { name = "Turpentine", goal = 1 },
+    }
+},
 
-    ["Petal Planter"] = {
-        show = false,
-        emoji = "<:Plastic_Planter:1478071027488653412>",
-        requirements = {
-            { name = "Honey", goal = 5000000000000 },
-            { name = "MagicBean", goal = 100 },
-            { name = "Glitter", goal = 100 },
-            { name = "SoftWax", goal = 250 },
-            { name = "SwirledWax", goal = 50 },
-            { name = "SuperSmoothie", goal = 25 },
-        }
-    },
+["Petal Planter"] = {
+    show = false,
+    emoji = "<:Petal_Planter:1478414487533916436>",
+    requirements = {
+        { name = "Honey", goal = 5000000000000 },
+        { name = "MagicBean", goal = 100 },
+        { name = "Glitter", goal = 100 },
+        { name = "SoftWax", goal = 250 },
+        { name = "SwirledWax", goal = 50 },
+        { name = "SuperSmoothie", goal = 25 },
+    }
+},
 
-    ["Planter Of Plenty"] = {
-        show = false,
-        emoji = "<:Plastic_Planter:1478071027488653412>",
-        requirements = {
-            { name = "Honey", goal = 100000000000000 },
-            { name = "MagicBean", goal = 500 },
-            { name = "SuperSmoothie", goal = 100 },
-            { name = "SwirledWax", goal = 100 },
-            { name = "CausticWax", goal = 100 },
-            { name = "Turpentine", goal = 25 },
-        }
-    },
-}
-
+["Planter Of Plenty"] = {
+    show = false,
+    emoji = "<:Plastic_Planter:1478071027488653412>", -- ยังไม่มีอิโมจิแยกที่ให้มา
+    requirements = {
+        { name = "Honey", goal = 100000000000000 },
+        { name = "MagicBean", goal = 500 },
+        { name = "SuperSmoothie", goal = 100 },
+        { name = "SwirledWax", goal = 100 },
+        { name = "CausticWax", goal = 100 },
+        { name = "Turpentine", goal = 25 },
+    }
+},
 
 -- 🧩 PART 1.6 END
 
