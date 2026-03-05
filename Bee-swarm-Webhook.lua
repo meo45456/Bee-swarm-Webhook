@@ -138,34 +138,13 @@ QuestShowlist = {
     ["Bucko Bee"]    = { show = false },
 }
 
--- 🧸 รายชื่อหมีและเควชที่เลือกได้
-BadgeShowlist = {
-    ["Honey Badge"] = false,
-    ["Quest Badge"] = false,
-    ["Battle Badge"] = false,
-    ["Abillity Badge"] = false,
-    ["Goo Badge"] = false,
-    ["Playtime Badge"] = false,
-    ["Sticker Stack Badge"] = false,
-    ["Sunflower Badge"] = false,
-    ["Dandelion Badge"] = false,
-    ["Mushroom Badge"] = false,
-    ["Blue Flower Badge"] = false,
-    ["Clover Badge"] = false,
-    ["Strawberry Badge"] = false,
-    ["Spider Badge"] = false,
-    ["Bamboo Badge"] = false,
-    ["Pineapple Badge"] = false,
-    ["Stump Badge"] = false,
-    ["Cactus Badge"] = false,
-    ["Pumpkin Badge"] = false,
-    ["Pine Tree Badge"] = false,
-    ["Rose Badge"] = false,
-    ["Mountain Top Badge"] = false,
-    ["Pepper Badge"] = false,
-    ["Coconut Badge"] = false,
-    ["Hive Hub Badge"] = false,
+-- 🛟 รายการตัวช่วย
+HelpersShowlist = {
+    ["Spirit Bear Helper"] = { show = false, description = "ตัวช่วย Spirit Bear" },
+    ["Black Bear Helper"]  = { show = false, description = "ตัวช่วย Black Bear" },
+    -- เพิ่มได้ทีหลัง
 }
+
 
 local QuestOwnerMap = {
     -- 🧭 Spirit Bear
@@ -1210,7 +1189,7 @@ local function saveConfig()
 	if not isfolder(folderPath) then makefolder(folderPath) end
 	local dataToSave = {
 		Showlist = {},
-		BadgeShowlist = {},
+        HelpersShowlist = {},
 		QuestShowlist = {},
 		-- 👇 เพิ่มบรรทัดนี้
 		ToolList = {}
@@ -1223,9 +1202,9 @@ local function saveConfig()
 			extrafarm = tonumber(v.extrafarm) or 0
 		}
 	end
-	for k, v in pairs(BadgeShowlist) do
-		dataToSave.BadgeShowlist[k] = v
-	end
+    for k, v in pairs(HelpersShowlist) do
+        dataToSave.HelpersShowlist[k] = { show = v.show }
+    end
 	for k, v in pairs(QuestShowlist) do
 		dataToSave.QuestShowlist[k] = { show = v.show }
 	end
@@ -1252,13 +1231,13 @@ local function loadConfig()
 			end
 		end
 
-		if decoded.BadgeShowlist then
-			for k, v in pairs(decoded.BadgeShowlist) do
-				if BadgeShowlist[k] ~= nil then
-					BadgeShowlist[k] = v
-				end
-			end
-		end
+        if decoded.HelpersShowlist then
+            for k, v in pairs(decoded.HelpersShowlist) do
+                if HelpersShowlist[k] ~= nil and v and v.show ~= nil then
+                    HelpersShowlist[k].show = v.show
+                end
+            end
+        end
 
 		if decoded.QuestShowlist then
 			for k, v in pairs(decoded.QuestShowlist) do
@@ -1461,59 +1440,47 @@ end)
 	return itemFrames
 end
 
--- 🏅 ฟังก์ชันสร้าง Frame ของ Badge
-local function buildBadgeShowlistFrames()
-	local badgeFrames, badges = {}, {}
-	for name, show in pairs(BadgeShowlist) do
-		table.insert(badges, { name = name, show = show })
-	end
-	table.sort(badges, function(a, b) return a.name < b.name end)
-
-	for i, badge in ipairs(badges) do
-		local frame = Instance.new("Frame")
-		frame.Size = UDim2.new(1, 0, 0, itemHeight)
-		frame.BackgroundColor3 = (i % 2 == 0)
-			and Color3.fromRGB(26, 26, 26)
-			or Color3.fromRGB(18, 18, 18)
-		frame.BorderSizePixel = 0
-
-		local label = Instance.new("TextLabel", frame)
-		label.Size = UDim2.new(0.7, -10, 1, 0)
-		label.Position = UDim2.new(0, 10, 0, 0)
-		label.BackgroundTransparency = 1
-		label.Text = badge.name
-		label.TextColor3 = Color3.fromRGB(220, 220, 220)
-		label.TextXAlignment = Enum.TextXAlignment.Left
-		label.Font = Enum.Font.Gotham
-		label.TextSize = 12
-
-		local toggle = Instance.new("TextButton", frame)
-		toggle.Size = UDim2.new(0.3, -8, 1, -8)
-		toggle.Position = UDim2.new(0.7, 8, 0, 4)
-		toggle.Text = badge.show and "Show" or "Hide"
-		toggle.Font = Enum.Font.Gotham
-		toggle.TextSize = 12
-
-		local function updateColor()
-			if badge.show then
-				toggle.BackgroundColor3 = Color3.fromRGB(40, 90, 40)
-			else
-				toggle.BackgroundColor3 = Color3.fromRGB(90, 40, 40)
-			end
-		end
-		updateColor()
-
-		toggle.MouseButton1Click:Connect(function()
-			badge.show = not badge.show
-			BadgeShowlist[badge.name] = badge.show
-			toggle.Text = badge.show and "Show" or "Hide"
-			updateColor()
-			saveConfig()
-		end)
-
-		table.insert(badgeFrames, frame)
-	end
-	return badgeFrames
+-- แทนด้วย:
+local function buildHelpersFrames()
+    local helpersFrames = {}
+    local items = {}
+    for name, data in pairs(HelpersShowlist) do
+        table.insert(items, { name = name, data = data })
+    end
+    table.sort(items, function(a, b) return a.name < b.name end)
+    for i, item in ipairs(items) do
+        local frame = Instance.new("Frame")
+        frame.Size = UDim2.new(1, 0, 0, itemHeight)
+        frame.BackgroundColor3 = i % 2 == 0 and Color3.fromRGB(26,26,26) or Color3.fromRGB(18,18,18)
+        frame.BorderSizePixel = 0
+        local label = Instance.new("TextLabel", frame)
+        label.Size = UDim2.new(0.7, -10, 1, 0)
+        label.Position = UDim2.new(0, 10, 0, 0)
+        label.BackgroundTransparency = 1
+        label.Text = item.name
+        label.TextColor3 = Color3.fromRGB(220, 220, 220)
+        label.TextXAlignment = Enum.TextXAlignment.Left
+        label.Font = Enum.Font.Gotham
+        label.TextSize = 12
+        local toggle = Instance.new("TextButton", frame)
+        toggle.Size = UDim2.new(0.3, -8, 1, -8)
+        toggle.Position = UDim2.new(0.7, 8, 0, 4)
+        toggle.Text = item.data.show and "Show" or "Hide"
+        toggle.Font = Enum.Font.Gotham
+        toggle.TextSize = 12
+        local function updateColor()
+            toggle.BackgroundColor3 = item.data.show and Color3.fromRGB(40,90,40) or Color3.fromRGB(90,40,40)
+        end
+        updateColor()
+        toggle.MouseButton1Click:Connect(function()
+            item.data.show = not item.data.show
+            toggle.Text = item.data.show and "Show" or "Hide"
+            updateColor()
+            saveConfig()
+        end)
+        table.insert(helpersFrames, frame)
+    end
+    return helpersFrames
 end
 
 -- 🧸 ฟังก์ชันสร้าง Frame ของ Quest
@@ -1703,7 +1670,7 @@ local cozyTheme = {
 }
 
 -- ☕ Bee Swarm Config Panel (โทนน้ำตาลอบอุ่น)
-local function createUI(showFrames, badgeFrames, questFrames, toolFrames)
+local function createUI(showFrames, helpersFrames, questFrames, toolFrames)
 	if game.CoreGui:FindFirstChild("ItemUi") then
 		game.CoreGui.ItemUi:Destroy()
 		task.wait(0.05)
@@ -1803,7 +1770,7 @@ local function createUI(showFrames, badgeFrames, questFrames, toolFrames)
 
 	local scrollShow = makeScroll("scrollShow")
 	local scrollQuest = makeScroll("scrollQuest")
-	local scrollBadge = makeScroll("scrollBadge")
+    local scrollHelpers = makeScroll("scrollHelpers")
 	local scrollSettings = makeScroll("scrollSettings")
 	local scrollTool = makeScroll("scrollTool")
 
@@ -1815,10 +1782,10 @@ local function createUI(showFrames, badgeFrames, questFrames, toolFrames)
 		frame.Parent = scrollQuest
 		frame.Position = UDim2.new(0, 0, 0, (i - 1) * 26)
 	end
-	for i, frame in ipairs(badgeFrames) do
-		frame.Parent = scrollBadge
-		frame.Position = UDim2.new(0, 0, 0, (i - 1) * 26)
-	end
+    for i, frame in ipairs(helpersFrames) do
+        frame.Parent = scrollHelpers
+        frame.Position = UDim2.new(0, 0, 0, (i-1)*26)
+    end
 	for i, frame in ipairs(toolFrames) do
 	frame.Parent = scrollTool
 	frame.Position = UDim2.new(0, 0, 0, (i - 1) * 26)
@@ -1855,7 +1822,7 @@ local function createUI(showFrames, badgeFrames, questFrames, toolFrames)
 	local function switchTab(tabName)
 		scrollShow.Visible = (tabName == "Items")
 		scrollQuest.Visible = (tabName == "Quests")
-        scrollBadge.Visible  = tabName == "Helpers"
+        scrollHelpers.Visible = tabName == "Helpers"
 		scrollTool.Visible = (tabName == "Tools")
 
 		for name, btn in pairs(tabButtons) do
@@ -1905,7 +1872,7 @@ searchBox:GetPropertyChangedSignal("Text"):Connect(function()
 	elseif activeTab == "Quests" then
 		filterFrames(scrollQuest:GetChildren(), searchText)
     elseif activeTab == "Helpers" then
-        filterFrames(scrollBadge:GetChildren(), searchText)
+        filterFrames(scrollHelpers:GetChildren(), searchText)
 	elseif activeTab == "Tools" then
 		-- 🧰 กรองเฉพาะอุปกรณ์ (ไม่รวม header หมวด)
 		local toolFrames = {}
@@ -1922,7 +1889,7 @@ end)
 		if activeTab == "Items" then
 			filterFrames(showFrames, searchBox.Text)
         elseif activeTab == "Helpers" then
-            filterFrames(badgeFrames, searchBox.Text)
+            filterFrames(helpersFrames, searchBox.Text)
 		elseif activeTab == "Quests" then
 			filterFrames(questFrames, searchBox.Text)
 		end
@@ -1939,10 +1906,10 @@ end
 -- โหลด config และสร้าง UI ตอนเริ่มต้น
 loadConfig()
 local showFrames = buildShowlistFrames()
-local badgeFrames = buildBadgeShowlistFrames()
+local helpersFrames = buildHelpersFrames()
 local questFrames = buildQuestFrames()
 local toolFrames = buildToolFrames()
-createUI(showFrames, badgeFrames, questFrames, toolFrames)
+createUI(showFrames, helpersFrames, questFrames, toolFrames)
 
 -- 🧩 PART 3 END
 
@@ -3911,70 +3878,242 @@ function combo_webhook_service()
     return true
 end
 
+-- ============================================================
+-- 🛟 PART 5.5 : Helper System — Spirit Bear Auto Use Items
+-- ============================================================
 
+local Event = ReplicatedStorage:WaitForChild("Events"):WaitForChild("PlayerActivesCommand")
 
--- 🏅 Badge Report
-local function badgetab_webhook_service()
-	if not (config.Flags and config.Flags.Badge) then return end
+-- pattern ใช้เทียบ description, display ใช้ยิง Remote, key ใช้เช็คใน freshData
+local useItemPatterns = {
+    { pattern = "Use 1 Magic Bean",           display = "Magic Bean",   key = "MagicBean"   },
+    { pattern = "Use 10 Field Dice",          display = "Field Dice",   key = "FieldDice"   },
+    { pattern = "Use 20 Field Dice",          display = "Field Dice",   key = "FieldDice"   },
+    { pattern = "Use 3 Cloud Vials",          display = "Cloud Vial",   key = "CloudVial"   },
+    { pattern = "Use 5 Blue Extracts",        display = "Blue Extract", key = "BlueExtract" },
+    { pattern = "Use 5 Red Extracts",         display = "Red Extract",  key = "RedExtract"  },
+    { pattern = "Catch 20 Falling Coconuts",  display = "Coconut",      key = "Coconut"     },
+    { pattern = "Catch 50 Falling Coconuts",  display = "Coconut",      key = "Coconut"     },
+    { pattern = "Catch 100 Falling Coconuts", display = "Coconut",      key = "Coconut"     },
+}
 
-	print("🎯 [BadgeTab] เปิดแท็บ Badges ...")
-	opentab("Badge")
-	task.wait(2)
+local helperBusy = false
 
-	local maintofind = nil
-	for i = 1, 20 do
-		local pg = LocalPlayer:FindFirstChild("PlayerGui")
-		local content = pg
-			and pg:FindFirstChild("ScreenGui")
-			and pg.ScreenGui:FindFirstChild("Menus")
-			and pg.ScreenGui.Menus:FindFirstChild("Children")
-			and pg.ScreenGui.Menus.Children:FindFirstChild("Badges")
-			and pg.ScreenGui.Menus.Children.Badges:FindFirstChild("Content")
+local function debugSpiritBearHelper()
+    local bearName = "Spirit Bear"
+    print("🛟 [Spirit Bear Helper] เริ่มตรวจเควส...")
 
-		if content and #content:GetChildren() > 0 then
-			-- ✅ หาตัวแรกที่เป็น ScrollingFrame ภายใน Content
-			for _, obj in ipairs(content:GetChildren()) do
-				if obj:IsA("ScrollingFrame") then
-					maintofind = obj
-					break
-				end
-			end
-		end
+    -- helper refetch data
+    local freshData
+    local function refetchData()
+        freshData = nil
+        for _, v in pairs(getgc(true)) do
+            if type(v) == "table" and rawget(v, "Honey") and rawget(v, "Eggs") then
+                if v.UserId == player.UserId then
+                    freshData = v
+                    break
+                end
+            end
+        end
+        if not freshData or not freshData.Quests or not freshData.Quests.Active then
+            return false
+        end
+        return true
+    end
 
-		if maintofind then
-			print("✅ [BadgeTab] พบ BadgeList หลังจาก " .. i .. " รอบ")
-			break
-		end
-		task.wait(0.5)
-	end
+    if not refetchData() then
+        warn("🛟 [Spirit Bear Helper] ❌ ไม่พบ Quests.Active")
+        return
+    end
 
-	if not maintofind then
-		warn("⚠️ [BadgeTab] ไม่พบ BadgeList หรือ Content ว่าง — ยกเลิกส่งข้อมูล")
-		return
-	end
+    local TaskTypes = QuestModule:GetTaskTypes()
+    local foundQuest = false
 
-	-- 🏅 ดึงข้อมูล Badge
-	local fields = {}
-	for _, b in ipairs(maintofind:GetChildren()) do
-		local name = b:FindFirstChild("BadgeTitle")
-		local level = b:FindFirstChild("BadgeLevel")
-		if name and level then
-			if BadgeShowlist[name.Text] then
-				table.insert(fields, { name = "🏅 " .. name.Text, value = level.Text })
-			end
-		end
-	end
+    for _, activeData in ipairs(freshData.Quests.Active) do
+        local questName = activeData.Name
+        if type(questName) == "number" then
+            questName = QuestModule:IDToName(questName)
+        end
 
-	sendDiscordEmbed(config.WebhookUrl, {
-		title = "🏅 Badge Report",
-		color = 0x9B59B6,
-		fields = (#fields > 0 and fields) or {
-			{ name = "No Badge", value = "ไม่มี Badge ที่เลือกแสดง" }
-		},
-		footer = { text = os.date("📅 %d/%m/%Y ⏰ %H:%M:%S") }
-	})
-	print("✅ [BadgeTab] ส่งข้อมูล Badge ไปยัง Webhook สำเร็จ")
+        local owner = QuestOwnerMap[questName]
+        if owner ~= bearName then continue end
+
+        foundQuest = true
+        local questBase = QuestModule:Get(questName)
+        if not questBase or questBase.Hidden then
+            print(string.format("🛟 [Spirit Bear Helper] ⚠️ Quest Hidden/ไม่พบ: %s", questName))
+            continue
+        end
+
+        print(string.format("🛟 [Spirit Bear Helper] 📜 Quest: %s",
+            tostring(questBase.DisplayName or questName)))
+
+        local tasks = (type(questBase.Tasks) == "function")
+            and questBase.Tasks(freshData) or questBase.Tasks
+        if not tasks then
+            warn("🛟 [Spirit Bear Helper] ❌ ไม่มี tasks ใน Quest นี้")
+            continue
+        end
+
+        print(string.format("🛟 [Spirit Bear Helper] 📋 Tasks: %d รายการ", #tasks))
+
+        ----------------------------------------------------------------
+        -- สร้างคิว task ที่มีคีย์เวิร์ดใช้ของ ตามลำดับ
+        ----------------------------------------------------------------
+        local useQueue = {}
+
+        for taskIndex, taskInfo in ipairs(tasks) do
+            local description = "n/a"
+            pcall(function()
+                local descVal = taskInfo.Description
+                    or QuestModule.GetTaskDescription(freshData, taskInfo)
+                description = (type(descVal) == "function")
+                    and descVal(freshData) or tostring(descVal)
+            end)
+
+            if description == "n/a" then
+                continue
+            end
+
+            local cleanDesc = description:gsub("%.$", ""):gsub(",$", "")
+            for _, pat in ipairs(useItemPatterns) do
+                if string.find(cleanDesc, pat.pattern, 1, true) then
+                    table.insert(useQueue, {
+                        index       = taskIndex,
+                        desc        = description,
+                        cleanDesc   = cleanDesc,
+                        pattern     = pat.pattern,
+                        displayName = pat.display, -- ใช้ยิง Remote
+                        keyName     = pat.key,     -- ใช้เช็คใน freshData
+                        taskInfo    = taskInfo,
+                    })
+                    break
+                end
+            end
+        end
+
+        if #useQueue == 0 then
+            print("🛟 [Spirit Bear Helper] เควสนี้ไม่มี task แบบใช้ไอเทม")
+        else
+            print(string.format("🛟 [Spirit Bear Helper] พบ task ใช้ไอเทม %d รายการ เริ่มกดตามคิว...", #useQueue))
+        end
+
+        ----------------------------------------------------------------
+        -- ทำงานตามลำดับคิว: ดึง freshData ใหม่ทุกครั้งก่อนเช็ค
+        ----------------------------------------------------------------
+        for order, taskData in ipairs(useQueue) do
+            if not refetchData() then
+                warn("🛟 [Spirit Bear Helper] ❌ refetchData ล้มเหลวในคิว")
+                break
+            end
+
+            -- หา activeData ของเควชนี้ใน freshData ล่าสุด
+            local currentActive = nil
+            for _, a in ipairs(freshData.Quests.Active) do
+                local name = a.Name
+                if type(name) == "number" then
+                    name = QuestModule:IDToName(name)
+                end
+                if name == questName then
+                    currentActive = a
+                    break
+                end
+            end
+            if not currentActive or not currentActive.StartValues then
+                warn("🛟 [Spirit Bear Helper] ❌ หา activeData ใหม่ไม่เจอ / ไม่มี StartValues")
+                break
+            end
+
+            local idx         = taskData.index
+            local desc        = taskData.desc
+            local cleanDesc   = taskData.cleanDesc
+            local displayName = taskData.displayName
+            local keyName     = taskData.keyName
+            local taskInfo    = taskData.taskInfo
+
+            local current = (TaskTypes[taskInfo.Type].GetStat(taskInfo, freshData) or 0)
+                - (currentActive.StartValues[idx] or 0)
+            local target = (type(taskInfo.Amount) == "function")
+                and taskInfo.Amount(freshData) or (taskInfo.Amount or 1)
+
+            -- จำนวนของในตัว (ใช้ keyName)
+            local have = 0
+            if freshData.Eggs and freshData.Eggs[keyName] ~= nil then
+                local raw = tostring(freshData.Eggs[keyName]):gsub(",", "")
+                have = tonumber(raw) or 0
+            elseif rawget(freshData, keyName) ~= nil then
+                local raw = tostring(rawget(freshData, keyName)):gsub(",", "")
+                have = tonumber(raw) or 0
+            end
+
+            local remainQuest = math.max(target - current, 0)
+            local lack        = math.max(remainQuest - have, 0)
+
+            print(string.rep("=", 50))
+            print(string.format("▶ Queue #%d (Task [%d])", order, idx))
+            print(string.format("• Description : %s", desc))
+            print(string.format("• Item        : %s (key=%s)", displayName, keyName))
+            print(string.format("• Quest need  : %d", target))
+            print(string.format("• Progress    : %d / %d", current, target))
+            print(string.format("• In inventory: %d", have))
+
+            if string.find(cleanDesc, "Falling Coconuts", 1, true) then
+                local hasCoconutBag = character and character:FindFirstChild("Coconut Canister", true) ~= nil
+                print(string.format("• Coconut Bag : %s",
+                    hasCoconutBag and "✅ มี Coconut Canister ใส่อยู่"
+                                    or  "❌ ไม่มี Coconut Canister ใส่อยู่"))
+            end
+
+            if current >= target then
+                print("• Status      : ✅ เควสส่วนนี้เสร็จแล้ว (ไม่กด)")
+                continue
+            end
+
+            if lack > 0 or have <= 0 then
+                print(string.format("• Status      : ❌ ของไม่พอ ขาด %d ชิ้น (ไม่กด)", lack))
+                continue
+            end
+
+            if not Event then
+                warn("• Status      : ❌ Event = nil (กดไม่ได้)")
+                continue
+            end
+
+            print(string.format("• Status      : 🖱️ กดจริง 1 ครั้ง → %s", displayName))
+            pcall(function()
+                Event:FireServer({ Name = displayName })
+            end)
+            task.wait(1.5)
+        end
+    end
+
+    if not foundQuest then
+        print("🛟 [Spirit Bear Helper] ℹ️ ไม่มี Quest Active ของ Spirit Bear")
+    end
 end
+
+local function runHelpersLoop()
+    print("🛟 [Spirit Bear Helper] Helper Loop เริ่มต้น ✅")
+    while true do
+        if config.Flags and config.Flags.Helpers then
+            local spiritCfg = HelpersShowlist["Spirit Bear Helper"]
+            if not helperBusy and spiritCfg and spiritCfg.show then
+                helperBusy = true
+                pcall(debugSpiritBearHelper)
+                helperBusy = false
+            end
+        end
+        task.wait(25)
+    end
+end
+
+task.spawn(runHelpersLoop)
+
+-- ============================================================
+-- END PART 5.5
+-- ============================================================
+
+
 
 --- ===== Loop System  ===== - - -
 local looping = false
