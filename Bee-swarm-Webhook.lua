@@ -3879,22 +3879,40 @@ function combo_webhook_service()
 end
 
 -- ============================================================
--- 🛟 PART 5.5 : Helper System — Spirit Bear Auto Use Items
+-- 🛟 PART 5.5 : Helper System — Spirit Bear Auto Use Items + Toys
 -- ============================================================
 
-local Event = ReplicatedStorage:WaitForChild("Events"):WaitForChild("PlayerActivesCommand")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
 
--- pattern ใช้เทียบ description, display ใช้ยิง Remote, key ใช้เช็คใน freshData
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+local QuestModule = QuestModule -- สมมติประกาศไว้ข้างบนแล้ว
+local QuestOwnerMap = QuestOwnerMap -- มีอยู่ในไฟล์ของคุณแล้ว
+
+local Event = ReplicatedStorage:WaitForChild("Events"):WaitForChild("PlayerActivesCommand")
+local ToyEvent = ReplicatedStorage:WaitForChild("Events"):WaitForChild("ToyEvent")
+
+-- pattern ใช้เทียบ description
+-- display = ใช้ยิง PlayerActivesCommand
+-- toy     = ใช้ยิง ToyEvent
+-- key     = ใช้เช็คใน freshData
 local useItemPatterns = {
-    { pattern = "Use 1 Magic Bean",           display = "Magic Bean",   key = "MagicBean"   },
-    { pattern = "Use 10 Field Dice",          display = "Field Dice",   key = "FieldDice"   },
-    { pattern = "Use 20 Field Dice",          display = "Field Dice",   key = "FieldDice"   },
-    { pattern = "Use 3 Cloud Vials",          display = "Cloud Vial",   key = "CloudVial"   },
-    { pattern = "Use 5 Blue Extracts",        display = "Blue Extract", key = "BlueExtract" },
-    { pattern = "Use 5 Red Extracts",         display = "Red Extract",  key = "RedExtract"  },
-    { pattern = "Catch 20 Falling Coconuts",  display = "Coconut",      key = "Coconut"     },
-    { pattern = "Catch 50 Falling Coconuts",  display = "Coconut",      key = "Coconut"     },
-    { pattern = "Catch 100 Falling Coconuts", display = "Coconut",      key = "Coconut"     },
+    { pattern = "Use 1 Magic Bean",                       display = "Magic Bean",             key = "MagicBean"   },
+    { pattern = "Use 10 Field Dice",                      display = "Field Dice",             key = "FieldDice"   },
+    { pattern = "Use 20 Field Dice",                      display = "Field Dice",             key = "FieldDice"   },
+    { pattern = "Use 3 Cloud Vials",                      display = "Cloud Vial",             key = "CloudVial"   },
+    { pattern = "Use 5 Blue Extracts",                    display = "Blue Extract",           key = "BlueExtract" },
+    { pattern = "Use 5 Red Extracts",                     display = "Red Extract",            key = "RedExtract"  },
+    { pattern = "Catch 20 Falling Coconuts",              display = "Coconut",                key = "Coconut"     },
+    { pattern = "Catch 50 Falling Coconuts",              display = "Coconut",                key = "Coconut"     },
+    { pattern = "Catch 100 Falling Coconuts",             display = "Coconut",                key = "Coconut"     },
+
+    -- เควชเรียกเครื่อง ToyEvent
+    { pattern = "Use the Honeystorm 1 Time",              toy     = "Honeystorm",             key = nil           },
+    { pattern = "Use the Moon Amulet Generator 1 Time",   toy     = "Moon Amulet Generator",  key = "MoonCharm"   },
+    { pattern = "Use the Sprout Summoner 1 Time",         toy     = "Sprout Summoner",        key = nil           },
 }
 
 local helperBusy = false
@@ -3903,7 +3921,9 @@ local function debugSpiritBearHelper()
     local bearName = "Spirit Bear"
     print("🛟 [Spirit Bear Helper] เริ่มตรวจเควส...")
 
-    -- helper refetch data
+    ----------------------------------------------------------------
+    -- refetchData: ดึง data player สดๆ จาก getgc
+    ----------------------------------------------------------------
     local freshData
     local function refetchData()
         freshData = nil
@@ -3936,7 +3956,9 @@ local function debugSpiritBearHelper()
         end
 
         local owner = QuestOwnerMap[questName]
-        if owner ~= bearName then continue end
+        if owner ~= bearName then
+            continue
+        end
 
         foundQuest = true
         local questBase = QuestModule:Get(questName)
@@ -3958,7 +3980,7 @@ local function debugSpiritBearHelper()
         print(string.format("🛟 [Spirit Bear Helper] 📋 Tasks: %d รายการ", #tasks))
 
         ----------------------------------------------------------------
-        -- สร้างคิว task ที่มีคีย์เวิร์ดใช้ของ ตามลำดับ
+        -- สร้างคิว task ที่มีคีย์เวิร์ดใช้ของ / ใช้เครื่อง ตามลำดับ
         ----------------------------------------------------------------
         local useQueue = {}
 
@@ -3976,6 +3998,7 @@ local function debugSpiritBearHelper()
             end
 
             local cleanDesc = description:gsub("%.$", ""):gsub(",$", "")
+
             for _, pat in ipairs(useItemPatterns) do
                 if string.find(cleanDesc, pat.pattern, 1, true) then
                     table.insert(useQueue, {
@@ -3983,8 +4006,10 @@ local function debugSpiritBearHelper()
                         desc        = description,
                         cleanDesc   = cleanDesc,
                         pattern     = pat.pattern,
-                        displayName = pat.display, -- ใช้ยิง Remote
-                        keyName     = pat.key,     -- ใช้เช็คใน freshData
+
+                        displayName = pat.display,  -- ใช้ Event (item)
+                        toyName     = pat.toy,      -- ใช้ ToyEvent (เครื่อง)
+                        keyName     = pat.key,
                         taskInfo    = taskInfo,
                     })
                     break
@@ -3993,13 +4018,16 @@ local function debugSpiritBearHelper()
         end
 
         if #useQueue == 0 then
-            print("🛟 [Spirit Bear Helper] เควสนี้ไม่มี task แบบใช้ไอเทม")
+            print("🛟 [Spirit Bear Helper] เควสนี้ไม่มี task แบบใช้ไอเทม/เครื่อง")
         else
-            print(string.format("🛟 [Spirit Bear Helper] พบ task ใช้ไอเทม %d รายการ เริ่มกดตามคิว...", #useQueue))
+            print(string.format(
+                "🛟 [Spirit Bear Helper] พบ task ใช้ไอเทม/เครื่อง %d รายการ เริ่มกดตามคิว...",
+                #useQueue
+            ))
         end
 
         ----------------------------------------------------------------
-        -- ทำงานตามลำดับคิว: ดึง freshData ใหม่ทุกครั้งก่อนเช็ค
+        -- ทำงานตามลำดับคิว
         ----------------------------------------------------------------
         for order, taskData in ipairs(useQueue) do
             if not refetchData() then
@@ -4007,7 +4035,7 @@ local function debugSpiritBearHelper()
                 break
             end
 
-            -- หา activeData ของเควชนี้ใน freshData ล่าสุด
+            -- หา activeData ของเควสนี้ใน freshData ล่าสุด
             local currentActive = nil
             for _, a in ipairs(freshData.Quests.Active) do
                 local name = a.Name
@@ -4028,6 +4056,7 @@ local function debugSpiritBearHelper()
             local desc        = taskData.desc
             local cleanDesc   = taskData.cleanDesc
             local displayName = taskData.displayName
+            local toyName     = taskData.toyName
             local keyName     = taskData.keyName
             local taskInfo    = taskData.taskInfo
 
@@ -4036,14 +4065,16 @@ local function debugSpiritBearHelper()
             local target = (type(taskInfo.Amount) == "function")
                 and taskInfo.Amount(freshData) or (taskInfo.Amount or 1)
 
-            -- จำนวนของในตัว (ใช้ keyName)
+            -- จำนวนของในตัว (ใช้ keyName ถ้ามี)
             local have = 0
-            if freshData.Eggs and freshData.Eggs[keyName] ~= nil then
-                local raw = tostring(freshData.Eggs[keyName]):gsub(",", "")
-                have = tonumber(raw) or 0
-            elseif rawget(freshData, keyName) ~= nil then
-                local raw = tostring(rawget(freshData, keyName)):gsub(",", "")
-                have = tonumber(raw) or 0
+            if keyName then
+                if freshData.Eggs and freshData.Eggs[keyName] ~= nil then
+                    local raw = tostring(freshData.Eggs[keyName]):gsub(",", "")
+                    have = tonumber(raw) or 0
+                elseif rawget(freshData, keyName) ~= nil then
+                    local raw = tostring(rawget(freshData, keyName)):gsub(",", "")
+                    have = tonumber(raw) or 0
+                end
             end
 
             local remainQuest = math.max(target - current, 0)
@@ -4052,37 +4083,81 @@ local function debugSpiritBearHelper()
             print(string.rep("=", 50))
             print(string.format("▶ Queue #%d (Task [%d])", order, idx))
             print(string.format("• Description : %s", desc))
-            print(string.format("• Item        : %s (key=%s)", displayName, keyName))
+            if toyName then
+                print(string.format("• Target      : ToyEvent → %s", toyName))
+            else
+                print(string.format("• Item        : %s (key=%s)", tostring(displayName), tostring(keyName)))
+            end
             print(string.format("• Quest need  : %d", target))
             print(string.format("• Progress    : %d / %d", current, target))
-            print(string.format("• In inventory: %d", have))
+            if keyName then
+                print(string.format("• In inventory: %d", have))
+            end
 
             if string.find(cleanDesc, "Falling Coconuts", 1, true) then
                 local hasCoconutBag = character and character:FindFirstChild("Coconut Canister", true) ~= nil
                 print(string.format("• Coconut Bag : %s",
                     hasCoconutBag and "✅ มี Coconut Canister ใส่อยู่"
-                                    or  "❌ ไม่มี Coconut Canister ใส่อยู่"))
+                                   or  "❌ ไม่มี Coconut Canister ใส่อยู่"))
             end
 
+            -- 1) เช็คว่าจบ task แล้วหรือยัง
             if current >= target then
                 print("• Status      : ✅ เควสส่วนนี้เสร็จแล้ว (ไม่กด)")
                 continue
             end
 
-            if lack > 0 or have <= 0 then
+            -- 2) ถ้ามี keyName ให้เช็คของในตัวก่อน
+            if keyName and (lack > 0 or have <= 0) then
                 print(string.format("• Status      : ❌ ของไม่พอ ขาด %d ชิ้น (ไม่กด)", lack))
                 continue
             end
 
-            if not Event then
-                warn("• Status      : ❌ Event = nil (กดไม่ได้)")
-                continue
+            ----------------------------------------------------------------
+            -- ยิง Remote ตามชนิด: ToyEvent หรือ PlayerActivesCommand
+            ----------------------------------------------------------------
+            if toyName then
+                -- ใช้เครื่อง (ToyEvent)
+                if not ToyEvent then
+                    warn("• Status      : ❌ ToyEvent = nil (กดเครื่องไม่ได้)")
+                    continue
+                end
+
+                -- เงื่อนไขพิเศษ Moon Amulet Generator ต้องมี Moon Charms >= 100
+                if toyName == "Moon Amulet Generator" then
+                    local haveMoon = 0
+                    if freshData and freshData.Eggs and freshData.Eggs["MoonCharm"] then
+                        local raw = tostring(freshData.Eggs["MoonCharm"]):gsub(",", "")
+                        haveMoon = tonumber(raw) or 0
+                    end
+                    if haveMoon < 100 then
+                        print(string.format("• Status      : ❌ Moon Charms ไม่ถึง 100 (%d) ไม่กด Moon Amulet Generator", haveMoon))
+                        continue
+                    end
+                end
+
+                print(string.format("• Status      : 🖱️ เรียก ToyEvent → %s", toyName))
+                pcall(function()
+                    ToyEvent:FireServer(toyName)
+                end)
+            else
+                -- ใช้ item ปกติผ่าน PlayerActivesCommand
+                if not Event then
+                    warn("• Status      : ❌ Event = nil (กดไม่ได้)")
+                    continue
+                end
+
+                if not displayName then
+                    warn("• Status      : ❌ ไม่มี displayName สำหรับ Event")
+                    continue
+                end
+
+                print(string.format("• Status      : 🖱️ กดใช้ไอเทม 1 ครั้ง → %s", displayName))
+                pcall(function()
+                    Event:FireServer({ Name = displayName })
+                end)
             end
 
-            print(string.format("• Status      : 🖱️ กดจริง 1 ครั้ง → %s", displayName))
-            pcall(function()
-                Event:FireServer({ Name = displayName })
-            end)
             task.wait(1.5)
         end
     end
