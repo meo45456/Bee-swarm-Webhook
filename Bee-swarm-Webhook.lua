@@ -263,7 +263,7 @@ local QuestOwnerMap = {
     ["All-Whitey Then"] = "Black Bear",
     ["Red Delicacy"] = "Black Bear",
     ["Boss Battles"] = "Black Bear",
-    ["Myth In The Making"] = "Black Bear",
+    ["MythITM"] = "Black Bear",
 
     -- 🧊 Polar Bear
     ["Polar Power"] = "Polar Bear",
@@ -3329,7 +3329,7 @@ local function questtab_webhook_service()
         sendDiscordEmbed(config.WebhookUrl, {
             title       = "📜 Quest Report",
             color       = 0xB57EDC,
-            description = "❌ ไม่มีเควชที่เปิด Show อยู่ใน UI",
+            description = "`❌ ไม่มีเควชที่เปิด Show อยู่ใน UI`",
             footer      = { text = os.date("📅 %d/%m/%Y ⏰ %H:%M:%S") }
         })
         return
